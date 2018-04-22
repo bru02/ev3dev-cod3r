@@ -1,8 +1,8 @@
 <?php
 if(isset($_REQUEST['run'])) {
-	echo "sad";
 	$f = htmlentities($_GET['run']);
 	$output = shell_exec("python3 $f");
+	if(!$output) $output = "Script ran successfully!";
 	echo $output;
 	exit();
 }
