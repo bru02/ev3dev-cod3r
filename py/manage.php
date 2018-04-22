@@ -778,6 +778,7 @@
              }
              echo 'Charset: ' . ($is_utf8 ? 'utf-8' : '8 bit') . '<br>';
          }
+		 echo "Extension: $ext";
          ?>
    </p>
    <p>
