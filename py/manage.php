@@ -783,7 +783,7 @@
    </p>
    <p>
    <?php if($ext=="py"):?>
-   <b><a title="Run" href="runner.php?f=<?php echo $file_url ?>" target="_blank"><i class="fa fa-caret-square-o-right" aria-hidden="true"></i> Run</a></b>
+   <b><a title="Run" href="runner.php?f=<?php echo $file_path ?>" target="_blank"><i class="fa fa-caret-square-o-right" aria-hidden="true"></i> Run</a></b>
    <?php endif ?>
       <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;dl=<?php echo urlencode($file) ?>"><i class="fa fa-cloud-download"></i> Download</a></b> &nbsp;
       <b><a href="<?php echo fm_enc($file_url) ?>" target="_blank"><i class="fa fa-external-link-square"></i> Open</a></b> &nbsp;
