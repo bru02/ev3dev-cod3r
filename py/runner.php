@@ -1,21 +1,21 @@
 <?php
-// if(isset($_REQUEST['run'])) {
-	// $f = htmlentities($_GET['run']));
-	// $output = shell_exec("python3 $f");
-	// echo $output;
-// }
-// if(isset($_REQUEST['stop'])) {
+if(isset($_REQUEST['run'])) {
+	$f = htmlentities($_GET['run']);
+	$output = shell_exec("python3 $f");
+	echo $output;
+}
+if(isset($_REQUEST['stop'])) {
 
-	// $output = shell_exec("^C");
+	$output = shell_exec("^C");
 
-	// echo "t";
-// }
- // function redirect($URL) {
-        // echo "<style>#loader{position:absolute;left:50%;top:50%;z-index:1;margin:-75px 0 0 -75px;border:16px solid #f3f3f3;border-radius:50%;border-top:16px solid #3498db;width:120px;height:120px;-webkit-animation:spin 2s linear infinite;animation:spin 2s linear infinite}@-webkit-keyframes spin{0%{-webkit-transform:rotate(0)}100%{-webkit-transform:rotate(360deg)}}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style><div id='loader'></div>\n";
-        // echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
-// echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
-        // exit();
-   // }
+	echo "t";
+}
+ function redirect($URL) {
+        echo "<style>#loader{position:absolute;left:50%;top:50%;z-index:1;margin:-75px 0 0 -75px;border:16px solid #f3f3f3;border-radius:50%;border-top:16px solid #3498db;width:120px;height:120px;-webkit-animation:spin 2s linear infinite;animation:spin 2s linear infinite}@-webkit-keyframes spin{0%{-webkit-transform:rotate(0)}100%{-webkit-transform:rotate(360deg)}}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style><div id='loader'></div>\n";
+        echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+        exit();
+   }
 if(!isset($_GET['f'])) {
 	redirect("manage.php");
 } else {
