@@ -45,7 +45,7 @@
    // allowed upload file extensions
    $upload_extensions = ''; // 'gif,png,jpg'
    // show or hide the left side tree view
-   $show_tree_view = true;
+   $show_tree_view = false;
    //Array of folders excluded from listing
    $GLOBALS['exclude_folders'] = array(
    
@@ -781,6 +781,9 @@
          ?>
    </p>
    <p>
+   <?php if($mime_type=="text/x-python"):?>
+   <b><a title="Run" href="runner.php?f=<?php echo urlencode(FM_PATH) ?>" target="_blank"><i class="fa fa-caret-square-o-right" aria-hidden="true"></i> Run</a></b>
+   <?php endif ?>
       <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;dl=<?php echo urlencode($file) ?>"><i class="fa fa-cloud-download"></i> Download</a></b> &nbsp;
       <b><a href="<?php echo fm_enc($file_url) ?>" target="_blank"><i class="fa fa-external-link-square"></i> Open</a></b> &nbsp;
       <?php
