@@ -19,7 +19,7 @@ echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
 if(!isset($_GET['f'])) {
 	redirect("manage.php");
 } else {
-	$f = htmlentities($f);
+	$f = htmlentities($_GET['f']);
 }
 ?>
 <!DOCTYPE html>
