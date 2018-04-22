@@ -1,5 +1,6 @@
 <?php
 if(isset($_REQUEST['run'])) {
+	echo "sad";
 	$f = htmlentities($_GET['run']);
 	$output = shell_exec("python3 $f");
 	echo $output;
