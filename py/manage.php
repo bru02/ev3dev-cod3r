@@ -32,7 +32,7 @@
    // Default timezone for date() and time() - http://php.net/manual/en/timezones.php
    $default_timezone = 'Etc/UTC'; // UTC
    // Root path for file manager
-   $root_path = $_SERVER['DOCUMENT_ROOT']."../../home/robot";
+   $root_path = $_SERVER['DOCUMENT_ROOT']."/../../../home/robot";
    // Root url for links in file manager.Relative to $http_host. Variants: '', 'path/to/subfolder'
    // Will not working if $root_path will be outside of server document root
    $root_url = '';
@@ -1069,6 +1069,9 @@
             <?php endif; ?>
             <a title="Direct link" href="<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f . '/') ?>" target="_blank">
             <i class="fa fa-link" aria-hidden="true"></i>
+            </a>
+			<a title="Run" href="runner.php?f=<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f . '/') ?>" target="_blank">
+            <i class="fa fa-caret-square-o-right" aria-hidden="true"></i>
             </a>
          </td>
       </tr>
