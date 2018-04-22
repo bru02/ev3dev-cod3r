@@ -782,7 +782,7 @@
          ?>
    </p>
    <p>
-   <?php if($ext=="python"):?>
+   <?php if($ext=="py"):?>
    <b><a title="Run" href="runner.php?f=<?php echo $file_url ?>" target="_blank"><i class="fa fa-caret-square-o-right" aria-hidden="true"></i> Run</a></b>
    <?php endif ?>
       <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;dl=<?php echo urlencode($file) ?>"><i class="fa fa-cloud-download"></i> Download</a></b> &nbsp;
@@ -892,7 +892,7 @@
        $fd=fopen($file_path,"w");
        @fwrite($fd, $writedata);
        fclose($fd);
-	   if($ext=="python") {
+	   if($ext=="py") {
 		   shell_exec("chmod +x $file_path");
 	   }
        fm_set_msg('File Saved Successfully', 'alert');
