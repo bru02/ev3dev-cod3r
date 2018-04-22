@@ -18,7 +18,7 @@ if(isset($_REQUEST['stop'])) {
 echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
         exit();
    }
-if(!isset($_GET['f'])) {
+if(!isset($_GET['f'])&&!isset($_REQUEST['run'])&&!isset($_REQUEST['stop'])) {
 	redirect("manage.php");
 } else {
 	$f = htmlentities($_GET['f']);
