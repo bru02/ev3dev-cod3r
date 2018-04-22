@@ -1,23 +1,25 @@
 <?php
-if(isset($_GET['run'])&&isset($_GET['f'])) {
+if(isset($_REQUEST['run'])) {
 	$f = htmlentities($_GET['run']));
-	$p = htmlentities($_GET['f']));
-
-	$old_path = getcwd();
-	chdir("/home/robot/$p");
 	$output = shell_exec("python3 $f");
-	chdir($old_path);
 	echo $output;
 }
-if(isset($_GET['stop'])&&isset($_GET['f'])) {
-	$f = htmlentities($_GET['run']));
-	$p = htmlentities($_GET['f']));
+if(isset($_REQUEST['stop'])) {
 
-	$old_path = getcwd();
-	chdir("/home/robot/$p");
 	$output = shell_exec("^C");
-	chdir($old_path);
+
 	echo "t";
+}
+ function redirect($URL) {
+        echo "<style>#loader{position:absolute;left:50%;top:50%;z-index:1;margin:-75px 0 0 -75px;border:16px solid #f3f3f3;border-radius:50%;border-top:16px solid #3498db;width:120px;height:120px;-webkit-animation:spin 2s linear infinite;animation:spin 2s linear infinite}@-webkit-keyframes spin{0%{-webkit-transform:rotate(0)}100%{-webkit-transform:rotate(360deg)}}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style><div id='loader'></div>\n";
+        echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+        exit();
+   }
+if(!isset($_GET['f'])) {
+	redirect("manage.php");
+} else {
+	$f = htmlentities($f);
 }
 ?>
 <!DOCTYPE html>
@@ -26,20 +28,42 @@ if(isset($_GET['stop'])&&isset($_GET['f'])) {
 <script src="../static/notcrap.js"></script>
 <link rel="stylesheet" href="../static/style.css">
 <title>Cod3r | Run script</title>
+<style>
+#console {
+	    background-color: #000000;
+       color:#fff;
+      font-family: consolas,"courier new",monospace;
+     font-size: 15px;
+     height: 100%;
+     width: 100%;
+     border: none;
+     ine-height: normal;
+}
+</style>
 </head>
 <body>
 <div class="margin">
 <h1>Run script</h1>
-<p><button class="btn" id="start_btn">Start</button></p>
-<p><button class="btn" id="stop_btn">Stop</button></p>
-<pre id="console" hidden></pre>
+<p>File: <?php echo array_pop(explode("/",$f));?></p>
+<p><button class="btn green" id="start_btn">Start</button></p>
+<p><button class="btn red" id="stop_btn">Stop</button></p>
+<hr>
+<h2>Console:</h2>
+<p><button class="btn gray" onclick="get('#console').innerHTML=''">Clear</button></p>
+
+<pre id="console"></pre>
 </div>
 <script>
+function log(e) {
+	get("#console").innerHTML+=e;
+}
 get("#start_btn").addEvent("click",()=>{
-	
+	log("Starting script...");
+	ajax({url:"runner.php",data:{run:"<?php echo $f; ?>"},method:"post"},(e)=>{log(e)});
 });
 get("#stop_btn").addEvent("click",()=>{
-	
+	log("Stopping script...");
+	ajax({url:"runner.php",data:{stop:"1"},method:"post"},(e)=>{});
 });
 </script>
 </body>
