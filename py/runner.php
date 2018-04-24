@@ -114,7 +114,7 @@ if(!isset($_GET['f'])&&!isset($_REQUEST['run'])&&!isset($_REQUEST['stop'])) {
 	$f = htmlentities($_GET['f']);
 }
 // $f="asd/asd.py";
-$e = explode("/",$f,1);
+$e = explode("/",$f);
 ?>
 <!DOCTYPE html>
 <html>
