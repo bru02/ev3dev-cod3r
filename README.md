@@ -28,12 +28,11 @@ Super user permisions are needed to run python scripts from php server.
 	* sudo /etc/init.d/apache2 restart
 	* sudo mkdir /var/www/html/cod3r/
 	* sudo git clone https://github.com/bru02/ev3dev-cod3r.git /var/www/html/cod3r/
-4. Open your browser and goto http://[ip_of_your_brick]/cod3r/py/test.php . If you see nothing install PHP again, if you see something (usually www-data) copy that.<br>
-    We need that to add permissions to PHP to be able to create files.
-	* sudo chown -R [String from browser] /home/robot
-	* sudo chown -R [String from browser] /var/www/html/cod3r
+	* sudo chown -R www-data /home/robot
+	* sudo chown -R www-data /var/www/html/cod3r
+4. Open your browser and goto http://[ip_of_your_brick]/cod3r/ . If you see nothing, install PHP again.<br>
 
-5. Open your browser and goto http://[ip_of_your_brick]/cod3r/py/manage.php . You should see a list of files in the home/robot folder
+
 
 
 
