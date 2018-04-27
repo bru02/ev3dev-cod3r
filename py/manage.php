@@ -1046,9 +1046,6 @@
             <a title="Direct link" href="<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f . '/') ?>" target="_blank">
             <i class="fa fa-link" aria-hidden="true"></i>
             </a>
-            <a title="Run" href="runner.php?f=<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f . '/') ?>" target="_blank">
-            <i class="fa fa-caret-square-o-right" aria-hidden="true"></i>
-            </a>
          </td>
       </tr>
       <?php
