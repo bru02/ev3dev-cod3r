@@ -101,40 +101,7 @@
        fm_show_image($_GET['img']);
    }
    // Auth
-   if ($use_auth) {
-       if (isset($_SESSION['logged'], $auth_users[$_SESSION['logged']])) {
-           // Logged
-       } elseif (isset($_POST['fm_usr'], $_POST['fm_pwd'])) {
-           // Logging In
-           sleep(1);
-           if (isset($auth_users[$_POST['fm_usr']]) && md5($_POST['fm_pwd']) === $auth_users[$_POST['fm_usr']]) {
-               $_SESSION['logged'] = $_POST['fm_usr'];
-               fm_set_msg('You are logged in');
-               fm_redirect(FM_SELF_URL . '?p=');
-           } else {
-               unset($_SESSION['logged']);
-               fm_set_msg('Wrong password', 'error');
-               fm_redirect(FM_SELF_URL);
-           }
-       } else {
-           // Form
-           unset($_SESSION['logged']);
-           fm_show_header_login();
-           fm_show_message();
-           ?>
-<div class="path login-form">
-   <img src="https://image.ibb.co/k92AFQ/h3k_logo_dark.png" alt="H3K File manager" style="margin:20px;">
-   <form action="" method="post">
-      <label for="fm_usr">Username</label><input type="text" id="fm_usr" name="fm_usr" value="" placeholder="Username" required><br>
-      <label for="fm_pwd">Password</label><input type="password" id="fm_pwd" name="fm_pwd" value="" placeholder="Password" required><br>
-      <input type="submit" value="Login">
-   </form>
-</div>
-<?php
-   fm_show_footer_login();
-   exit;
-   }
-   }
+   
    defined('FM_LANG') || define('FM_LANG', $lang);
    defined('FM_EXTENSION') || define('FM_EXTENSION', $upload_extensions);
    defined('FM_TREEVIEW') || define('FM_TREEVIEW', $show_tree_view);
@@ -145,7 +112,7 @@
    fm_redirect(FM_SELF_URL . '?p=');
    }
    // get path
-   $p = isset($_GET['p']) ? $_GET['p'] : (isset($_POST['p']) ? $_POST['p'] : '');
+   $p = isset($_REQUEST['p'])?$_REQUEST['p']:'';
    // clean path
    $p = fm_clean_path($p);
    // instead globals vars
@@ -778,13 +745,13 @@
              }
              echo 'Charset: ' . ($is_utf8 ? 'utf-8' : '8 bit') . '<br>';
          }
-		 echo "Extension: $ext";
+         echo "Extension: $ext";
          ?>
    </p>
    <p>
-   <?php if($ext=="py"):?>
-   <b><a title="Run" href="runner.php?f=<?php echo $file_path ?>" target="_blank"><i class="fa fa-caret-square-o-right" aria-hidden="true"></i> Run</a></b>
-   <?php endif ?>
+      <?php if($ext=="py"):?>
+      <b><a title="Run" href="runner.php?f=<?php echo $file_path ?>" target="_blank"><i class="fa fa-caret-square-o-right" aria-hidden="true"></i> Run</a></b>
+      <?php endif ?>
       <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;dl=<?php echo urlencode($file) ?>"><i class="fa fa-cloud-download"></i> Download</a></b> &nbsp;
       <b><a href="<?php echo fm_enc($file_url) ?>" target="_blank"><i class="fa fa-external-link-square"></i> Open</a></b> &nbsp;
       <?php
@@ -799,7 +766,7 @@
          }
          if($is_text && !FM_READONLY) {
          ?>
-     <!-- <b><a href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>" class="edit-file"><i class="fa fa-pencil-square"></i> Edit</a></b> &nbsp;-->
+      <!-- <b><a href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>" class="edit-file"><i class="fa fa-pencil-square"></i> Edit</a></b> &nbsp;-->
       <b><a href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>&env=ace" class="edit-file"><i class="fa fa-pencil-square"></i> Edit</a></b> &nbsp;
       <?php }
          if($send_mail && !FM_READONLY) {
@@ -887,14 +854,14 @@
    //Save File
    if(isset($_POST['savedata'])) {
        $writedata = $_POST['savedata'];
-	   $ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
-	   
+    $ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+    
        $fd=fopen($file_path,"w");
        @fwrite($fd, $writedata);
        fclose($fd);
-	   if($ext=="py") {
-		   shell_exec("chmod +x $file_path");
-	   }
+    if($ext=="py") {
+     shell_exec("chmod +x $file_path");
+    }
        fm_set_msg('File Saved Successfully', 'alert');
    }
    $ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
@@ -1079,7 +1046,7 @@
             <a title="Direct link" href="<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f . '/') ?>" target="_blank">
             <i class="fa fa-link" aria-hidden="true"></i>
             </a>
-			<a title="Run" href="runner.php?f=<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f . '/') ?>" target="_blank">
+            <a title="Run" href="runner.php?f=<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f . '/') ?>" target="_blank">
             <i class="fa fa-caret-square-o-right" aria-hidden="true"></i>
             </a>
          </td>
@@ -1165,7 +1132,6 @@
       <a href="javascript:document.getElementById('a-zip').click();" class="group-btn"><i class="fa fa-file-archive-o"></i> Zip </a> &nbsp;
       <input type="submit" class="hidden" name="copy" id="a-copy" value="Copy">
       <a href="javascript:document.getElementById('a-copy').click();" class="group-btn"><i class="fa fa-files-o"></i> Copy </a>
-      <a href="https://github.com/prasathmani/tinyfilemanager" target="_blank" class="float-right" style="color:silver">H3K | Tiny File Manager</a>
    </p>
    <?php endif; ?>
 </form>
@@ -1883,7 +1849,7 @@
    <head>
       <meta charset="utf-8">
       <title>Cod3r | Project Manager</title>
-      <meta name="Description" CONTENT="Author: CCP Programmers, H3K Tiny PHP File Manager">
+      <meta name="Description" CONTENT="Author: Project Manager">
       <link rel="icon" href="<?php echo FM_SELF_URL ?>?img=favicon" type="image/png">
       <link rel="shortcut icon" href="<?php echo FM_SELF_URL ?>?img=favicon" type="image/png">
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
@@ -1923,7 +1889,7 @@
    <head>
       <meta charset="utf-8">
       <title>Cod3r | Project Manager</title>
-      <meta name="Description" CONTENT="Author: CCP Programmers, H3K Tiny PHP File Manager">
+      <meta name="Description" CONTENT="Project Manager">
       <link rel="icon" href="<?php echo FM_SELF_URL ?>?img=favicon" type="image/png">
       <link rel="shortcut icon" href="<?php echo FM_SELF_URL ?>?img=favicon" type="image/png">
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
@@ -1964,7 +1930,134 @@
                 ?>
       </div>
       <script>
-         function newfolder(e){var t=document.getElementById("newfilename").value,n=document.querySelector('input[name="newfile"]:checked').value;null!==t&&""!==t&&n&&(window.location.hash="#",window.location.search="p="+encodeURIComponent(e)+"&new="+encodeURIComponent(t)+"&type="+encodeURIComponent(n))}function rename(e,t){var n=prompt("New name",t);null!==n&&""!==n&&n!=t&&(window.location.search="p="+encodeURIComponent(e)+"&ren="+encodeURIComponent(t)+"&to="+encodeURIComponent(n))}function change_checkboxes(e,t){for(var n=e.length-1;n>=0;n--)e[n].checked="boolean"==typeof t?t:!e[n].checked}function get_checkboxes(){for(var e=document.getElementsByName("file[]"),t=[],n=e.length-1;n>=0;n--)(e[n].type="checkbox")&&t.push(e[n]);return t}function select_all(){change_checkboxes(get_checkboxes(),!0)}function unselect_all(){change_checkboxes(get_checkboxes(),!1)}function invert_all(){change_checkboxes(get_checkboxes())}function mailto(e,t){var n=new XMLHttpRequest,a="path="+e+"&file="+t+"&type=mail&ajax=true";n.open("POST","",!0),n.setRequestHeader("Content-type","application/x-www-form-urlencoded"),n.onreadystatechange=function(){4==n.readyState&&200==n.status&&alert(n.responseText)},n.send(a)}function showSearch(e){var t=new XMLHttpRequest,n="path="+e+"&type=search&ajax=true";t.open("POST","",!0),t.setRequestHeader("Content-type","application/x-www-form-urlencoded"),t.onreadystatechange=function(){4==t.readyState&&200==t.status&&(window.searchObj=t.responseText,document.getElementById("searchresultWrapper").innerHTML="",window.location.hash="#searchResult")},t.send(n)}function getSearchResult(e,t){var n=[],a=[];return e.forEach(function(e){"folder"===e.type?(getSearchResult(e.items,t),e.name.toLowerCase().match(t)&&n.push(e)):"file"===e.type&&e.name.toLowerCase().match(t)&&a.push(e)}),{folders:n,files:a}}function checkbox_toggle(){var e=get_checkboxes();e.push(this),change_checkboxes(e)}function backup(e,t){var n=new XMLHttpRequest,a="path="+e+"&file="+t+"&type=backup&ajax=true";return n.open("POST","",!0),n.setRequestHeader("Content-type","application/x-www-form-urlencoded"),n.onreadystatechange=function(){4==n.readyState&&200==n.status&&alert(n.responseText)},n.send(a),!1}function edit_save(e,t){var n="ace"==t?editor.getSession().getValue():document.getElementById("normal-editor").value;if(n){var a=document.createElement("form");a.setAttribute("method","POST"),a.setAttribute("action","");var o=document.createElement("textarea");o.setAttribute("type","textarea"),o.setAttribute("name","savedata");var c=document.createTextNode(n);o.appendChild(c),a.appendChild(o),document.body.appendChild(a),a.submit()}}function init_php_file_tree(){if(document.getElementsByTagName){for(var e=document.getElementsByTagName("LI"),t=0;t<e.length;t++){var n=e[t].className;if(n.indexOf("pft-directory")>-1)for(var a=e[t].childNodes,o=0;o<a.length;o++)"A"==a[o].tagName&&(a[o].onclick=function(){for(var e=this.nextSibling;;){if(null==e)return!1;if("UL"==e.tagName){var t="none"==e.style.display;return e.style.display=t?"block":"none",this.className=t?"open":"closed",!1}e=e.nextSibling}return!1},a[o].className=n.indexOf("open")>-1?"open":"closed"),"UL"==a[o].tagName&&(a[o].style.display=n.indexOf("open")>-1?"block":"none")}return!1}}var searchEl=document.querySelector("input[type=search]"),timeout=null;searchEl.onkeyup=function(e){clearTimeout(timeout);var t=JSON.parse(window.searchObj),n=document.querySelector("input[type=search]").value;timeout=setTimeout(function(){if(n.length>=2){var e=getSearchResult(t,n),a="",o="";e.folders.forEach(function(e){a+='<li class="'+e.type+'"><a href="?p='+e.path+'">'+e.name+"</a></li>"}),e.files.forEach(function(e){o+='<li class="'+e.type+'"><a href="?p='+e.path+"&view="+e.name+'">'+e.name+"</a></li>"}),document.getElementById("searchresultWrapper").innerHTML='<div class="model-wrapper">'+a+o+"</div>"}},500)},window.onload=init_php_file_tree;if(document.getElementById("file-tree-view")){var tableViewHt=document.getElementById("main-table").offsetHeight-2;document.getElementById("file-tree-view").setAttribute("style","height:"+tableViewHt+"px")};
+         function newfolder(e) {
+         	let t = document.getElementById('newfilename').value,
+         		n = document.querySelector('input[name="newfile"]:checked').value;
+         	t !== null && t !== '' && n && (window.location.hash = '#', window.location.search = `p=${encodeURIComponent(e)}&new=${encodeURIComponent(t)}&type=${encodeURIComponent(n)}`);
+         }
+         
+         function rename(e, t) {
+         	const n = prompt('New name', t);
+         	n !== null && n !== '' && n != t && (window.location.search = `p=${encodeURIComponent(e)}&ren=${encodeURIComponent(t)}&to=${encodeURIComponent(n)}`);
+         }
+         
+         function change_checkboxes(e, t) {
+         	for (let n = e.length - 1; n >= 0; n--) e[n].checked = typeof t === 'boolean' ? t : !e[n].checked;
+         }
+         
+         function get_checkboxes() {
+         	for (var e = document.getElementsByName('file[]'), t = [], n = e.length - 1; n >= 0; n--)(e[n].type = 'checkbox') && t.push(e[n]);
+         	return t;
+         }
+         
+         function select_all() {
+         	change_checkboxes(get_checkboxes(), !0);
+         }
+         
+         function unselect_all() {
+         	change_checkboxes(get_checkboxes(), !1);
+         }
+         
+         function invert_all() {
+         	change_checkboxes(get_checkboxes());
+         }
+         
+         function mailto(e, t) {
+         	let n = new XMLHttpRequest(),
+         		a = `path=${e}&file=${t}&type=mail&ajax=true`;
+         	n.open('POST', '', !0), n.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'), n.onreadystatechange = function () {
+         		n.readyState == 4 && n.status == 200 && alert(n.responseText);
+         	}, n.send(a);
+         }
+         
+         function showSearch(e) {
+         	let t = new XMLHttpRequest(),
+         		n = `path=${e}&type=search&ajax=true`;
+         	t.open('POST', '', !0), t.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'), t.onreadystatechange = function () {
+         		t.readyState == 4 && t.status == 200 && (window.searchObj = t.responseText, document.getElementById('searchresultWrapper').innerHTML = '', window.location.hash = '#searchResult');
+         	}, t.send(n);
+         }
+         
+         function getSearchResult(e, t) {
+         	let n = [],
+         		a = [];
+         	return e.forEach((e) => {
+         		e.type === 'folder' ? (getSearchResult(e.items, t), e.name.toLowerCase().match(t) && n.push(e)) : e.type === 'file' && e.name.toLowerCase().match(t) && a.push(e);
+         	}), {
+         		folders: n,
+         		files: a
+         	};
+         }
+         
+         function checkbox_toggle() {
+         	const e = get_checkboxes();
+         	e.push(this), change_checkboxes(e);
+         }
+         
+         function backup(e, t) {
+         	let n = new XMLHttpRequest(),
+         		a = `path=${e}&file=${t}&type=backup&ajax=true`;
+         	return n.open('POST', '', !0), n.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'), n.onreadystatechange = function () {
+         		n.readyState == 4 && n.status == 200 && alert(n.responseText);
+         	}, n.send(a), !1;
+         }
+         
+         function edit_save(e, t) {
+         	const n = t == 'ace' ? editor.getSession().getValue() : document.getElementById('normal-editor').value;
+         	if (n) {
+         		const a = document.createElement('form');
+         		a.setAttribute('method', 'POST'), a.setAttribute('action', '');
+         		const o = document.createElement('textarea');
+         		o.setAttribute('type', 'textarea'), o.setAttribute('name', 'savedata');
+         		const c = document.createTextNode(n);
+         		o.appendChild(c), a.appendChild(o), document.body.appendChild(a), a.submit();
+         	}
+         }
+         
+         function init_php_file_tree() {
+         	if (document.getElementsByTagName) {
+         		for (let e = document.getElementsByTagName('LI'), t = 0; t < e.length; t++) {
+         			const n = e[t].className;
+         			if (n.indexOf('pft-directory') > -1)
+         				for (let a = e[t].childNodes, o = 0; o < a.length; o++) a[o].tagName == 'A' && (a[o].onclick = function () {
+         					for (let e = this.nextSibling;;) {
+         						if (e == null) return !1;
+         						if (e.tagName == 'UL') {
+         							const t = e.style.display == 'none';
+         							return e.style.display = t ? 'block' : 'none', this.className = t ? 'open' : 'closed', !1;
+         						}
+         						e = e.nextSibling;
+         					}
+         					return !1;
+         				}, a[o].className = n.indexOf('open') > -1 ? 'open' : 'closed'), a[o].tagName == 'UL' && (a[o].style.display = n.indexOf('open') > -1 ? 'block' : 'none');
+         		}
+         		return !1;
+         	}
+         }
+         let searchEl = document.querySelector('input[type=search]'),
+         	timeout = null;
+         searchEl.onkeyup = function (e) {
+         	clearTimeout(timeout);
+         	let t = JSON.parse(window.searchObj),
+         		n = document.querySelector('input[type=search]').value;
+         	timeout = setTimeout(() => {
+         		if (n.length >= 2) {
+         			let e = getSearchResult(t, n),
+         				a = '',
+         				o = '';
+         			e.folders.forEach((e) => {
+         				a += `<li class="${e.type}"><a href="?p=${e.path}">${e.name}</a></li>`;
+         			}), e.files.forEach((e) => {
+         				o += `<li class="${e.type}"><a href="?p=${e.path}&view=${e.name}">${e.name}</a></li>`;
+         			}), document.getElementById('searchresultWrapper').innerHTML = `<div class="model-wrapper">${a}${o}</div>`;
+         		}
+         	}, 500);
+         }, window.onload = init_php_file_tree;
+         if (document.getElementById('file-tree-view')) {
+         	const tableViewHt = document.getElementById('main-table').offsetHeight - 2;
+         	document.getElementById('file-tree-view').setAttribute('style', `height:${tableViewHt}px`);
+         }
+               
       </script>
       <?php if (isset($_GET['view']) && FM_USE_HIGHLIGHTJS): ?>
       <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
@@ -1972,7 +2065,10 @@
       <?php endif; ?>
       <?php if (isset($_GET['edit']) && isset($_GET['env']) && FM_EDIT_FILE): ?>
       <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js"></script>
-      <script>var editor = ace.edit("editor");editor.getSession().setMode("ace/mode/javascript");</script>
+      <script>
+         var editor = ace.edit("editor");
+         editor.getSession().setMode("ace/mode/javascript");
+      </script>
       <?php endif; ?>
    </body>
 </html>
