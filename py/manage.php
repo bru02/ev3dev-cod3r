@@ -3001,11 +3001,13 @@ if (document.getElementById("file-tree-view")) {
 	exit();
    }
    function fm_get_file($p) {
-	   $path = fm_clean_path($p);
-	   if(file_exists($path)) {
-	   $mime = fm_get_mime_type($path);
+	   $file = fm_clean_path($p);
+	   if(file_exists($file)) {
+	   $mime = fm_get_mime_type($file);
 	   header('Content-Type: ' . $mime);
-	   readfile($path);
+	   header('Content-Length: ' . filesize($file));
+		echo "foundfile";
+	   echo readfile($file);
 	   }
 	   exit();
    }
