@@ -3005,7 +3005,7 @@ if (document.getElementById("file-tree-view")) {
 	   if(file_exists($path)) {
 	   $mime = fm_get_mime_type($path);
 	   header('Content-Type: ' . $mime);
-	   echo file_get_contents($path);
+	   readfile($path);
 	   }
 	   exit();
    }
