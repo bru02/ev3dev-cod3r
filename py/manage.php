@@ -757,7 +757,7 @@ if ($use_auth) {
    fm_show_header(); // HEADER
    fm_show_nav_path(FM_PATH); // current path
    $file_path = $path . '/' . $file;
-   $file_url = "?getFile=" . $file_path;
+   $file_url = FM_BASE_URL . "/cod3r/py/manage.php?getFile=" . $file_path;
 
    $ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
    $mime_type = fm_get_mime_type($file_path);
