@@ -1,3 +1,7 @@
+<!--
+
+
+-->
 <?php
    /**
     * H3K | Tiny File Manager
@@ -10,15 +14,17 @@
    // Auth with login/password (set true/false to enable/disable it)
    $use_auth = false;
    // Users: array('Username' => 'Password', 'Username2' => 'Password2', ...), Password has to encripted into MD5
-   $auth_users = array(
-   
-   );
-   // Readonly users (usernames array)
-   $readonly_users = array(
-   
-   );
+   $readonly_users = array();
+
+   $auth_users = array();
+
+
+   // upload path, where files from CKEDITOR will be uploaded
+   $CKE_upload_path = $_SERVER['DOCUMENT_ROOT']."/../../../home/robot";;
+   // Public_html folder
+   $path_to_hosted_folder = $_SERVER['DOCUMENT_ROOT'];
    // Show or hide files and folders that starts with a dot
-   $show_hidden_files = true;
+   $show_hidden_files = false;
    // Enable highlight.js (https://highlightjs.org/) on view's page
    $use_highlightjs = true;
    // highlight.js style
@@ -28,14 +34,14 @@
    // Send files though mail
    $send_mail = false;
    // Send files though mail
-   $toMailId = "files@cod3r.hu"; //yourmailid@mail.com
+   $toMailId = ""; //yourmailid@mail.com
    // Default timezone for date() and time() - http://php.net/manual/en/timezones.php
    $default_timezone = 'Etc/UTC'; // UTC
    // Root path for file manager
    $root_path = $_SERVER['DOCUMENT_ROOT']."/../../../home/robot";
    // Root url for links in file manager.Relative to $http_host. Variants: '', 'path/to/subfolder'
    // Will not working if $root_path will be outside of server document root
-   $root_url = '';
+   $root_url = '/cloud/data';
    // Server hostname. Can set manually if wrong
    $http_host = $_SERVER['HTTP_HOST'];
    // input encoding for iconv
@@ -50,6 +56,13 @@
    $GLOBALS['exclude_folders'] = array(
    
    );
+   // CKEDITOR Support
+    $ck =  $ck_img = isset($_GET['CKEditor'])&&isset($_GET['CKEditorFuncNum'])&&isset($_GET['langCode']);
+   if($ck) {
+	   $show_tree_view = false;
+	   $ckd ="&CKEditor=" . htmlentities($_GET['CKEditor']) . "&CKEditorFuncNum=" . intval($_GET['CKEditor']) . "&langCode=" . htmlentities($_GET['langCode']);
+   } else $ckd = "";
+   define("CK_PATH",$ckd);
    // include user config php file
    if (defined('FM_CONFIG') && is_file(FM_CONFIG) ) {
    	include(FM_CONFIG);
@@ -90,26 +103,75 @@
    defined('FM_SHOW_HIDDEN') || define('FM_SHOW_HIDDEN', $show_hidden_files);
    defined('FM_ROOT_PATH') || define('FM_ROOT_PATH', $root_path);
    defined('FM_ROOT_URL') || define('FM_ROOT_URL', ($is_https ? 'https' : 'http') . '://' . $http_host . (!empty($root_url) ? '/' . $root_url : ''));
+   defined('FM_BASE_URL') || define('FM_BASE_URL', ($is_https ? 'https' : 'http') . '://' . $http_host);
    defined('FM_SELF_URL') || define('FM_SELF_URL', ($is_https ? 'https' : 'http') . '://' . $http_host . $_SERVER['PHP_SELF']);
-   // logout
+   defined('FM_PUBLIC_HTML') || define('FM_PUBLIC_HTML',fm_clean_path($path_to_hosted_folder));
+  
+   $CKE_upload_path = fm_clean_path($CKE_upload_path);
+   $CKE_upload_path = str_replace(FM_PUBLIC_HTML,FM_BASE_URL,$CKE_upload_path);
+
+   defined('FM_UPLOAD_PATH') || define('FM_UPLOAD_PATH', ($is_https ? 'https' : 'http') . '://' . $http_host . $CKE_upload_path);
+
+     // logout
    if (isset($_GET['logout'])) {
-       unset($_SESSION['logged']);
+       unset($_SESSION['user']);
        fm_redirect(FM_SELF_URL);
    }
    // Show image here
    if (isset($_GET['img'])) {
        fm_show_image($_GET['img']);
    }
+   // Show file here
+   if (isset($_GET['src'])) {
+       fm_show_file($_GET['src']);
+   }
+   //Show source files
+   if (isset($_GET['getFile'])) {
+	   fm_get_file($_GET['getFile']);
+   }
    // Auth
-   
+if ($use_auth) {
+    if (isset($_SESSION['user'], $auth_users[$_SESSION['user']])) {
+        // Logged
+    } elseif (isset($_POST['fm_usr'], $_POST['fm_pwd'])) {
+        // Logging In
+        sleep(1);
+        if (isset($auth_users[$_POST['fm_usr']]) && md5($_POST['fm_pwd']) === $auth_users[$_POST['fm_usr']]) {
+            $_SESSION['user'] = $_POST['fm_usr'];
+            fm_set_msg('You are logged in');
+            fm_redirect(FM_SELF_URL . '?p=' . CK_PATH);
+        } else {
+            unset($_SESSION['user']);
+            fm_set_msg('Wrong password', 'error');
+            fm_redirect(FM_SELF_URL);
+        }
+    } else {
+        // Form
+        unset($_SESSION['user']);
+        fm_show_header_login();
+        fm_show_message();
+        ?>
+        <div class="path login-form">
+                <img src="<?php echo FM_SELF_URL ?>?img=cloud" alt="Sákrány" style="margin:20px;">
+            <form action="" method="post">
+                <label for="fm_usr">Username</label><input type="text" id="fm_usr" name="fm_usr" value="" placeholder="Username" required><br>
+                <label for="fm_pwd">Password</label><input type="password" id="fm_pwd" name="fm_pwd" value="" placeholder="Password" required><br>
+                <input type="submit" value="Login">
+            </form>
+        </div>
+        <?php
+        fm_show_footer_login();
+        exit;
+    }
+}
    defined('FM_LANG') || define('FM_LANG', $lang);
    defined('FM_EXTENSION') || define('FM_EXTENSION', $upload_extensions);
    defined('FM_TREEVIEW') || define('FM_TREEVIEW', $show_tree_view);
-   define('FM_READONLY', $use_auth && !empty($readonly_users) && isset($_SESSION['logged']) && in_array($_SESSION['logged'], $readonly_users));
+   define('FM_READONLY', $use_auth && !empty($readonly_users) && isset($_SESSION['user']) && in_array($_SESSION['user'], $readonly_users));
    define('FM_IS_WIN', DIRECTORY_SEPARATOR == '\\');
    // always use ?p=
    if (!isset($_GET['p']) && empty($_FILES)) {
-   fm_redirect(FM_SELF_URL . '?p=');
+   fm_redirect(FM_SELF_URL . '?p=' . CK_PATH);
    }
    // get path
    $p = isset($_REQUEST['p'])?$_REQUEST['p']:'';
@@ -169,7 +231,7 @@
    } else {
    fm_set_msg('Wrong file or folder name', 'error');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // Create folder
    if (isset($_GET['new']) && isset($_GET['type']) && !FM_READONLY) {
@@ -201,7 +263,7 @@
    } else {
    fm_set_msg('Wrong folder name', 'error');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // Copy folder / file
    if (isset($_GET['copy'], $_GET['finish']) && !FM_READONLY) {
@@ -211,7 +273,7 @@
    // empty path
    if ($copy == '') {
    fm_set_msg('Source path not defined', 'error');
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // abs path from
    $from = FM_ROOT_PATH . '/' . $copy;
@@ -245,7 +307,7 @@
    } else {
    fm_set_msg('Paths must be not equal', 'alert');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // Mass copy files/ folders
    if (isset($_POST['file'], $_POST['copy_to'], $_POST['finish']) && !FM_READONLY) {
@@ -262,12 +324,12 @@
    }
    if ($path == $copy_to_path) {
    fm_set_msg('Paths must be not equal', 'alert');
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    if (!is_dir($copy_to_path)) {
    if (!fm_mkdir($copy_to_path, true)) {
        fm_set_msg('Unable to create destination folder', 'error');
-       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    }
    // move?
@@ -305,7 +367,7 @@
    } else {
    fm_set_msg('Nothing selected', 'alert');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // Rename
    if (isset($_GET['ren'], $_GET['to']) && !FM_READONLY) {
@@ -332,7 +394,7 @@
    } else {
    fm_set_msg('Names not set', 'error');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // Download
    if (isset($_GET['dl'])) {
@@ -357,12 +419,17 @@
    exit;
    } else {
    fm_set_msg('File not found', 'error');
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    }
    // Upload
    if (!empty($_FILES) && !FM_READONLY) {
    $f = $_FILES;
+	   $ck = false;
+   if(!isset($f['file'])&&isset($f['upload'])) {
+	   $f['file'] = $f['upload'];
+	   $ck = true;
+   }
    $path = FM_ROOT_PATH;
    if (FM_PATH != '') {
    $path .= '/' . FM_PATH;
@@ -375,9 +442,27 @@
    $tmp_name = $f['file']['tmp_name'];
    $ext = pathinfo($filename, PATHINFO_EXTENSION);
    $isFileAllowed = ($allowed) ? in_array($ext, $allowed) : true;
+   $name = $path . '/' . $f['file']['name'];
+   $i = 0;
+
+   while(file_exists($name)) {
+   $name = $path . '/' .$i. $f['file']['name'];
+	$i = $i +1;
+   }
    if (empty($f['file']['error']) && !empty($tmp_name) && $tmp_name != 'none' && $isFileAllowed) {
-   if (move_uploaded_file($tmp_name, $path . '/' . $f['file']['name'])) {
+   if (move_uploaded_file($tmp_name, $name)) {
+	   if(!$ck)
        die('Successfully uploaded');
+   else {
+	   $name = str_replace(FM_PUBLIC_HTML,FM_BASE_URL,$name);
+	   $arr = array(
+			"uploaded" => 1,
+			"fileName" => $filename,
+			"url" => $name
+	   );
+	   echo json_encode($arr);
+	   exit();
+   }
    } else {
        die(sprintf('Error while uploading files. Uploaded files: %s', $uploads));
    }
@@ -409,7 +494,7 @@
    } else {
    fm_set_msg('Nothing selected', 'alert');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // Pack files
    if (isset($_POST['group'], $_POST['zip']) && !FM_READONLY) {
@@ -419,7 +504,7 @@
    }
    if (!class_exists('ZipArchive')) {
    fm_set_msg('Operations with archives are not available', 'error');
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    $files = $_POST['file'];
    if (!empty($files)) {
@@ -441,7 +526,7 @@
    } else {
    fm_set_msg('Nothing selected', 'alert');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // Unpack
    if (isset($_GET['unzip']) && !FM_READONLY) {
@@ -454,7 +539,7 @@
    }
    if (!class_exists('ZipArchive')) {
    fm_set_msg('Operations with archives are not available', 'error');
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    if ($unzip != '' && is_file($path . '/' . $unzip)) {
    $zip_path = $path . '/' . $unzip;
@@ -476,7 +561,7 @@
    } else {
    fm_set_msg('File not found', 'error');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    // Change Perms (not for Windows)
    if (isset($_POST['chmod']) && !FM_READONLY && !FM_IS_WIN) {
@@ -489,7 +574,7 @@
    $file = str_replace('/', '', $file);
    if ($file == '' || (!is_file($path . '/' . $file) && !is_dir($path . '/' . $file))) {
    fm_set_msg('File not found', 'error');
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    $mode = 0;
    if (!empty($_POST['ur'])) {
@@ -524,7 +609,7 @@
    } else {
    fm_set_msg('Permissions not changed', 'error');
    }
-   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+   fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    /*************************** /ACTIONS ***************************/
    // get current path
@@ -534,7 +619,7 @@
    }
    // check path
    if (!is_dir($path)) {
-   fm_redirect(FM_SELF_URL . '?p=');
+   fm_redirect(FM_SELF_URL . '?p=' . CK_PATH);
    }
    // get parent folder
    $parent = fm_get_parent_path(FM_PATH);
@@ -573,7 +658,7 @@
 <div class="path">
    <p><b>Uploading files</b></p>
    <p class="break-word">Destination folder: <?php echo fm_enc(fm_convert_win(FM_ROOT_PATH . '/' . FM_PATH)) ?></p>
-   <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]).'?p='.fm_enc(FM_PATH) ?>" class="dropzone" id="fileuploader" enctype="multipart/form-data">
+   <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]).'?p='.fm_enc(FM_PATH).CK_PATH ?>" class="dropzone" id="fileuploader" enctype="multipart/form-data">
       <input type="hidden" name="p" value="<?php echo fm_enc(FM_PATH) ?>">
       <div class="fallback">
          <input name="file" type="file" multiple />
@@ -589,7 +674,7 @@
    $copy_files = $_POST['file'];
    if (!is_array($copy_files) || empty($copy_files)) {
        fm_set_msg('Nothing selected', 'alert');
-       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    fm_show_header(); // HEADER
    fm_show_nav_path(FM_PATH); // current path
@@ -612,7 +697,7 @@
       <p><label><input type="checkbox" name="move" value="1"> Move'</label></p>
       <p>
          <button type="submit" class="btn"><i class="fa fa-check-circle"></i> Copy </button> &nbsp;
-         <b><a href="?p=<?php echo urlencode(FM_PATH) ?>"><i class="fa fa-times-circle"></i> Cancel</a></b>
+         <b><a href="?p=<?php echo urlencode(FM_PATH) . CK_PATH; ?>"><i class="fa fa-times-circle"></i> Cancel</a></b>
       </p>
    </form>
 </div>
@@ -626,7 +711,7 @@
    $copy = fm_clean_path($copy);
    if ($copy == '' || !file_exists(FM_ROOT_PATH . '/' . $copy)) {
        fm_set_msg('File not found', 'error');
-       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    fm_show_header(); // HEADER
    fm_show_nav_path(FM_PATH); // current path
@@ -638,21 +723,21 @@
       Destination folder: <?php echo fm_enc(fm_convert_win(FM_ROOT_PATH . '/' . FM_PATH)) ?>
    </p>
    <p>
-      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;copy=<?php echo urlencode($copy) ?>&amp;finish=1"><i class="fa fa-check-circle"></i> Copy</a></b> &nbsp;
-      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;copy=<?php echo urlencode($copy) ?>&amp;finish=1&amp;move=1"><i class="fa fa-check-circle"></i> Move</a></b> &nbsp;
-      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>"><i class="fa fa-times-circle"></i> Cancel</a></b>
+      <b><a href="?p=<?php echo urlencode(FM_PATH) . CK_PATH; ?>&amp;copy=<?php echo urlencode($copy) ?>&amp;finish=1"><i class="fa fa-check-circle"></i> Copy</a></b> &nbsp;
+      <b><a href="?p=<?php echo urlencode(FM_PATH) . CK_PATH; ?>&amp;copy=<?php echo urlencode($copy) ?>&amp;finish=1&amp;move=1"><i class="fa fa-check-circle"></i> Move</a></b> &nbsp;
+      <b><a href="?p=<?php echo urlencode(FM_PATH) . CK_PATH; ?>"><i class="fa fa-times-circle"></i> Cancel</a></b>
    </p>
    <p><i>Select folder</i></p>
    <ul class="folders break-word">
       <?php
          if ($parent !== false) {
              ?>
-      <li><a href="?p=<?php echo urlencode($parent) ?>&amp;copy=<?php echo urlencode($copy) ?>"><i class="fa fa-chevron-circle-left"></i> ..</a></li>
+      <li><a href="?p=<?php echo urlencode($parent) ?>&amp;copy=<?php echo urlencode($copy) . CK_PATH; ?>"><i class="fa fa-chevron-circle-left"></i> ..</a></li>
       <?php
          }
          foreach ($folders as $f) {
              ?>
-      <li><a href="?p=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?>&amp;copy=<?php echo urlencode($copy) ?>"><i class="fa fa-folder-o"></i> <?php echo fm_convert_win($f) ?></a></li>
+      <li><a href="?p=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?>&amp;copy=<?php echo urlencode($copy) . CK_PATH; ?>"><i class="fa fa-folder-o"></i> <?php echo fm_convert_win($f) ?></a></li>
       <?php
          }
          ?>
@@ -669,12 +754,13 @@
    $file = str_replace('/', '', $file);
    if ($file == '' || !is_file($path . '/' . $file)) {
        fm_set_msg('File not found', 'error');
-       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    fm_show_header(); // HEADER
    fm_show_nav_path(FM_PATH); // current path
-   $file_url = FM_ROOT_URL . fm_convert_win((FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $file);
    $file_path = $path . '/' . $file;
+   $file_url = "?getFile=" . $file_path;
+
    $ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
    $mime_type = fm_get_mime_type($file_path);
    $filesize = filesize($file_path);
@@ -752,28 +838,28 @@
       <?php if($ext=="py"):?>
       <b><a title="Run" href="runner.php?f=<?php echo $file_path ?>" target="_blank"><i class="fa fa-caret-square-o-right" aria-hidden="true"></i> Run</a></b>
       <?php endif ?>
-      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;dl=<?php echo urlencode($file) ?>"><i class="fa fa-cloud-download"></i> Download</a></b> &nbsp;
+      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;dl=<?php echo urlencode($file) . CK_PATH; ?>"><i class="fa fa-cloud-download"></i> Download</a></b> &nbsp;
       <b><a href="<?php echo fm_enc($file_url) ?>" target="_blank"><i class="fa fa-external-link-square"></i> Open</a></b> &nbsp;
       <?php
          // ZIP actions
          if (!FM_READONLY && $is_zip && $filenames !== false) {
              $zip_name = pathinfo($file_path, PATHINFO_FILENAME);
              ?>
-      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;unzip=<?php echo urlencode($file) ?>"><i class="fa fa-check-circle"></i> UnZip</a></b> &nbsp;
-      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;unzip=<?php echo urlencode($file) ?>&amp;tofolder=1" title="UnZip to <?php echo fm_enc($zip_name) ?>"><i class="fa fa-check-circle"></i>
+      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;unzip=<?php echo urlencode($file) . CK_PATH; ?>"><i class="fa fa-check-circle"></i> UnZip</a></b> &nbsp;
+      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>&amp;unzip=<?php echo urlencode($file) ?>&amp;tofolder=1<?php echo CK_PATH; ?>" title="UnZip to <?php echo fm_enc($zip_name) ?>"><i class="fa fa-check-circle"></i>
       UnZip to folder</a></b> &nbsp;
       <?php
          }
          if($is_text && !FM_READONLY) {
          ?>
-      <!-- <b><a href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>" class="edit-file"><i class="fa fa-pencil-square"></i> Edit</a></b> &nbsp;-->
-      <b><a href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>&env=ace" class="edit-file"><i class="fa fa-pencil-square"></i> Edit</a></b> &nbsp;
+      <!-- <b><a href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) . CK_PATH; ?>" class="edit-file"><i class="fa fa-pencil-square"></i> Edit</a></b> &nbsp;-->
+      <b><a href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>&env=ace<?php echo CK_PATH;?>" class="edit-file"><i class="fa fa-pencil-square"></i> Edit</a></b> &nbsp;
       <?php }
          if($send_mail && !FM_READONLY) {
          ?>
       <b><a href="javascript:mailto('<?php echo urlencode(trim(FM_ROOT_PATH.'/'.FM_PATH)) ?>','<?php echo urlencode($file) ?>')"><i class="fa fa-pencil-square"></i> Mail</a></b> &nbsp;
       <?php } ?>
-      <b><a href="?p=<?php echo urlencode(FM_PATH) ?>"><i class="fa fa-chevron-circle-left"></i> Back</a></b>
+      <b><a href="?p=<?php echo urlencode(FM_PATH) . CK_PATH; ?>"><i class="fa fa-chevron-circle-left"></i> Back</a></b>
    </p>
    <?php
       if ($is_zip) {
@@ -838,7 +924,7 @@
    $file = str_replace('/', '', $file);
    if ($file == '' || !is_file($path . '/' . $file)) {
        fm_set_msg('File not found', 'error');
-       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    fm_show_header(); // HEADER
    fm_show_nav_path(FM_PATH); // current path
@@ -876,15 +962,15 @@
    ?>
 <div class="path">
    <div class="edit-file-actions">
-      <a title="Cancel" href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;view=<?php echo urlencode($file) ?>"><i class="fa fa-reply-all"></i> Cancel</a>
+      <a title="Cancel" href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;view=<?php echo urlencode($file) . CK_PATH; ?>"><i class="fa fa-reply-all"></i> Cancel</a>
       <a title="Backup" href="javascript:backup('<?php echo urlencode($path) ?>','<?php echo urlencode($file) ?>')"><i class="fa fa-database"></i> Backup</a>
       <?php if($is_text) { ?>
       <?php if($isNormalEditor) { ?>
-      <a title="Advanced" href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>&amp;env=ace"><i class="fa fa-paper-plane"></i> Advanced Editor</a>
+      <a title="Advanced" href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>&amp;env=ace<?php echo CK_PATH; ?>"><i class="fa fa-paper-plane"></i> Advanced Editor</a>
       <button type="button" name="Save" data-url="<?php echo fm_enc($file_url) ?>" onclick="edit_save(this,'nrl')"><i class="fa fa-floppy-o"></i> Save</button>
       <?php } else { ?>
-      <!--<a title="Plain Editor" href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) ?>"><i class="fa fa-text-height"></i> Plain Editor</a>-->
-      <button type="button" name="Save" data-url="<?php echo fm_enc($file_url) ?>" onclick="edit_save(this,'ace')"><i class="fa fa-floppy-o"></i> Save</button>
+      <!--<a title="Plain Editor" href="?p=<?php echo urlencode(trim(FM_PATH)) ?>&amp;edit=<?php echo urlencode($file) . CK_PATH; ?>"><i class="fa fa-text-height"></i> Plain Editor</a>-->
+      <button type="button" name="Save" data-url="<?php echo fm_enc($file_url) . CK_PATH; ?>" onclick="edit_save(this,'ace')"><i class="fa fa-floppy-o"></i> Save</button>
       <?php } ?>
       <?php } ?>
    </div>
@@ -893,6 +979,28 @@
           echo '<textarea id="normal-editor" rows="33" cols="120" style="width: 99.5%;">'. htmlspecialchars($content) .'</textarea>';
       } elseif ($is_text) {
           echo '<div id="editor" contenteditable="true">'. htmlspecialchars($content) .'</div>';
+          if(true):?>
+                 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js"></script>
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-modelist.js"></script>
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-language_tools.js"></script>
+
+       
+      <script>
+          ace.require("ace/ext/language_tools");
+
+         var editor = ace.edit("editor");
+         var filename = "<?php echo $file; ?>";
+        // In this case "ace/mode/javascript"
+        var modelist = ace.require("ace/ext/modelist");
+        var mode =  modelist.getModeForPath(filename).mode;
+        editor.getSession().setMode(mode);
+        editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: false
+    });
+        </script>
+          <?php endif;
       } else {
           fm_set_msg('FILE EXTENSION HAS NOT SUPPORTED', 'error');
       }
@@ -909,7 +1017,7 @@
    $file = str_replace('/', '', $file);
    if ($file == '' || (!is_file($path . '/' . $file) && !is_dir($path . '/' . $file))) {
        fm_set_msg('File not found', 'error');
-       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
+       fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);
    }
    fm_show_header(); // HEADER
    fm_show_nav_path(FM_PATH); // current path
@@ -953,7 +1061,7 @@
       </table>
       <p>
          <button type="submit" class="btn"><i class="fa fa-check-circle"></i> Change</button> &nbsp;
-         <b><a href="?p=<?php echo urlencode(FM_PATH) ?>"><i class="fa fa-times-circle"></i> Cancel</a></b>
+         <b><a href="?p=<?php echo urlencode(FM_PATH) . CK_PATH; ?>"><i class="fa fa-times-circle"></i> Cancel</a></b>
       </p>
    </form>
 </div>
@@ -983,6 +1091,16 @@
    </div>
    <?php } ?>
    <table class="table" id="main-table">
+   <?php
+   $ck_browse = !empty(CK_PATH);
+   if($ck_browse) {
+// e-z params  
+$dim = 150;         /* image displays proportionally within this square dimension ) */  
+$cols = 4;          /* thumbnails per row */
+$thumIndicator = ''; /* e.g., *image123_th.jpg*) -> if not using thumbNails then use empty string */  
+   }
+   if(!$ck_browse):
+   ?>
       <thead>
          <tr>
             <?php if (!FM_READONLY): ?>
@@ -998,18 +1116,24 @@
             <th style="width:<?php if (!FM_READONLY): ?>13<?php else: ?>6.5<?php endif; ?>%">Actions</th>
          </tr>
       </thead>
+	  <?php endif;?>
       <?php
          // link to parent folder
          if ($parent !== false) {
              ?>
       <tr>
+		<?php if(!$ck_browse): ?>
          <?php if (!FM_READONLY): ?>
          <td></td>
          <?php endif; ?>
-         <td colspan="<?php echo !FM_IS_WIN ? '6' : '4' ?>"><a href="?p=<?php echo urlencode($parent) ?>"><i class="fa fa-chevron-circle-left"></i> ..</a></td>
-      </tr>
+         <td colspan="<?php echo !FM_IS_WIN ? '6' : '4' ?>"><a href="?p=<?php echo urlencode($parent) ?><?php echo CK_PATH;?>"><i class="fa fa-chevron-circle-left"></i> ..</a></td>
+		<?php else: ?>
+         <td><a href="?p=<?php echo urlencode($parent) ?><?php echo CK_PATH;?>"><div class="folder-btn"><i class="fa fa-chevron-circle-left"></i> ..</div></a></td>
+		<?php endif; ?>
+	  </tr>
       <?php
          }
+		 if($ck_browse) echo "<tr>";
          foreach ($folders as $f) {
              $is_link = is_link($path . '/' . $f);
              $img = $is_link ? 'icon-link_folder' : 'fa fa-folder-o';
@@ -1023,23 +1147,26 @@
                  $group = array('name' => '?');
              }
              ?>
+			  <?php if (!$ck_browse): ?>
       <tr>
+        
+
          <?php if (!FM_READONLY): ?>
          <td><label><input type="checkbox" name="file[]" value="<?php echo fm_enc($f) ?>"></label></td>
          <?php endif; ?>
          <td>
-            <div class="filename"><a href="?p=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?>"><i class="<?php echo $img ?>"></i> <?php echo fm_convert_win($f) ?></a><?php echo ($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?></div>
+            <div class="filename"><a href="?p=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?><?php echo CK_PATH;?>"><i class="<?php echo $img ?>"></i> <?php echo fm_convert_win($f) ?></a><?php echo ($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?></div>
          </td>
          <td>Folder</td>
          <td><?php echo $modif ?></td>
          <?php if (!FM_IS_WIN): ?>
-         <td><?php if (!FM_READONLY): ?><a title="Change Permissions" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;chmod=<?php echo urlencode($f) ?>"><?php echo $perms ?></a><?php else: ?><?php echo $perms ?><?php endif; ?></td>
+         <td><?php if (!FM_READONLY): ?><a title="Change Permissions" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;chmod=<?php echo urlencode($f) ?><?php echo CK_PATH;?>"><?php echo $perms ?></a><?php else: ?><?php echo $perms ?><?php endif; ?></td>
          <td><?php echo $owner['name'] . ':' . $group['name'] ?></td>
          <?php endif; ?>
          <td class="inline-actions"><?php if (!FM_READONLY): ?>
-            <a title="Delete" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;del=<?php echo urlencode($f) ?>" onclick="return confirm('Delete folder?');"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+            <a title="Delete" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;del=<?php echo urlencode($f) ?><?php echo CK_PATH;?>" onclick="return confirm('Delete folder?');"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
             <a title="Rename" href="#" onclick="rename('<?php echo fm_enc(FM_PATH) ?>', '<?php echo fm_enc($f) ?>');return false;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
-            <a title="Copy to..." href="?p=&amp;copy=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?>">
+            <a title="Copy to..." href="?p=&amp;copy=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?><?php echo CK_PATH;?>">
             <i class="fa fa-files-o" aria-hidden="true"></i>
             </a>
             <?php endif; ?>
@@ -1047,17 +1174,28 @@
             <i class="fa fa-link" aria-hidden="true"></i>
             </a>
          </td>
+		 		        
+
       </tr>
+     <?php else: ?>
+	<td><a href="?p=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?><?php echo CK_PATH;?>"><div class="folder-btn"><i class="<?php echo $img ?>"></i> <?php echo fm_convert_win($f) ?></div></a><?php echo ($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?>
+
+</td>
+            <?php endif; ?>
       <?php
          flush();
          }
+		 if($ck_browse) echo "</tr>";
+
+		 if(!$ck_browse):
+		 ?><?php
          foreach ($files as $f) {
          $is_link = is_link($path . '/' . $f);
          $img = $is_link ? 'fa fa-file-text-o' : fm_get_file_icon_class($path . '/' . $f);
          $modif = date(FM_DATETIME_FORMAT, filemtime($path . '/' . $f));
          $filesize_raw = filesize($path . '/' . $f);
          $filesize = fm_get_filesize($filesize_raw);
-         $filelink = '?p=' . urlencode(FM_PATH) . '&amp;view=' . urlencode($f);
+         $filelink = '?p=' . urlencode(FM_PATH) . '&amp;view=' . urlencode($f) . CK_PATH;
          $all_files_size += $filesize_raw;
          $perms = substr(decoct(fileperms($path . '/' . $f)), -4);
          if (function_exists('posix_getpwuid') && function_exists('posix_getgrgid')) {
@@ -1067,33 +1205,109 @@
              $owner = array('name' => '?');
              $group = array('name' => '?');
          }
+		 $ext = strtolower(pathinfo($path . '/' . $f, PATHINFO_EXTENSION));
+		
+
          ?>
       <tr>
          <?php if (!FM_READONLY): ?>
          <td><label><input type="checkbox" name="file[]" value="<?php echo fm_enc($f) ?>"></label></td>
          <?php endif; ?>
          <td>
-            <div class="filename"><a href="<?php echo $filelink ?>" title="File info"><i class="<?php echo $img ?>"></i> <?php echo fm_convert_win($f) ?></a><?php echo ($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?></div>
+            <div class="filename">
+			<a href="<?php echo $filelink ?>" title="File info"><i class="<?php echo $img ?>"></i> <?php echo fm_convert_win($f) ?></a><?php echo ($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?>
+			
+			</div>
          </td>
          <td><span title="<?php printf('%s bytes', $filesize_raw) ?>"><?php echo $filesize ?></span></td>
          <td><?php echo $modif ?></td>
          <?php if (!FM_IS_WIN): ?>
-         <td><?php if (!FM_READONLY): ?><a title="<?php echo 'Change Permissions' ?>" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;chmod=<?php echo urlencode($f) ?>"><?php echo $perms ?></a><?php else: ?><?php echo $perms ?><?php endif; ?></td>
+         <td><?php if (!FM_READONLY): ?><a title="<?php echo 'Change Permissions' ?>" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;chmod=<?php echo urlencode($f) ?><?php echo CK_PATH;?>"><?php echo $perms ?></a><?php else: ?><?php echo $perms ?><?php endif; ?></td>
          <td><?php echo fm_enc($owner['name'] . ':' . $group['name']) ?></td>
          <?php endif; ?>
          <td class="inline-actions">
             <?php if (!FM_READONLY): ?>
-            <a title="Delete" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;del=<?php echo urlencode($f) ?>" onclick="return confirm('Delete file?');"><i class="fa fa-trash-o"></i></a>
+            <a title="Delete" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;del=<?php echo urlencode($f) ?><?php echo CK_PATH;?>" onclick="return confirm('Delete file?');"><i class="fa fa-trash-o"></i></a>
             <a title="Rename" href="#" onclick="rename('<?php echo fm_enc(FM_PATH) ?>', '<?php echo fm_enc($f) ?>');return false;"><i class="fa fa-pencil-square-o"></i></a>
-            <a title="Copy to..." href="?p=<?php echo urlencode(FM_PATH) ?>&amp;copy=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?>"><i class="fa fa-files-o"></i></a>
+            <a title="Copy to..." href="?p=<?php echo urlencode(FM_PATH) ?>&amp;copy=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?><?php echo CK_PATH;?>"><i class="fa fa-files-o"></i></a>
             <?php endif; ?>
-            <a title="Direct link" href="<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f) ?>" target="_blank"><i class="fa fa-link"></i></a>
-            <a title="Download" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;dl=<?php echo urlencode($f) ?>"><i class="fa fa-download"></i></a>
+            <a title="Direct link" href="?getFile=<?php echo fm_enc(FM_ROOT_URL . (FM_PATH != '' ? '/' . FM_PATH : '') . '/' . $f) ?>" target="_blank"><i class="fa fa-link"></i></a>
+            <a title="Download" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;dl=<?php echo urlencode($f) ?><?php echo CK_PATH;?>"><i class="fa fa-download"></i></a>
          </td>
       </tr>
       <?php
          flush();
          }
+		 else:?>
+		 <?php  
+
+$dir = FM_ROOT_PATH . (FM_PATH != '' ? '/' . FM_PATH : '');    
+
+$dir = rtrim($dir, '/'); // the script will add the ending slash when appropriate  
+
+$files = scandir($dir);  
+
+$images = array();  
+
+foreach($files as $file){  
+    // filter for thumbNail image files (use an empty string for $thumIndicator if not using thumbnails )
+    if( !preg_match('/'. $thumIndicator .'\.(jpg|jpeg|png|gif)$/i', $file) )  
+        continue;  
+
+    $thumbSrc = $dir . '/' . $file;  
+	$thumbSrc = str_replace(FM_PUBLIC_HTML, FM_BASE_URL, $thumbSrc);
+    $fileBaseName = str_replace('_th.','.',$file);  
+
+    $image_info = getimagesize($thumbSrc);  
+    $_w = $image_info[0];  
+    $_h = $image_info[1]; 
+
+    if( $_w > $_h ) {       // $a is the longer side and $b is the shorter side
+        $a = $_w;  
+        $b = $_h;  
+    } else {  
+        $a = $_h;  
+        $b = $_w;  
+    }     
+
+    $pct = $b / $a;     // the shorter sides relationship to the longer side
+
+    if( $a > $dim )   
+        $a = $dim;      // limit the longer side to the dimension specified
+
+    $b = (int)($a * $pct);  // calculate the shorter side
+
+    $width =    $_w > $_h ? $a : $b;  
+    $height =   $_w > $_h ? $b : $a;  
+
+    // produce an image tag
+    $str = sprintf('<img src="%s" width="%d" height="%d" title="%s" alt="Click to use this image">',   
+        $thumbSrc,  
+        $width,  
+        $height,
+		$fileBaseName
+    );  
+    // save image tags in an array
+    $images[] = str_replace("'", "\\'", $str); // an unescaped apostrophe would break js  
+
+}
+
+$numRows = floor( count($images) / $cols );  
+
+// if there are any images left over then add another row
+if( count($images) % $cols != 0 )  
+    $numRows++;  
+
+
+// produce the correct number of table rows with empty cells
+for($i=0; $i<$numRows; $i++)   
+    echo "\t<tr>" . implode('', array_fill(0, $cols, '<td class="img"></td>')) . "</tr>\n\n";  
+
+?>  
+		 <?php
+		endif; 
+				 if(!$ck_browse):?>
+<?php
          if (empty($folders) && empty($files)) {
          ?>
       <tr>
@@ -1130,8 +1344,50 @@
       <input type="submit" class="hidden" name="copy" id="a-copy" value="Copy">
       <a href="javascript:document.getElementById('a-copy').click();" class="group-btn"><i class="fa fa-files-o"></i> Copy </a>
    </p>
+   <?php endif; else: ?>
+</table>
+<script>  
+
+// make a js array from the php array
+images = [  
+<?php   
+
+foreach( $images as $v)  
+    echo sprintf("\t'%s',\n", $v);  
+
+?>];  
+
+tbl = document.getElementById('main-table');  
+
+td = tbl.getElementsByClassName('img');  
+
+// fill the empty table cells with data
+for(var i=0; i < images.length; i++)  
+    td[i].innerHTML = images[i];  
+
+
+// event handler to place clicked image into CKeditor
+tbl.onclick =   
+
+    function(e) {  
+
+        var tgt = e.target || event.srcElement,  
+            url;  
+
+        if( tgt.nodeName != 'IMG' )  
+            return;  
+		// '<?php echo str_replace(FM_PUBLIC_HTML, FM_BASE_URL, $dir);?>' + '/' + tgt.title
+        url = tgt.src;  
+
+        this.onclick = null;  
+
+        window.opener.CKEDITOR.tools.callFunction(<?php echo $_GET['CKEditorFuncNum']; ?>, url);  
+
+        window.close();  
+    }  
+</script>  
    <?php endif; ?>
-</form>
+   </form>
 <?php
    fm_show_footer();
    //--- END
@@ -1471,7 +1727,7 @@
    					// File
                        $ext = fm_get_file_icon_class($this_file);
                        $path = str_replace($_SERVER['DOCUMENT_ROOT'],"",$directory);
-   					$link = "?p="."$path" ."&view=".urlencode($this_file);
+   					$link = "?p="."$path" ."&view=".urlencode($this_file) . CK_PATH;
    					$php_file_tree .= "<li class=\"pft-file\"><a href=\"$link\"> <i class=\"$ext\"></i>" . htmlspecialchars($this_file) . "</a></li>";
    				}
    			}
@@ -1790,7 +2046,7 @@
 <div class="path main-nav">
    <?php
       $path = fm_clean_path($path);
-      $root_url = "<a href='?p='><i class='fa fa-home' aria-hidden='true' title='" . FM_ROOT_PATH . "'></i></a>";
+      $root_url = "<a href='?p=" . CK_PATH . "'><i class='fa fa-home' aria-hidden='true' title='" . FM_ROOT_PATH . "'></i></a>";
       $sep = '<i class="fa fa-caret-right"></i>';
       if ($path != '') {
           $exploded = explode('/', $path);
@@ -1800,7 +2056,7 @@
           for ($i = 0; $i < $count; $i++) {
               $parent = trim($parent . '/' . $exploded[$i], '/');
               $parent_enc = urlencode($parent);
-              $array[] = "<a href='?p={$parent_enc}'>" . fm_enc(fm_convert_win($exploded[$i])) . "</a>";
+              $array[] = "<a href='?p={$parent_enc}" . CK_PATH . "'>" . fm_enc(fm_convert_win($exploded[$i])) . "</a>";
           }
           $root_url .= $sep . implode($sep, $array);
       }
@@ -1809,7 +2065,7 @@
    <div class="float-right">
       <?php if (!FM_READONLY): ?>
       <a title="Search" href="javascript:showSearch('<?php echo urlencode(FM_PATH) ?>')"><i class="fa fa-search"></i></a>
-      <a title="Upload files" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;upload"><i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
+      <a title="Upload files" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;upload=1<?php echo CK_PATH;?>"><i class="fa fa-cloud-upload" aria-hidden="true"></i></a>
       <a title="New folder" href="#createNewItem" ><i class="fa fa-plus-square"></i></a>
       <?php endif; ?>
       <?php if (FM_USE_AUTH): ?><a title="Logout" href="?logout=1"><i class="fa fa-sign-out" aria-hidden="true"></i></a><?php endif; ?>
@@ -1845,14 +2101,16 @@
 <html>
    <head>
       <meta charset="utf-8">
-      <title>Cod3r | Project Manager</title>
+      <title>Filemanger | Cod3r</title>
       <meta name="Description" CONTENT="Author: Project Manager">
       <link rel="icon" href="<?php echo FM_SELF_URL ?>?img=favicon" type="image/png">
       <link rel="shortcut icon" href="<?php echo FM_SELF_URL ?>?img=favicon" type="image/png">
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
-      <style>
-         a img,img{border:none}.filename,td,th{white-space:nowrap}.close,.close:focus,.close:hover,.php-file-tree a,a{text-decoration:none}a,body,code,div,em,form,html,img,label,li,ol,p,pre,small,span,strong,table,td,th,tr,ul{margin:0;padding:0;vertical-align:baseline;outline:0;font-size:100%;background:0 0;border:none;text-decoration:none}p,table,ul{margin-bottom:10px}html{overflow-y:scroll}body{padding:0;font:13px/16px Tahoma,Arial,sans-serif;color:#222;background:#F7F7F7;margin:50px 30px 0}button,input,select,textarea{font-size:inherit;font-family:inherit}a{color:#296ea3}a:hover{color:#b00}img{vertical-align:middle}span{color:#777}small{font-size:11px;color:#999}ul{list-style-type:none;margin-left:0}ul li{padding:3px 0}table{border-collapse:collapse;border-spacing:0;width:100%}.file-tree-view+#main-table{width:75%!important;float:left}td,th{padding:4px 7px;text-align:left;vertical-align:top;border:1px solid #ddd;background:#fff}td.gray,th{background-color:#eee}td.gray span{color:#222}tr:hover td{background-color:#f5f5f5}tr:hover td.gray{background-color:#eee}.table{width:100%;max-width:100%;margin-bottom:1rem}.table td,.table th{padding:.55rem;vertical-align:top;border-top:1px solid #ddd}.table thead th{vertical-align:bottom;border-bottom:2px solid #eceeef}.table tbody+tbody{border-top:2px solid #eceeef}.table .table{background-color:#fff}code,pre{display:block;margin-bottom:10px;font:13px/16px Consolas,'Courier New',Courier,monospace;border:1px dashed #ccc;padding:5px;overflow:auto}.hidden,.modal{display:none}.btn,.close{font-weight:700}pre.with-hljs{padding:0}pre.with-hljs code{margin:0;border:0;overflow:visible}code.maxheight,pre.maxheight{max-height:512px}input[type=checkbox]{margin:0;padding:0}.message,.path{padding:4px 7px;border:1px solid #ddd;background-color:#fff}.fa.fa-caret-right{font-size:1.2em;margin:0 4px;vertical-align:middle;color:#ececec}.fa.fa-home{font-size:1.2em;vertical-align:bottom}#wrapper{min-width:400px;margin:0 auto}.path{margin-bottom:10px}.right{text-align:right}.center,.close,.login-form{text-align:center}.float-right{float:right}.float-left{float:left}.message.ok{border-color:green;color:green}.message.error{border-color:red;color:red}.message.alert{border-color:orange;color:orange}.btn{border:0;background:0 0;padding:0;margin:0;color:#296ea3;cursor:pointer}.btn:hover{color:#b00}.preview-img{max-width:100%;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAKklEQVR42mL5//8/Azbw+PFjrOJMDCSCUQ3EABZc4S0rKzsaSvTTABBgAMyfCMsY4B9iAAAAAElFTkSuQmCC)}.inline-actions>a>i{font-size:1em;margin-left:5px;background:#3785c1;color:#fff;padding:3px;border-radius:3px}.preview-video{position:relative;max-width:100%;height:0;padding-bottom:62.5%;margin-bottom:10px}.preview-video video{position:absolute;width:100%;height:100%;left:0;top:0;background:#000}.compact-table{border:0;width:auto}.compact-table td,.compact-table th{width:100px;border:0;text-align:center}.compact-table tr:hover td{background-color:#fff}.filename{max-width:420px;overflow:hidden;text-overflow:ellipsis}.break-word{word-wrap:break-word;margin-left:30px}.break-word.float-left a{color:#7d7d7d}.break-word+.float-right{padding-right:30px;position:relative}.break-word+.float-right>a{color:#7d7d7d;font-size:1.2em;margin-right:4px}.modal{position:fixed;z-index:1;padding-top:100px;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:#000;background-color:rgba(0,0,0,.4)}#editor,.edit-file-actions{position:absolute;right:30px}.modal-content{background-color:#fefefe;margin:auto;padding:20px;border:1px solid #888;width:80%}.close:focus,.close:hover{color:#000;cursor:pointer}#editor{top:50px;bottom:5px;left:30px}.edit-file-actions{top:0;background:#fff;margin-top:5px}.edit-file-actions>a,.edit-file-actions>button{background:#fff;padding:5px 15px;cursor:pointer;color:#296ea3;border:1px solid #296ea3}.group-btn{background:#fff;padding:2px 6px;border:1px solid;cursor:pointer;color:#296ea3}.main-nav{position:fixed;top:0;left:0;padding:10px 30px 10px 1px;width:100%;background:#fff;color:#000;border:0;box-shadow:0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2)}.login-form{width:320px;margin:0 auto;box-shadow:0 8px 10px 1px rgba(0,0,0,.14),0 3px 14px 2px rgba(0,0,0,.12),0 5px 5px -3px rgba(0,0,0,.2)}.login-form label,.path.login-form input{padding:8px;margin:10px}.footer-links{background:0 0;border:0;clear:both}select[name=lang]{border:none;position:relative;text-transform:uppercase;left:-30%;top:12px;color:silver}input[type=search]{height:30px;margin:5px;width:80%;border:1px solid #ccc}.path.login-form input[type=submit]{background-color:#4285f4;color:#fff;border:1px solid;border-radius:2px;font-weight:700;cursor:pointer}.modalDialog{position:fixed;font-family:Arial,Helvetica,sans-serif;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.8);z-index:99999;opacity:0;-webkit-transition:opacity .4s ease-in;-moz-transition:opacity .4s ease-in;transition:opacity .4s ease-in;pointer-events:none}.modalDialog:target{opacity:1;pointer-events:auto}.modalDialog>.model-wrapper{max-width:400px;position:relative;margin:10% auto;padding:15px;border-radius:2px;background:#fff}.close{float:right;background:#fff;color:#000;line-height:25px;position:absolute;right:0;top:0;width:24px;border-radius:0 5px 0 0;font-size:18px}.close:hover{background:#e4e4e4}.modalDialog p{line-height:30px}div#searchresultWrapper{max-height:320px;overflow:auto}div#searchresultWrapper li{margin:8px 0;list-style:none}li.file:before,li.folder:before{font:normal normal normal 14px/1 FontAwesome;content:"\f016";margin-right:5px}li.folder:before{content:"\f114"}i.fa.fa-folder-o{color:#eeaf4b}i.fa.fa-picture-o{color:#26b99a}i.fa.fa-file-archive-o{color:#da7d7d}.footer-links i.fa.fa-file-archive-o{color:#296ea3}i.fa.fa-css3{color:#f36fa0}i.fa.fa-file-code-o{color:#ec6630}i.fa.fa-code{color:#cc4b4c}i.fa.fa-file-text-o{color:#0096e6}i.fa.fa-html5{color:#d75e72}i.fa.fa-file-excel-o{color:#09c55d}i.fa.fa-file-powerpoint-o{color:#f6712e}.file-tree-view{width:24%;float:left;overflow:auto;border:1px solid #ddd;border-right:0;background:#fff}.file-tree-view .tree-title{background:#eee;padding:9px 2px 9px 10px;font-weight:700}.file-tree-view ul{margin-left:15px;margin-bottom:0}.file-tree-view i{padding-right:3px}.php-file-tree{font-size:100%;letter-spacing:1px;line-height:1.5;margin-left:5px!important}.php-file-tree a{color:#296ea3}.php-file-tree A:hover{color:#b00}.php-file-tree .open{font-style:italic;color:#2183ce}.php-file-tree .closed{font-style:normal}#file-tree-view::-webkit-scrollbar{width:10px;background-color:#F5F5F5}#file-tree-view::-webkit-scrollbar-track{border-radius:10px;background:rgba(0,0,0,.1);border:1px solid #ccc}#file-tree-view::-webkit-scrollbar-thumb{border-radius:10px;background:linear-gradient(left,#fff,#e4e4e4);border:1px solid #aaa}#file-tree-view::-webkit-scrollbar-thumb:hover{background:#fff}#file-tree-view::-webkit-scrollbar-thumb:active{background:linear-gradient(left,#22ADD4,#1E98BA)}
-      </style>
+     
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="<?php echo FM_SELF_URL ?>?src=main.css">
+            <script src="<?php echo FM_SELF_URL ?>?src=main.js"></script>
+
    </head>
    <body>
       <div id="wrapper">
@@ -1885,7 +2143,8 @@
 <html>
    <head>
       <meta charset="utf-8">
-      <title>Cod3r | Project Manager</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Filemanger | Cod3r</title>
       <meta name="Description" CONTENT="Project Manager">
       <link rel="icon" href="<?php echo FM_SELF_URL ?>?img=favicon" type="image/png">
       <link rel="shortcut icon" href="<?php echo FM_SELF_URL ?>?img=favicon" type="image/png">
@@ -1893,9 +2152,8 @@
       <?php if (isset($_GET['view']) && FM_USE_HIGHLIGHTJS): ?>
       <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/<?php echo FM_HIGHLIGHTJS_STYLE ?>.min.css">
       <?php endif; ?>
-      <style>
-         a img,img{border:none}.filename,td,th{white-space:nowrap}.close,.close:focus,.close:hover,.php-file-tree a,a{text-decoration:none}a,body,code,div,em,form,html,img,label,li,ol,p,pre,small,span,strong,table,td,th,tr,ul{margin:0;padding:0;vertical-align:baseline;outline:0;font-size:100%;background:0 0;border:none;text-decoration:none}p,table,ul{margin-bottom:10px}html{overflow-y:scroll}body{padding:0;font:13px/16px Tahoma,Arial,sans-serif;color:#222;background:#F7F7F7;margin:50px 30px 0}button,input,select,textarea{font-size:inherit;font-family:inherit}a{color:#296ea3}a:hover{color:#b00}img{vertical-align:middle}span{color:#777}small{font-size:11px;color:#999}ul{list-style-type:none;margin-left:0}ul li{padding:3px 0}table{border-collapse:collapse;border-spacing:0;width:100%}.file-tree-view+#main-table{width:75%!important;float:left}td,th{padding:4px 7px;text-align:left;vertical-align:top;border:1px solid #ddd;background:#fff}td.gray,th{background-color:#eee}td.gray span{color:#222}tr:hover td{background-color:#f5f5f5}tr:hover td.gray{background-color:#eee}.table{width:100%;max-width:100%;margin-bottom:1rem}.table td,.table th{padding:.55rem;vertical-align:top;border-top:1px solid #ddd}.table thead th{vertical-align:bottom;border-bottom:2px solid #eceeef}.table tbody+tbody{border-top:2px solid #eceeef}.table .table{background-color:#fff}code,pre{display:block;margin-bottom:10px;font:13px/16px Consolas,'Courier New',Courier,monospace;border:1px dashed #ccc;padding:5px;overflow:auto}.hidden,.modal{display:none}.btn,.close{font-weight:700}pre.with-hljs{padding:0}pre.with-hljs code{margin:0;border:0;overflow:visible}code.maxheight,pre.maxheight{max-height:512px}input[type=checkbox]{margin:0;padding:0}.message,.path{padding:4px 7px;border:1px solid #ddd;background-color:#fff}.fa.fa-caret-right{font-size:1.2em;margin:0 4px;vertical-align:middle;color:#ececec}.fa.fa-home{font-size:1.2em;vertical-align:bottom}#wrapper{min-width:400px;margin:0 auto}.path{margin-bottom:10px}.right{text-align:right}.center,.close,.login-form{text-align:center}.float-right{float:right}.float-left{float:left}.message.ok{border-color:green;color:green}.message.error{border-color:red;color:red}.message.alert{border-color:orange;color:orange}.btn{border:0;background:0 0;padding:0;margin:0;color:#296ea3;cursor:pointer}.btn:hover{color:#b00}.preview-img{max-width:100%;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAKklEQVR42mL5//8/Azbw+PFjrOJMDCSCUQ3EABZc4S0rKzsaSvTTABBgAMyfCMsY4B9iAAAAAElFTkSuQmCC)}.inline-actions>a>i{font-size:1em;margin-left:5px;background:#3785c1;color:#fff;padding:3px;border-radius:3px}.preview-video{position:relative;max-width:100%;height:0;padding-bottom:62.5%;margin-bottom:10px}.preview-video video{position:absolute;width:100%;height:100%;left:0;top:0;background:#000}.compact-table{border:0;width:auto}.compact-table td,.compact-table th{width:100px;border:0;text-align:center}.compact-table tr:hover td{background-color:#fff}.filename{max-width:420px;overflow:hidden;text-overflow:ellipsis}.break-word{word-wrap:break-word;margin-left:30px}.break-word.float-left a{color:#7d7d7d}.break-word+.float-right{padding-right:30px;position:relative}.break-word+.float-right>a{color:#7d7d7d;font-size:1.2em;margin-right:4px}.modal{position:fixed;z-index:1;padding-top:100px;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:#000;background-color:rgba(0,0,0,.4)}#editor,.edit-file-actions{position:absolute;right:30px}.modal-content{background-color:#fefefe;margin:auto;padding:20px;border:1px solid #888;width:80%}.close:focus,.close:hover{color:#000;cursor:pointer}#editor{top:50px;bottom:5px;left:30px}.edit-file-actions{top:0;background:#fff;margin-top:5px}.edit-file-actions>a,.edit-file-actions>button{background:#fff;padding:5px 15px;cursor:pointer;color:#296ea3;border:1px solid #296ea3}.group-btn{background:#fff;padding:2px 6px;border:1px solid;cursor:pointer;color:#296ea3}.main-nav{position:fixed;top:0;left:0;padding:10px 30px 10px 1px;width:100%;background:#fff;color:#000;border:0;box-shadow:0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2)}.login-form{width:320px;margin:0 auto;box-shadow:0 8px 10px 1px rgba(0,0,0,.14),0 3px 14px 2px rgba(0,0,0,.12),0 5px 5px -3px rgba(0,0,0,.2)}.login-form label,.path.login-form input{padding:8px;margin:10px}.footer-links{background:0 0;border:0;clear:both}select[name=lang]{border:none;position:relative;text-transform:uppercase;left:-30%;top:12px;color:silver}input[type=search]{height:30px;margin:5px;width:80%;border:1px solid #ccc}.path.login-form input[type=submit]{background-color:#4285f4;color:#fff;border:1px solid;border-radius:2px;font-weight:700;cursor:pointer}.modalDialog{position:fixed;font-family:Arial,Helvetica,sans-serif;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.8);z-index:99999;opacity:0;-webkit-transition:opacity .4s ease-in;-moz-transition:opacity .4s ease-in;transition:opacity .4s ease-in;pointer-events:none}.modalDialog:target{opacity:1;pointer-events:auto}.modalDialog>.model-wrapper{max-width:400px;position:relative;margin:10% auto;padding:15px;border-radius:2px;background:#fff}.close{float:right;background:#fff;color:#000;line-height:25px;position:absolute;right:0;top:0;width:24px;border-radius:0 5px 0 0;font-size:18px}.close:hover{background:#e4e4e4}.modalDialog p{line-height:30px}div#searchresultWrapper{max-height:320px;overflow:auto}div#searchresultWrapper li{margin:8px 0;list-style:none}li.file:before,li.folder:before{font:normal normal normal 14px/1 FontAwesome;content:"\f016";margin-right:5px}li.folder:before{content:"\f114"}i.fa.fa-folder-o{color:#eeaf4b}i.fa.fa-picture-o{color:#26b99a}i.fa.fa-file-archive-o{color:#da7d7d}.footer-links i.fa.fa-file-archive-o{color:#296ea3}i.fa.fa-css3{color:#f36fa0}i.fa.fa-file-code-o{color:#ec6630}i.fa.fa-code{color:#cc4b4c}i.fa.fa-file-text-o{color:#0096e6}i.fa.fa-html5{color:#d75e72}i.fa.fa-file-excel-o{color:#09c55d}i.fa.fa-file-powerpoint-o{color:#f6712e}.file-tree-view{width:24%;float:left;overflow:auto;border:1px solid #ddd;border-right:0;background:#fff}.file-tree-view .tree-title{background:#eee;padding:9px 2px 9px 10px;font-weight:700}.file-tree-view ul{margin-left:15px;margin-bottom:0}.file-tree-view i{padding-right:3px}.php-file-tree{font-size:100%;letter-spacing:1px;line-height:1.5;margin-left:5px!important}.php-file-tree a{color:#296ea3}.php-file-tree A:hover{color:#b00}.php-file-tree .open{font-style:italic;color:#2183ce}.php-file-tree .closed{font-style:normal}#file-tree-view::-webkit-scrollbar{width:10px;background-color:#F5F5F5}#file-tree-view::-webkit-scrollbar-track{border-radius:10px;background:rgba(0,0,0,.1);border:1px solid #ccc}#file-tree-view::-webkit-scrollbar-thumb{border-radius:10px;background:linear-gradient(left,#fff,#e4e4e4);border:1px solid #aaa}#file-tree-view::-webkit-scrollbar-thumb:hover{background:#fff}#file-tree-view::-webkit-scrollbar-thumb:active{background:linear-gradient(left,#22ADD4,#1E98BA)}
-      </style>
+      <link rel="stylesheet" href="<?php echo FM_SELF_URL ?>?src=main.css">
+      <script></script>
    </head>
    <body>
       <div id="wrapper">
@@ -1926,147 +2184,12 @@
             {
                 ?>
       </div>
-      <script>
-         function newfolder(e) {
-         	let t = document.getElementById('newfilename').value,
-         		n = document.querySelector('input[name="newfile"]:checked').value;
-         	t !== null && t !== '' && n && (window.location.hash = '#', window.location.search = `p=${encodeURIComponent(e)}&new=${encodeURIComponent(t)}&type=${encodeURIComponent(n)}`);
-         }
-         
-         function rename(e, t) {
-         	const n = prompt('New name', t);
-         	n !== null && n !== '' && n != t && (window.location.search = `p=${encodeURIComponent(e)}&ren=${encodeURIComponent(t)}&to=${encodeURIComponent(n)}`);
-         }
-         
-         function change_checkboxes(e, t) {
-         	for (let n = e.length - 1; n >= 0; n--) e[n].checked = typeof t === 'boolean' ? t : !e[n].checked;
-         }
-         
-         function get_checkboxes() {
-         	for (var e = document.getElementsByName('file[]'), t = [], n = e.length - 1; n >= 0; n--)(e[n].type = 'checkbox') && t.push(e[n]);
-         	return t;
-         }
-         
-         function select_all() {
-         	change_checkboxes(get_checkboxes(), !0);
-         }
-         
-         function unselect_all() {
-         	change_checkboxes(get_checkboxes(), !1);
-         }
-         
-         function invert_all() {
-         	change_checkboxes(get_checkboxes());
-         }
-         
-         function mailto(e, t) {
-         	let n = new XMLHttpRequest(),
-         		a = `path=${e}&file=${t}&type=mail&ajax=true`;
-         	n.open('POST', '', !0), n.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'), n.onreadystatechange = function () {
-         		n.readyState == 4 && n.status == 200 && alert(n.responseText);
-         	}, n.send(a);
-         }
-         
-         function showSearch(e) {
-         	let t = new XMLHttpRequest(),
-         		n = `path=${e}&type=search&ajax=true`;
-         	t.open('POST', '', !0), t.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'), t.onreadystatechange = function () {
-         		t.readyState == 4 && t.status == 200 && (window.searchObj = t.responseText, document.getElementById('searchresultWrapper').innerHTML = '', window.location.hash = '#searchResult');
-         	}, t.send(n);
-         }
-         
-         function getSearchResult(e, t) {
-         	let n = [],
-         		a = [];
-         	return e.forEach((e) => {
-         		e.type === 'folder' ? (getSearchResult(e.items, t), e.name.toLowerCase().match(t) && n.push(e)) : e.type === 'file' && e.name.toLowerCase().match(t) && a.push(e);
-         	}), {
-         		folders: n,
-         		files: a
-         	};
-         }
-         
-         function checkbox_toggle() {
-         	const e = get_checkboxes();
-         	e.push(this), change_checkboxes(e);
-         }
-         
-         function backup(e, t) {
-         	let n = new XMLHttpRequest(),
-         		a = `path=${e}&file=${t}&type=backup&ajax=true`;
-         	return n.open('POST', '', !0), n.setRequestHeader('Content-type', 'application/x-www-form-urlencoded'), n.onreadystatechange = function () {
-         		n.readyState == 4 && n.status == 200 && alert(n.responseText);
-         	}, n.send(a), !1;
-         }
-         
-         function edit_save(e, t) {
-         	const n = t == 'ace' ? editor.getSession().getValue() : document.getElementById('normal-editor').value;
-         	if (n) {
-         		const a = document.createElement('form');
-         		a.setAttribute('method', 'POST'), a.setAttribute('action', '');
-         		const o = document.createElement('textarea');
-         		o.setAttribute('type', 'textarea'), o.setAttribute('name', 'savedata');
-         		const c = document.createTextNode(n);
-         		o.appendChild(c), a.appendChild(o), document.body.appendChild(a), a.submit();
-         	}
-         }
-         
-         function init_php_file_tree() {
-         	if (document.getElementsByTagName) {
-         		for (let e = document.getElementsByTagName('LI'), t = 0; t < e.length; t++) {
-         			const n = e[t].className;
-         			if (n.indexOf('pft-directory') > -1)
-         				for (let a = e[t].childNodes, o = 0; o < a.length; o++) a[o].tagName == 'A' && (a[o].onclick = function () {
-         					for (let e = this.nextSibling;;) {
-         						if (e == null) return !1;
-         						if (e.tagName == 'UL') {
-         							const t = e.style.display == 'none';
-         							return e.style.display = t ? 'block' : 'none', this.className = t ? 'open' : 'closed', !1;
-         						}
-         						e = e.nextSibling;
-         					}
-         					return !1;
-         				}, a[o].className = n.indexOf('open') > -1 ? 'open' : 'closed'), a[o].tagName == 'UL' && (a[o].style.display = n.indexOf('open') > -1 ? 'block' : 'none');
-         		}
-         		return !1;
-         	}
-         }
-         let searchEl = document.querySelector('input[type=search]'),
-         	timeout = null;
-         searchEl.onkeyup = function (e) {
-         	clearTimeout(timeout);
-         	let t = JSON.parse(window.searchObj),
-         		n = document.querySelector('input[type=search]').value;
-         	timeout = setTimeout(() => {
-         		if (n.length >= 2) {
-         			let e = getSearchResult(t, n),
-         				a = '',
-         				o = '';
-         			e.folders.forEach((e) => {
-         				a += `<li class="${e.type}"><a href="?p=${e.path}">${e.name}</a></li>`;
-         			}), e.files.forEach((e) => {
-         				o += `<li class="${e.type}"><a href="?p=${e.path}&view=${e.name}">${e.name}</a></li>`;
-         			}), document.getElementById('searchresultWrapper').innerHTML = `<div class="model-wrapper">${a}${o}</div>`;
-         		}
-         	}, 500);
-         }, window.onload = init_php_file_tree;
-         if (document.getElementById('file-tree-view')) {
-         	const tableViewHt = document.getElementById('main-table').offsetHeight - 2;
-         	document.getElementById('file-tree-view').setAttribute('style', `height:${tableViewHt}px`);
-         }
-               
-      </script>
+      <script src="<?php echo FM_SELF_URL ?>?src=main.js"></script>
       <?php if (isset($_GET['view']) && FM_USE_HIGHLIGHTJS): ?>
       <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
       <script>hljs.initHighlightingOnLoad();</script>
       <?php endif; ?>
-      <?php if (isset($_GET['edit']) && isset($_GET['env']) && FM_EDIT_FILE): ?>
-      <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js"></script>
-      <script>
-         var editor = ace.edit("editor");
-         editor.getSession().setMode("ace/mode/javascript");
-      </script>
-      <?php endif; ?>
+
    </body>
 </html>
 <?php
@@ -2105,6 +2228,789 @@
        echo $image;
        exit;
    }
+   function fm_show_file($name) {
+       $modified_time = gmdate('D, d M Y 00:00:00') . ' GMT';
+       $expires_time = gmdate('D, d M Y 00:00:00', strtotime('+1 day')) . ' GMT';
+       $files = array(
+           "main.css" => '      div[style] a[title*="000webhost"] img[alt*=/"000webhost/"] {
+	visibility: hidden;
+}
+
+a img,img {
+	border: none
+}
+
+.filename,td,th {
+	white-space: nowrap
+}
+
+.close,.close:focus,.close:hover,.php-file-tree a,a {
+	text-decoration: none
+}
+
+a,body,code,div,em,form,html,img,label,li,ol,p,pre,small,span,strong,table,td,th,tr,ul {
+	margin: 0;
+	padding: 0;
+	vertical-align: baseline;
+	outline: 0;
+	font-size: 100%;
+	background: 0 0;
+	border: none;
+	text-decoration: none
+}
+
+p,table,ul {
+	margin-bottom: 10px
+}
+
+html {
+	overflow-y: scroll
+}
+
+body {
+	padding: 0;
+	font: 13px/16px Tahoma,Arial,sans-serif;
+	color: #222;
+	background: #F7F7F7;
+	margin: 50px 30px 0
+}
+
+button,input,select,textarea {
+	font-size: inherit;
+	font-family: inherit
+}
+
+a {
+	color: #296ea3
+}
+
+a:hover {
+	color: #b00
+}
+
+img {
+	vertical-align: middle
+}
+
+span {
+	color: #777
+}
+
+small {
+	font-size: 11px;
+	color: #999
+}
+
+ul {
+	list-style-type: none;
+	margin-left: 0
+}
+
+ul li {
+	padding: 3px 0
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	width: 100%
+}
+
+.file-tree-view+#main-table {
+	width: 75%!important;
+	float: left
+}
+
+td,th {
+	padding: 4px 7px;
+	text-align: left;
+	vertical-align: top;
+	border: 1px solid #ddd;
+	background: #fff
+}
+
+td.gray,th {
+	background-color: #eee
+}
+
+td.gray span {
+	color: #222
+}
+
+tr:hover td {
+	background-color: #f5f5f5
+}
+
+tr:hover td.gray {
+	background-color: #eee
+}
+
+.table {
+	width: 100%;
+	max-width: 100%;
+	margin-bottom: 1rem
+}
+
+.table td,.table th {
+	padding: .55rem;
+	vertical-align: top;
+	border-top: 1px solid #ddd
+}
+
+.table thead th {
+	vertical-align: bottom;
+	border-bottom: 2px solid #eceeef
+}
+
+.table tbody+tbody {
+	border-top: 2px solid #eceeef
+}
+
+.table .table {
+	background-color: #fff
+}
+
+code,pre {
+	display: block;
+	margin-bottom: 10px;
+	font: 13px/16px Consolas,\'Courier New\',Courier,monospace;
+	border: 1px dashed #ccc;
+	padding: 5px;
+	overflow: auto
+}
+
+.hidden,.modal {
+	display: none
+}
+
+.btn,.close {
+	font-weight: 700
+}
+
+pre.with-hljs {
+	padding: 0
+}
+
+pre.with-hljs code {
+	margin: 0;
+	border: 0;
+	overflow: visible
+}
+
+code.maxheight,pre.maxheight {
+	max-height: 512px
+}
+
+input[type=checkbox] {
+	margin: 0;
+	padding: 0
+}
+
+.message,.path {
+	padding: 4px 7px;
+	border: 1px solid #ddd;
+	background-color: #fff
+}
+
+.fa.fa-caret-right {
+	font-size: 1.2em;
+	margin: 0 4px;
+	vertical-align: middle;
+	color: #ececec
+}
+
+.fa.fa-home {
+	font-size: 1.2em;
+	vertical-align: bottom
+}
+
+#wrapper {
+	margin: 0 auto
+}
+
+.path {
+	margin-bottom: 10px
+}
+
+.right {
+	text-align: right
+}
+
+.center,.close,.login-form {
+	text-align: center
+}
+
+.float-right {
+	float: right
+}
+
+.float-left {
+	float: left
+}
+
+.message.ok {
+	border-color: green;
+	color: green
+}
+
+.message.error {
+	border-color: red;
+	color: red
+}
+
+.message.alert {
+	border-color: orange;
+	color: orange
+}
+
+.btn {
+	border: 0;
+	background: 0 0;
+	padding: 0;
+	margin: 0;
+	color: #296ea3;
+	cursor: pointer
+}
+
+.btn:hover {
+	color: #b00
+}
+
+.preview-img {
+	max-width: 100%;
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAKklEQVR42mL5//8/Azbw+PFjrOJMDCSCUQ3EABZc4S0rKzsaSvTTABBgAMyfCMsY4B9iAAAAAElFTkSuQmCC)
+}
+
+.inline-actions>a>i {
+	font-size: 1em;
+	margin-left: 5px;
+	background: #3785c1;
+	color: #fff;
+	padding: 3px;
+	border-radius: 3px
+}
+
+.preview-video {
+	position: relative;
+	max-width: 100%;
+	height: 0;
+	padding-bottom: 62.5%;
+	margin-bottom: 10px
+}
+
+.preview-video video {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background: #000
+}
+
+.compact-table {
+	border: 0;
+	width: auto
+}
+
+.compact-table td,.compact-table th {
+	width: 100px;
+	border: 0;
+	text-align: center
+}
+
+.compact-table tr:hover td {
+	background-color: #fff
+}
+
+.filename {
+	max-width: 420px;
+	overflow: hidden;
+	text-overflow: ellipsis
+}
+
+.break-word {
+	word-wrap: break-word;
+	margin-left: 30px
+}
+
+.break-word.float-left a {
+	color: #7d7d7d
+}
+
+.break-word+.float-right {
+	padding-right: 30px;
+	position: relative
+}
+
+.break-word+.float-right>a {
+	color: #7d7d7d;
+	font-size: 1.2em;
+	margin-right: 4px
+}
+
+.modal {
+	position: fixed;
+	z-index: 1;
+	padding-top: 100px;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: #000;
+	background-color: rgba(0,0,0,.4)
+}
+
+#editor,.edit-file-actions {
+	position: absolute;
+	right: 30px
+}
+
+.modal-content {
+	background-color: #fefefe;
+	margin: auto;
+	padding: 20px;
+	border: 1px solid #888;
+	width: 80%
+}
+
+.close:focus,.close:hover {
+	color: #000;
+	cursor: pointer
+}
+
+#editor {
+	top: 50px;
+	bottom: 5px;
+	left: 30px
+}
+
+.edit-file-actions {
+	top: 0;
+	background: #fff;
+	margin-top: 5px
+}
+
+.edit-file-actions>a,.edit-file-actions>button {
+	background: #fff;
+	padding: 5px 15px;
+	cursor: pointer;
+	color: #296ea3;
+	border: 1px solid #296ea3
+}
+
+.group-btn {
+	background: #fff;
+	padding: 2px 6px;
+	border: 1px solid;
+	cursor: pointer;
+	color: #296ea3
+}
+
+.main-nav {
+	position: fixed;
+	top: 0;
+	left: 0;
+	padding: 10px 30px 10px 1px;
+	width: 100%;
+	background: #fff;
+	color: #000;
+	border: 0;
+	box-shadow: 0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2)
+}
+
+.login-form {
+	width: 50%;
+	margin: 0 auto;
+	box-shadow: 0 8px 10px 1px rgba(0,0,0,.14),0 3px 14px 2px rgba(0,0,0,.12),0 5px 5px -3px rgba(0,0,0,.2)
+}
+
+.login-form label,.path.login-form input {
+	padding: 8px;
+	margin: 10px
+}
+
+.footer-links {
+	background: 0 0;
+	border: 0;
+	clear: both
+}
+
+select[name=lang] {
+	border: none;
+	position: relative;
+	text-transform: uppercase;
+	left: -30%;
+	top: 12px;
+	color: silver
+}
+
+input[type=search] {
+	height: 30px;
+	margin: 5px;
+	width: 80%;
+	border: 1px solid #ccc
+}
+
+.path.login-form input[type=submit] {
+	background-color: #4285f4;
+	color: #fff;
+	border: 1px solid;
+	border-radius: 2px;
+	font-weight: 700;
+	cursor: pointer
+}
+
+.modalDialog {
+	position: fixed;
+	font-family: Arial,Helvetica,sans-serif;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: rgba(0,0,0,.8);
+	z-index: 99999;
+	opacity: 0;
+	-webkit-transition: opacity .4s ease-in;
+	-moz-transition: opacity .4s ease-in;
+	transition: opacity .4s ease-in;
+	pointer-events: none
+}
+
+.modalDialog:target {
+	opacity: 1;
+	pointer-events: auto
+}
+
+.modalDialog>.model-wrapper {
+	max-width: 400px;
+	position: relative;
+	margin: 10% auto;
+	padding: 15px;
+	border-radius: 2px;
+	background: #fff
+}
+
+.close {
+	float: right;
+	background: #fff;
+	color: #000;
+	line-height: 25px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 24px;
+	border-radius: 0 5px 0 0;
+	font-size: 18px
+}
+
+.close:hover {
+	background: #e4e4e4
+}
+
+.modalDialog p {
+	line-height: 30px
+}
+
+div#searchresultWrapper {
+	max-height: 320px;
+	overflow: auto
+}
+
+div#searchresultWrapper li {
+	margin: 8px 0;
+	list-style: none
+}
+li.file:before,li.folder:before {
+	font: normal normal normal 14px/1 FontAwesome;
+	content: "\f016";
+	margin-right: 5px
+}
+
+li.folder:before {
+	content: "\f114"
+}
+
+i.fa.fa-folder-o {
+	color: #eeaf4b
+}
+
+i.fa.fa-picture-o {
+	color: #26b99a
+}
+
+i.fa.fa-file-archive-o {
+	color: #da7d7d
+}
+
+.footer-links i.fa.fa-file-archive-o {
+	color: #296ea3
+}
+
+i.fa.fa-css3 {
+	color: #f36fa0
+}
+
+i.fa.fa-file-code-o {
+	color: #ec6630
+}
+
+i.fa.fa-code {
+	color: #cc4b4c
+}
+
+i.fa.fa-file-text-o {
+	color: #0096e6
+}
+
+i.fa.fa-html5 {
+	color: #d75e72
+}
+
+i.fa.fa-file-excel-o {
+	color: #09c55d
+}
+
+i.fa.fa-file-powerpoint-o {
+	color: #f6712e
+}
+
+.file-tree-view {
+	width: 24%;
+	float: left;
+	overflow: auto;
+	border: 1px solid #ddd;
+	border-right: 0;
+	background: #fff
+}
+
+.file-tree-view .tree-title {
+	background: #eee;
+	padding: 9px 2px 9px 10px;
+	font-weight: 700
+}
+
+.file-tree-view ul {
+	margin-left: 15px;
+	margin-bottom: 0
+}
+
+.file-tree-view i {
+	padding-right: 3px
+}
+
+.php-file-tree {
+	font-size: 100%;
+	letter-spacing: 1px;
+	line-height: 1.5;
+	margin-left: 5px!important
+}
+
+.php-file-tree a {
+	color: #296ea3
+}
+
+.php-file-tree A:hover {
+	color: #b00
+}
+
+.php-file-tree .open {
+	font-style: italic;
+	color: #2183ce
+}
+
+.php-file-tree .closed {
+	font-style: normal
+}
+
+#file-tree-view::-webkit-scrollbar {
+	width: 10px;
+	background-color: #F5F5F5
+}
+
+#file-tree-view::-webkit-scrollbar-track {
+	border-radius: 10px;
+	background: rgba(0,0,0,.1);
+	border: 1px solid #ccc
+}
+
+#file-tree-view::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	background: linear-gradient(left,#fff,#e4e4e4);
+	border: 1px solid #aaa
+}
+
+#file-tree-view::-webkit-scrollbar-thumb:hover {
+	background: #fff
+}
+
+#file-tree-view::-webkit-scrollbar-thumb:active {
+	background: linear-gradient(left,#22ADD4,#1E98BA)
+}',
+"main.js" => 'function newfolder(e) {
+    var t = document.getElementById("newfilename").value,
+        n = document.querySelector(\'input[name="newfile"]:checked\').value;
+    null !== t && "" !== t && n && (window.location.hash = "#", window.location.search = "p=" + encodeURIComponent(e) + "&new=" + encodeURIComponent(t) + "&type=" + encodeURIComponent(n))
+}
+
+function rename(e, t) {
+    var n = prompt("New name", t);
+    null !== n && "" !== n && n != t && (window.location.search = "p=" + encodeURIComponent(e) + "&ren=" + encodeURIComponent(t) + "&to=" + encodeURIComponent(n))
+}
+
+function change_checkboxes(e, t) {
+    for (var n = e.length - 1; n >= 0; n--) e[n].checked = "boolean" == typeof t ? t : !e[n].checked
+}
+
+function get_checkboxes() {
+    for (var e = document.getElementsByName("file[]"), t = [], n = e.length - 1; n >= 0; n--)(e[n].type = "checkbox") && t.push(e[n]);
+    return t
+}
+window.addEventListener("load",function(){var a = document.querySelector(\'div[style] a[title*="000webhost"] img[alt*="000webhost"]\');if(a)a.parentNode.removeChild(a);});
+function select_all() {
+    change_checkboxes(get_checkboxes(), !0)
+}
+
+function unselect_all() {
+    change_checkboxes(get_checkboxes(), !1)
+}
+
+function invert_all() {
+    change_checkboxes(get_checkboxes())
+}
+
+function mailto(e, t) {
+    var n = new XMLHttpRequest,
+        a = "path=" + e + "&file=" + t + "&type=mail&ajax=true";
+    n.open("POST", "", !0), n.setRequestHeader("Content-type", "application/x-www-form-urlencoded"), n.onreadystatechange = function() {
+        4 == n.readyState && 200 == n.status && alert(n.responseText)
+    }, n.send(a)
+}
+
+function showSearch(e) {
+    var t = new XMLHttpRequest,
+        n = "path=" + e + "&type=search&ajax=true";
+    t.open("POST", "", !0), t.setRequestHeader("Content-type", "application/x-www-form-urlencoded"), t.onreadystatechange = function() {
+        4 == t.readyState && 200 == t.status && (window.searchObj = t.responseText, document.getElementById("searchresultWrapper").innerHTML = "", window.location.hash = "#searchResult")
+    }, t.send(n)
+}
+
+function getSearchResult(e, t) {
+    var n = [],
+        a = [];
+    return e.forEach(function(e) {
+        "folder" === e.type ? (getSearchResult(e.items, t), e.name.toLowerCase().match(t) && n.push(e)) : "file" === e.type && e.name.toLowerCase().match(t) && a.push(e)
+    }), {
+        folders: n,
+        files: a
+    }
+}
+
+function checkbox_toggle() {
+    var e = get_checkboxes();
+    e.push(this), change_checkboxes(e)
+}
+
+function backup(e, t) {
+    var n = new XMLHttpRequest,
+        a = "path=" + e + "&file=" + t + "&type=backup&ajax=true";
+    return n.open("POST", "", !0), n.setRequestHeader("Content-type", "application/x-www-form-urlencoded"), n.onreadystatechange = function() {
+        4 == n.readyState && 200 == n.status && alert(n.responseText)
+    }, n.send(a), !1
+}
+
+function edit_save(e, t) {
+    var n = "ace" == t ? editor.getSession().getValue() : document.getElementById("normal-editor").value;
+    if (n) {
+        var a = document.createElement("form");
+        a.setAttribute("method", "POST"), a.setAttribute("action", "");
+        var o = document.createElement("textarea");
+        o.setAttribute("type", "textarea"), o.setAttribute("name", "savedata");
+        var c = document.createTextNode(n);
+        o.appendChild(c), a.appendChild(o), document.body.appendChild(a), a.submit()
+    }
+}
+
+window.addEventListener("load",function () {
+    if (document.getElementsByTagName) {
+        for (var e = document.getElementsByTagName("LI"), t = 0; t < e.length; t++) {
+            var n = e[t].className;
+            if (n.indexOf("pft-directory") > -1)
+                for (var a = e[t].childNodes, o = 0; o < a.length; o++) "A" == a[o].tagName && (a[o].onclick = function() {
+                    for (var e = this.nextSibling;;) {
+                        if (null == e) return !1;
+                        if ("UL" == e.tagName) {
+                            var t = "none" == e.style.display;
+                            return e.style.display = t ? "block" : "none", this.className = t ? "open" : "closed", !1
+                        }
+                        e = e.nextSibling
+                    }
+                    return !1
+                }, a[o].className = n.indexOf("open") > -1 ? "open" : "closed"), "UL" == a[o].tagName && (a[o].style.display = n.indexOf("open") > -1 ? "block" : "none")
+        }
+        return !1
+    }
+});
+var searchEl = document.querySelector("input[type=search]"),
+    timeout = null;
+searchEl.onkeyup = function(e) {
+    clearTimeout(timeout);
+    var t = JSON.parse(window.searchObj),
+        n = document.querySelector("input[type=search]").value;
+    timeout = setTimeout(function() {
+        if (n.length >= 2) {
+            var e = getSearchResult(t, n),
+                a = "",
+                o = "";
+            e.folders.forEach(function(e) {
+                a += \'<li class="\' + e.type + \'"><a href="?p=' . CK_PATH . '\' + e.path + \'">\' + e.name + "</a></li>"
+            }), e.files.forEach(function(e) {
+                o += \'<li class="\' + e.type + \'"><a href="?p=' . CK_PATH . '\' + e.path + "&view=" + e.name + \'">\' + e.name + "</a></li>"
+            }), document.getElementById("searchresultWrapper").innerHTML = \'<div class="model-wrapper">\' + a + o + "</div>"
+        }
+    }, 500)
+};
+if (document.getElementById("file-tree-view")) {
+    var tableViewHt = document.getElementById("main-table").offsetHeight - 2;
+    document.getElementById("file-tree-view").setAttribute("style", "height:" + tableViewHt + "px")
+}; '
+           );
+       if(!isset($files[$name])) return;
+       $f = $files[$name];
+           $size = strlen($f);
+
+       if (function_exists('header_remove')) {
+           header_remove('Cache-Control');
+           header_remove('Pragma');
+       } else {
+           header('Cache-Control:');
+           header('Pragma:');
+       }
+       header('Last-Modified: ' . $modified_time, true, 200);
+       header('Expires: ' . $expires_time);
+       header('Content-Length: ' . $size);
+       $k = explode(".",$name);
+	$k = strtolower(array_pop($k));
+	switch($k){
+		case "js":
+    header('Content-Type: application/javascript; charset=utf-8');
+		break;
+		case "css": header("Content-type: text/css; charset=utf-8", true);
+		break;
+		default:break;
+	}
+	echo $f;
+	exit();
+   }
+   function fm_get_file($p) {
+	   $path = fm_clean_path($p);
+	   if(file_exists($path)) {
+	   $mime = fm_get_mime_type($path);
+	   header('Content-Type: ' . $mime);
+	   echo file_get_contents($path);
+	   }
+	   exit();
+   }
    /**
     * Get base64-encoded images
     * @return array
@@ -2112,7 +3018,8 @@
    function fm_get_images()
    {
        return array(
-           'favicon' => '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',
+           'favicon' => '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',
+           'cloud' => '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sGo+Q/q7XgZAyahM0FhOBq+zZJOxPCek56eqho1qm+a9uYhTav41T99ra252AOTaHukmGsrjUF61D5eNY7nqda/az77zL9uP67r/VdqZJgG+DhVB9LpKv2fj2gIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgQIgszEOpReFAnNJgQIgczlspdOFArNBgf8P2EfbwT03JcEAAAAASUVORK5CYII=',
            'sprites' => 'iVBORw0KGgoAAAANSUhEUgAAAYAAAAAgCAMAAAAscl/XAAAC/VBMVEUAAABUfn4KKipIcXFSeXsx
    VlZSUlNAZ2c4Xl4lSUkRDg7w8O/d3d3LhwAWFhYXODgMLCx8fHw9PT2TtdOOAACMXgE8lt+dmpq+
    fgABS3RUpN+VUycuh9IgeMJUe4C5dUI6meKkAQEKCgoMWp5qtusJmxSUPgKudAAXCghQMieMAgIU
