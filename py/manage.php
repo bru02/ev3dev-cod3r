@@ -3006,10 +3006,11 @@ if (document.getElementById("file-tree-view")) {
 	   $mime = fm_get_mime_type($file);
 	   header('Content-Type: ' . $mime);
 	   header('Content-Length: ' . filesize($file));
-		echo "foundfile";
 	   echo readfile($file);
 	   }
-	   exit();
+	   		echo "foundfile";
+
+	   die();
    }
    /**
     * Get base64-encoded images
