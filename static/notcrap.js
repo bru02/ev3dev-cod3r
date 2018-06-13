@@ -1,8 +1,19 @@
-/*! Notcrap.js ©Notcrap 2018 v2.0.0
- * License: bru02.000webhostapp.com/license
- */
-/*! Sizzle v2.3.4-pre | sizzlejs.com */
-!function (window, document) {
+// if the module has no dependencies, the above pattern can be simplified to
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.returnExports = factory();
+  }
+}(typeof self !== 'undefined' ? self : this, function () {
+
 	Array.prototype.forEach || (Array.prototype.forEach = function (fn, scope) {
 		let i,
 		len;
@@ -347,20 +358,29 @@
 		const f = readyfunc || (res => {
 				console.log(res);
 			});
+			let async = !!data.async;
+			if(data.success) readyfunc = data.success;
 		let dataString = null;
 		if (!data.url)
 			throw "You need to give an URL";
 		const type = (data.method || "GET").toUpperCase();
-		let xhttp,
-		str = data.data;
-		(xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP")).open(type, data.url),
+		let xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"),
+		str = data.data, url  = data.url;
+		dataString = "string" == typeof str ? str : Object.keys(str).map(r => `${encodeURIComponent(r)}=${encodeURIComponent(str[r])}`).join("&");
+		if(type == "GET") {
+			 dataString = url.indexOf("?") ==  -1 ? "?" : "&" +dataString;
+			url = url + dataString;
+			dataString = null;
+			
+		}
+		xhttp.open(type, url);
 		xhttp.onreadystatechange = (() => {
 			xhttp.readyState > 3 && 200 == xhttp.status && f(xhttp.responseText);
-		}),
-		"POST" == type && (dataString && (dataString = "string" == typeof str ? str : Object.keys(str).map(r => `${encodeURIComponent(r)}=${encodeURIComponent(str[r])}`).join("&")),
-			xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest")),
+		});
+		
+		xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 		xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"),
-		xhttp.send(dataString);
+		xhttp.send(dataString,async);
 	};
 	String.prototype.replaceAll = function (str1, str2, ignore) {
 		return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), ignore ? "gi" : "g"), "string" == typeof str2 ? str2.replace(/\$/g, "$$$$") : str2);
@@ -409,6 +429,33 @@
 		},
 		this.update();
 	},
+	random = function(min, max) {
+  var rand;
+
+  if (seeded) {
+    rand = lcg.rand();
+  } else {
+    rand = Math.random();
+  }
+  if (typeof min === 'undefined') {
+    return rand;
+  } else if (typeof max === 'undefined') {
+    if (min instanceof Array) {
+      return min[Math.floor(rand * min.length)];
+    } else {
+      return rand * min;
+    }
+  } else {
+    if (min > max) {
+      var tmp = min;
+      min = max;
+      max = tmp;
+    }
+
+    return rand * (max - min) + min;
+  }
+},
+
 	hide000ad = () => {
 		new Css("div[style] a[title] img[alt]{visibility:none}"),
 		get("div[style] a[title] img[alt]", !0).forEach(e => {
@@ -442,6 +489,7 @@
 				const o = new Script();
 				return o.src = l,
 				o.update(),
+				o.scr.setAttribute("async","async"),
 				o.scr;
 
 			case "CSS":
@@ -504,7 +552,8 @@
 		Css,
 		Script,
 		get,
-		addEvent
+		addEvent,
+		random
 	},
 	window = Object.assign(window, {
 			notcrap,
@@ -515,7 +564,10 @@
 			Css,
 			Script,
 			get,
-			addEvent
+			addEvent,random
 		});
-}
-(window, document);
+
+
+
+    return notcrap;
+}));

