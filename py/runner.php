@@ -241,8 +241,8 @@ if(!$_SESSION['loggedIn']) {
                 }
                 
                 ajax({
-					method:"POST"
-					data:{cmd:encodeURIComponent(command)}
+					method:"POST",
+					data:{cmd: command}
 				}, function() {
                             var parsedResponse = request.responseText.split("<br>");
                             previousDir = currentDir;
