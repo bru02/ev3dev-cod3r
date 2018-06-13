@@ -44,6 +44,8 @@ function disable_ob() {
         apache_setenv('dont-vary', '1');
     }
 }
+if(isset($_POST['command']))
+				disable_ob();
 ?>
 
 <html>
