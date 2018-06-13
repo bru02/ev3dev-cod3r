@@ -227,7 +227,7 @@ if(!$_SESSION['loggedIn']) {
                     }
                     
                 } else if (parsedCommand[0] == "clear") {
-                    outputElement.innerHTML = "";
+                    outputElement.innerHTML = txtArea.innerHTML = "";
                     return false;
                 } else if (parsedCommand[0] == "upload") {
                     fileBrowserElement.click();
@@ -246,14 +246,31 @@ if(!$_SESSION['loggedIn']) {
                             var parsedResponse = request.responseText.split("<br>");
                             previousDir = currentDir;
                             currentDir = parsedResponse[0].replace(new RegExp("&sol;", "g"), "/");
-                            outputElement.innerHTML += "<div style='color:#ff0000; float: left;'><?php echo $name;?>@<?php echo $host;?></div><div style='float: left;'>"+":"+originalDir+"$ "+originalCommand+"</div><br>";
-                            usernameElement.innerHTML = "<div style='color: #ff0000; display: inline;'><?php echo $name;?>@<?php echo $host;?></div>:"+currentDir+"$ ";
+                            outputElement.innerHTML += "<div style='color:#ff0000; float: left;'><?php echo NAME;?>@<?php echo HOST;?></div><div style='float: left;'>"+":"+originalDir+"$ "+originalCommand+"</div><br>";
+                            usernameElement.innerHTML = "<div style='color: #ff0000; display: inline;'><?php echo NAME;?>@<?php echo HOST;?></div>:"+currentDir+"$ ";
 
                         updateInputWidth();
                 });
 				txtArea.value += outputElement.innerHTML;
             }
-            
+			
+            function uploadFile() {
+                var formData = new FormData();
+                formData.append('file', fileBrowserElement.files[0], fileBrowserElement.files[0].name);
+                formData.append('path', currentDir);
+                
+                var request = new XMLHttpRequest();
+                
+                request.onreadystatechange = function() {
+                    if (request.readyState == XMLHttpRequest.DONE) {
+                        outputElement.innerHTML += request.responseText+"<br>";
+                    }
+                };
+                request.open("POST", "", true);
+                request.send(formData);
+                outputElement.innerHTML += "<div style='color:#ff0000; float: left;'>"+username+"@"+hostname+"</div><div style='float: left;'>"+":"+currentDir+"# Uploading "+fileBrowserElement.files[0].name+"...</div><br>";
+            }
+			
             function updateInputWidth() {
                 inputTextElement.style.width = window.innerWidth - usernameElement.clientWidth - 15;
             }
