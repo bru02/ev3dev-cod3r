@@ -39,14 +39,14 @@ function runCmd($cmd, $connection) {
     $env = array_merge(
         array('COLUMNS'=>130, 'LINES'=> 50), $_SERVER
     );
-    $cmd = 'python /var/www/html/cod3r/py/cmd.py ' . $cmd;
+    // $cmd = 'python /var/www/html/cod3r/py/cmd.py ' . $cmd;
     $connection->process = proc_open($cmd, $descriptorspec, $pipes, null, $env);
     $connection->pipes = $pipes;
     stream_set_blocking($pipes[0], 0);
     $connection->process_stdout = new TcpConnection($pipes[1]);
     $connection->process_stdout->onMessage = function($process_connection, $data)use($connection)
     {
-        $connection->send($data);
+        $connection->send(str_replace('\n', '\r\n', $data));
     };
     $connection->process_stdout->onClose = function($process_connection)use($connection)
     {
@@ -58,7 +58,7 @@ function runCmd($cmd, $connection) {
     $connection->process_stdin = new TcpConnection($pipes[2]);
     $connection->process_stdin->onMessage = function($process_connection, $data)use($connection)
     {
-        $connection->send($data);
+        $connection->send(str_replace('\n', '\r\n', $data));
     };
 }
 $worker->onConnect = function($connection)
@@ -68,10 +68,13 @@ $worker->onConnect = function($connection)
 
 $worker->onMessage = function($connection, $data)
 {
-    if($cmdRunnin)
+    if($cmdRunnin) {
         fwrite($connection->pipes[0], $data);
-        else
-        runCmd($data, $connection);
+    } else {
+        $d = json_decode($data, true);
+        chdir($d.cwd);
+        runCmd($d.cmd, $connection);
+    }
 };
 
 $worker->onClose = function($connection)

@@ -194,6 +194,7 @@ if (window.WebSocket) {
 
 
   var CWD = null,
+  loggedIn = false,
    commandHistory = [],
    historyPosition = 0,
    eShellCmdInput = null,
@@ -210,6 +211,7 @@ if (window.WebSocket) {
     term.open(document.getElementById('terminal'));
   const socket = new WebSocket(`ws://${document.domain}:7778`);
   socket.onopen = function () {
+    featureShell("");
     shellInput.style.display = 'block';
     term.on('data', (data) => {
       socket.send(data);
@@ -235,7 +237,7 @@ if (window.WebSocket) {
   }
 
   function featureShell(command) {
-
+if(loggedIn) {
     _insertCommand(command);
     let temp = command.split(' ')[0];
     if(quickCmds.indexOf(temp) > -1) {
@@ -245,8 +247,19 @@ if (window.WebSocket) {
          shellInput.style.display = 'block';
 
       });
-    } else socket.send(command);
-
+    } else {
+      let data = JSON.stringify({cwd: CWD, cmd: command});
+      socket.send(data);
+      }
+} else {
+  // Really unsafe auth
+  if(command == 'maker') {
+    loggedIn = true;
+    // Ridicolus ASCII text
+    term.write("\x1b[91m              _             _      ____                _____      _                      _  _   \r\n _ __   ___  | |__    ___  | |_   / __ \\   ___ __   __|___ /   __| |  ___ __   __ /\\/| _| || |_ \r\n| '__| / _ \\ | '_ \\  / _ \\ | __| / / _` | / _ \\\\ \\ / /  |_ \\  / _` | / _ \\\\ \\ / /|/\\/ |_  ..  _|\r\n| |   | (_) || |_) || (_) || |_ | | (_| ||  __/ \\ V /  ___) || (_| ||  __/ \\ V /      |_      _|\r\n|_|    \\___/ |_.__/  \\___/  \\__| \\ \\__,_| \\___|  \\_/  |____/  \\__,_| \\___|  \\_/         |_||_|  \r\n                                  \\____/                                                         \r\n\x1b[m\r\n");
+    } else
+  term.write('\x1b[31mPassword for robot:\x1b[m');
+}
   }
 
   function featureHint() {
