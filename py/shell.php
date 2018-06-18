@@ -240,7 +240,7 @@ if (window.WebSocket) {
     let temp = command.split(' ')[0];
     if(quickCmds.indexOf(temp) > -1) {
       makeRequest('?feature=shell', { cmd: command, cwd: CWD }, (response) => {
-          _insertStdout(response.stdout.join('\n'));
+          _insertStdout(response.stdout.join('\r\n'));
          updateCwd(response.cwd);
          shellInput.style.display = 'block';
 
