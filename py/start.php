@@ -39,7 +39,7 @@ function runCmd($cmd, $connection) {
     $env = array_merge(
         array('COLUMNS'=>130, 'LINES'=> 50), $_SERVER
     );
-    $cmd = 'python cmd.py' . $cmd;
+    $cmd = 'python cmd.py ' . $cmd;
     $connection->process = proc_open($cmd, $descriptorspec, $pipes, null, $env);
     $connection->pipes = $pipes;
     stream_set_blocking($pipes[0], 0);
