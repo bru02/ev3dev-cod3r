@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 MODULE_FOLDER="/var/www/html/"
-ROOT_URL="https://raw.githubusercontent.com/bru02/ev3dev-cod3r/installer/"
+ROOT_URL="https://raw.githubusercontent.com/bru02/ev3dev-cod3r/installer"
 
 # $1 => module name
 function download_module() {
