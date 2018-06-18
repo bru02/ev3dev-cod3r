@@ -11,7 +11,6 @@ function download_module() {
 
 # $1 => module name
 function run_module() {
-    createHeader "$1"
     download_module "$1"
     source "$MODULE_FOLDER/$1.sh"
 }
@@ -65,7 +64,7 @@ while getopts hvf: opt; do
     case $opt in
         help)
             show_help
-            exit 0
+            exit 1
             ;;
         update)
             update
