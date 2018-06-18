@@ -129,6 +129,7 @@ if(!$_SESSION['loggedIn']) {
                 height: 30px;
                 position: absolute;
                 bottom: 0;
+				float: right;
             }
             .inputtext {
                 width: auto;
@@ -272,7 +273,7 @@ if(!$_SESSION['loggedIn']) {
             }
 			
             function updateInputWidth() {
-                inputTextElement.style.width = window.innerWidth - usernameElement.clientWidth - 15;
+                inputTextElement.style.width = window.innerWidth - usernameElement.clientWidth - 50;
             }
             
             document.onkeydown = checkForArrowKeys;

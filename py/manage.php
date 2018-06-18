@@ -185,6 +185,21 @@ if ($use_auth) {
    defined('FM_DATETIME_FORMAT') || define('FM_DATETIME_FORMAT', $datetime_format);
    unset($p, $use_auth, $iconv_input_encoding, $use_highlightjs, $highlightjs_style);
    /*************************** ACTIONS ***************************/
+   function fm_set_response_code($code = 200) {
+	   if (!function_exists('http_response_code'))
+{
+    function http_response_code($newcode = NULL)
+    {
+        if($newcode !== NULL)
+        {
+            header('X-PHP-Response-Code: '.$newcode, true, $newcode);
+            if(!headers_sent())
+                $code = $newcode;
+        }       
+        return $code;
+    }
+}
+   }
    //AJAX Request
    if (isset($_POST['ajax']) && !FM_READONLY) {
    //search : get list of files from the current folder
@@ -247,6 +262,7 @@ if ($use_auth) {
            @fopen($path . '/' . $new, 'w') or die('Cannot open file:  '.$new);
            fm_set_msg(sprintf('File <b>%s</b> created', fm_enc($new)));
        } else {
+		   fm_set_response_code('500');
            fm_set_msg(sprintf('File <b>%s</b> already exists', fm_enc($new)), 'alert');
        }
    } else {
@@ -255,10 +271,12 @@ if ($use_auth) {
        } elseif (fm_mkdir($path . '/' . $new, false) === $path . '/' . $new) {
            fm_set_msg(sprintf('Folder <b>%s</b> already exists', fm_enc($new)), 'alert');
        } else {
+		   fm_set_response_code('500');
            fm_set_msg(sprintf('Folder <b>%s</b> not created', fm_enc($new)), 'error');
        }
    }
    } else {
+   fm_set_response_code('500');
    fm_set_msg('Wrong folder name', 'error');
    }
    fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH) . CK_PATH);

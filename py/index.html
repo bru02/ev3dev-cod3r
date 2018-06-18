@@ -3,31 +3,101 @@
   <head>
 <script src="../static/notcrap.js"></script>
 <link rel="stylesheet" href="../static/style.css">
-
     <title>Cod3r</title>
-
-    <!-- Load bootstrap styles -->
-   
-
-    <!-- /!\ To be defined after the css import in order to overwrite it (see http://getbootstrap.com/components/#navbar-fixed-bottom) -->
-
-
-   
+	<style>.modal{display:block;position:fixed;z-index:1;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:#000;background-color:rgba(0,0,0,.4)}.modal-content{background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%}.close{color:#aaa;float:right;font-size:28px;font-weight:700}.close:focus,.close:hover{color:#000;text-decoration:none;cursor:pointer}</style>
   </head>
   <body>
   <div class="margin">
 <h1>Run script</h1>
-<p><button class="btn" id="start_btn">New project</button></p>
+<p><button class="btn" id="new">New project</button></p>
 <p><a href="manage.php" class="btn">Manage Projects</a></p>
 <pre id="console" hidden></pre>
 </div>
 <script>
-get("#start_btn").addEvent("click",()=>{
-	
+function Modal(text = '', parent = document.body, options = {}) {
+ this.parent = parent;
+ this.defaultOptions = {
+  clodeBtn: true,
+ }; 
+ 	  this.events = {
+	     open: [],
+		 close: [],
+		 destroy: []
+	  };
+	  this.fireEvent = function (event) {
+	     if(this.events[event]) {
+				(this.events[event]).forEach((e)=>{
+					if(typeof e == "function") e();
+				});
+		 } else {
+		this.contentWrapper.dispatchEvent(new Event("change"));
+		}
+	  }
+	  this.on = function (event, callback) {
+	     if(this.events[event]) this.events[event].push(callback); else this.contentWrapper.addEvent(event, callback);				
+	  }
+ this.options = {};
+ Object.keys(options).forEach((e)=>{
+   this.options[e] = this.defaultOptions[e] != null ? options[e] : this.defaultOptions[e];
+ });
+		this.modal = document.createElement("DIV");
+      document.body.appendChild(this.modal),
+	  this.modal.className="modal";
+      this.contentWrapper=document.createElement("DIV");
+      this.modal.appendChild(this.contentWrapper),
+	  this.contentWrapper.className="modal-content";
+	  if(!!this.options.closeBtn) {
+      this.closeBtn=document.createElement("SPAN");
+      this.closeBtn.className="close";
+      this.closeBtn.innerHTML="&times;";
+      this.closeBtn.setAttribute("onclick","this.parent(3).hide()");
+	  this.contentWrapper.appendChild(this.closeBtn);
+
+	  }
+      this.content=document.createElement("DIV");
+      this.contentWrapper.appendChild(this.content),
+      this.content.innerHTML=text;
+	  this.fireEvent("open");
+	  this.close = function () {
+	       this.fireEvent("close");
+           this.modal.hide();
+	  }
+	  this.open = function () {
+	    this.fireEvent("open");
+        this.modal.show();
+	  }
+	  this.destroy = function () {
+	     this.modal.remove();
+	  }
+	  window.addEvent('click', function (e) {
+	     if(e.target&&e.target == this.modal) this.close();
+	  });
+
+}
+
+get("#new").addEvent("click",()=>{
+	let m = new Modal("<p class='text-red' style='display:none;' id='err'></p><p>Pick a project name: <input type='text' id='title' placeholder='Project name...'/>  <button class='btn green' id='go'>Go!</button></p>");
+    let err = get('#err');
+  get("#go").addEvent('click',()=>{
+        err.innerHTML = "";
+		err.hide();
+	    let v = encodeURIComponent(get("#title").value);
+		if(v) {
+        ajax({url:"manage.php?p=&new=" + v + "&type=folder"},function(a, code ){
+		    if(code==200) {
+			    m.content.innerHTML = "<p class='text-green'>Project created! Redirecting, please wait!</p>";
+				        ajax({url:"manage.php?p=" + v + "&new=app.py&type=file"},function(){
+						     location.href = "manage.php?p=" + v;
+						});
+			} else if(code=500) {
+			  err.innerHTML = "<p class='text-red'>Foldername already taken!</p>"; err.show();
+			}
+		});
+       } else {err.innerHTML = "Pick a project name!";err.show(); }
+
+	});
 });
-get("#stop_btn").addEvent("click",()=>{
-	
-});
+
 </script>
   </body>
 </html>

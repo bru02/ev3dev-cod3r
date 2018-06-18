@@ -366,7 +366,7 @@
 		const type = (data.method || "GET").toUpperCase();
 		let xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"),
 		str = data.data, url  = data.url;
-		dataString = "string" == typeof str ? str : Object.keys(str).map(r => `${encodeURIComponent(r)}=${encodeURIComponent(str[r])}`).join("&");
+		dataString = str != null ? "string" == typeof str ? str : Object.keys(str).map(r => `${encodeURIComponent(r)}=${encodeURIComponent(str[r])}`).join("&") : ""; 
 		if(type == "GET") {
 			 dataString = url.indexOf("?") ==  -1 ? "?" : "&" +dataString;
 			url = url + dataString;
@@ -375,7 +375,7 @@
 		}
 		xhttp.open(type, url);
 		xhttp.onreadystatechange = (() => {
-			xhttp.readyState > 3 && 200 == xhttp.status && f(xhttp.responseText);
+			xhttp.readyState > 3 && f(xhttp.responseText, xhttp.status, xhttp);
 		});
 		
 		xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
