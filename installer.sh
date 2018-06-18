@@ -16,12 +16,11 @@ function run_module() {
 }
 function show_help() {
 cat << EOF
-Usage: ${0##*/} [-server] [-help] [-update]
-Do stuff with FILE and write the result to standard output. With no FILE
-or when FILE is -, read standard input.
+Usage: ${0##*/} [-php] [-help] [-update]
+Install cod3r.
     -update  Update the brick (takes a long time)
     -help    display this help and exit
-    -server  installs PHP and Apache
+    -php  installs PHP and Apache
     
 EOF
 }
@@ -64,12 +63,12 @@ while getopts hvf: opt; do
     case $opt in
         help)
             show_help
-            exit 1
+            exit 0
             ;;
         update)
             update
             ;;
-        server)
+        php)
             install_server  
             ;;
         *)
