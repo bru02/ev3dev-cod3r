@@ -224,7 +224,7 @@ if (window.WebSocket) {
     };
   };
   function _insertCommand(command) {
-    term.write(`\x1b[92mrobot@ev3dev:\x1b[96m${CWD}\x1b[92m# \x1b[m\r\n${command}`);
+    term.write(`\r\n\x1b[92mrobot@ev3dev:\x1b[96m${CWD}\x1b[92m# \x1b[m${command}\r\n`);
 
   }
 
@@ -242,6 +242,8 @@ if (window.WebSocket) {
       makeRequest('?feature=shell', { cmd: command, cwd: CWD }, (response) => {
           _insertStdout(response.stdout.join('\n'));
          updateCwd(response.cwd);
+         shellInput.style.display = 'block';
+
       });
     } else socket.send(command);
 
@@ -262,7 +264,7 @@ if (window.WebSocket) {
         }
       } else {
         _insertCommand(eShellCmdInput.value);
-        _insertStdout(data.files.join('\n'));
+        _insertStdout(data.files.join('\r\n'));
       }
     }
 
