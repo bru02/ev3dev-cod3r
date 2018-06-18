@@ -200,7 +200,8 @@ if (window.WebSocket) {
    eShellContent = null,
    eShellCmdInput = document.getElementById('shell-cmd'),
     eShellContent = document.getElementById('shell-content'),
-    shellInput = document.getElementById('shell-input');
+    shellInput = document.getElementById('shell-input'),
+    quickCmds = ['cd', 'ls'];
     window.term = new Terminal({
       cols: 130,
       rows: 50,
@@ -235,11 +236,14 @@ if (window.WebSocket) {
   function featureShell(command) {
 
     _insertCommand(command);
-    makeRequest('?feature=shell', { cmd: command, cwd: CWD }, (response) => {
-      //_insertStdout(response.stdout.join('\n'));
+    let temp = command.split(' ')[0];
+    if(quickCmds.indexOf(temp) > -1) {
+      makeRequest('?feature=shell', { cmd: command, cwd: CWD }, (response) => {
+          _insertStdout(response.stdout.join('\n'));
+         updateCwd(response.cwd);
+      });
+    } else socket.send(command);
 
-      updateCwd(response.cwd);
-    });
   }
 
   function featureHint() {
