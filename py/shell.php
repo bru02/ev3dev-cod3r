@@ -229,8 +229,9 @@ if (window.WebSocket) {
   }
 
   function _insertStdout(stdout) {
-   /* eShellContent.innerHTML += escapeHtml(stdout);
-    eShellContent.scrollTop = eShellContent.scrollHeight; */
+   // eShellContent.innerHTML += escapeHtml(stdout);
+   // eShellContent.scrollTop = eShellContent.scrollHeight; 
+   term.write(stdout);
   }
 
   function featureShell(command) {
