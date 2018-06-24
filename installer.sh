@@ -26,6 +26,8 @@ EOF
 }
 function update() {
     if confirm "Did you upgrade your brick?"; then
+        echo ""
+    else
         echo "Upgrading brick..."
         sudo apt-get update
         sudo apt-get dist-upgrade
@@ -40,7 +42,7 @@ function confirm() {
             return 0
             ;;
         *)
-            return 255
+            return 255 # Cause i shouldnt 
             ;;
     esac
 }
