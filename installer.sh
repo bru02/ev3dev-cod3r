@@ -18,15 +18,19 @@ function show_help() {
 cat << EOF
 Usage: ${0##*/} [-php] [-help] [-update]
 Install cod3r.
-    -update  Update the brick (takes a long time)
-    -help    display this help and exit
-    -php  installs PHP and Apache
+    -update -u Updates and upgrades the brick (takes a long time)
+    -help -h   Display this help and exit
+    -php -p    Installs PHP and Apache
     
 EOF
 }
 function update() {
-    sudo apt-get update
-    sudo apt-get dist-upgrade
+    if ! [ confirm "Did you upgrade your brick?" ]; then
+        echo "Upgrading brick..."
+        sudo apt-get update
+        sudo apt-get dist-upgrade
+        echo "Done"
+    fi
 }
 function confirm() {
     # call with a prompt string or use a default
@@ -42,24 +46,29 @@ function confirm() {
 }
 function install_server() {
     if ! [ -x "$(command -v php)" ]; then
-        update
-        sudo apt-get install apache2 php5 libapache2-mod-php5
-        sudo /etc/init.d/apache2 restart
-    else
-        echo 'PHP is already installed!';
+        echo 'Error: PHP is not installed.' >&2
+        if [ confirm "Do you want to install it?" ]; then
+             update
+             echo "Installing Apache2 and PHP5..."
+             sudo apt-get install apache2 php5 libapache2-mod-php5
+             sudo /etc/init.d/apache2 restart
+             echo "Done"
+         else
+               echo "You are screwed"
+               exit 1
+         fi
     fi
 }
 echo
 echo "##############################"
 echo "# Cod3r Installer            #"
 echo "##############################"
-echo "# Last update: 2018/06/18    #"
+echo "# Last update: 2018/06/24    #"
 echo "##############################"
 echo
 if ! [ -x "$(command -v wget)" ]; then
   echo 'Error: wget is not installed.' >&2
-  if [ confirm "Do you want to install it?" ]
-  then
+  if [ confirm "Do you want to install it?" ]; then
         sudo apt-get wget
   else
         echo "You are screwed"
@@ -68,8 +77,7 @@ if ! [ -x "$(command -v wget)" ]; then
 fi
 if ! [ -x "$(command -v git)" ]; then
   echo 'Error: git is not installed.' >&2
-  if [ confirm "Do you want to install it?" ]
-  then
+  if [ confirm "Do you want to install it?" ]; then
         sudo apt-get git
   else
         echo "You are screwed"
@@ -79,15 +87,17 @@ fi
 
 
 
-OPTIND=1
-# Resetting OPTIND is necessary if getopts was used previously in the script.
-# It is a good idea to make OPTIND local if you process options in a function.
-
 if [ "$1" == "-h" ] || [ "$1" == "-help" ] ; then
     show_help
 fi
-shift "$((OPTIND-1))"
 
+if [ "$1" == "-u" ] || [ "$1" == "-update" ] ; then
+    update
+fi
+
+if ! [ -x "$(command -v php)" ] || [ "$1" == "-p" ] || [ "$1" == "-php" ] ; then
+    install_server
+fi
 run_module update
 sudo chown -R www-data /var/www/html/cod3r
 
