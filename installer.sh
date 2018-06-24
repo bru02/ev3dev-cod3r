@@ -25,7 +25,7 @@ Install cod3r.
 EOF
 }
 function update() {
-    if ! [ confirm "Did you upgrade your brick?" ]; then
+    if confirm "Did you upgrade your brick?"; then
         echo "Upgrading brick..."
         sudo apt-get update
         sudo apt-get dist-upgrade
@@ -37,17 +37,17 @@ function confirm() {
     read -r -p "${1:-Are you sure? [y/N]} " response
     case "$response" in
         [yY][eE][sS]|[yY]) 
-            true
+            return 0
             ;;
         *)
-            false
+            return 255
             ;;
     esac
 }
 function install_server() {
     if ! [ -x "$(command -v php)" ]; then
         echo 'Error: PHP is not installed.' >&2
-        if [ confirm "Do you want to install it?" ]; then
+        if confirm "Do you want to install it?"; then
              update
              echo "Installing Apache2 and PHP5..."
              sudo apt-get install apache2 php5 libapache2-mod-php5
@@ -68,7 +68,7 @@ echo "##############################"
 echo
 if ! [ -x "$(command -v wget)" ]; then
   echo 'Error: wget is not installed.' >&2
-  if [ confirm "Do you want to install it?" ]; then
+  if confirm "Do you want to install it?"; then
         sudo apt-get wget
   else
         echo "You are screwed"
@@ -77,7 +77,7 @@ if ! [ -x "$(command -v wget)" ]; then
 fi
 if ! [ -x "$(command -v git)" ]; then
   echo 'Error: git is not installed.' >&2
-  if [ confirm "Do you want to install it?" ]; then
+  if confirm "Do you want to install it?"; then
         sudo apt-get git
   else
         echo "You are screwed"
