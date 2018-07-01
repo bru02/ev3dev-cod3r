@@ -11,20 +11,24 @@ function download_module() {
 
 # $1 => module name
 function run_module() {
-    download_module "$1"
+    local=$(<"$MODULE_FOLDER/$1.sh")
+    git=$(wget "$MODULE_FOLDER/$1.sh" -q -O -)
+    if [ "$git" != "$local" ] || [ ! -e "$MODULE_FOLDER/$1.sh" ] ; then
+        download_module "$1"
+    fi
     source "$MODULE_FOLDER/$1.sh"
 }
 function show_help() {
-cat << EOF
-Usage: ${0##*/} [-php] [-help] [-update]
-Install cod3r.
-    -update -u Updates and upgrades the brick (takes a long time)
-    -help -h   Display this help and exit
-    -php -p    Installs PHP and Apache
+    cat << EOF
+    Usage: ${0##*/} [-php] [-help] [-update]
+    Install cod3r.
+        -update -u Updates and upgrades the brick (takes a long time)
+        -help -h   Display this help and exit
+        -php -p    Installs PHP and Apache
     
 EOF
 }
-function update() {
+function updateBrick() {
     if confirm "Did you upgrade your brick?"; then
         echo ""
     else
@@ -94,7 +98,7 @@ if [ "$1" == "-h" ] || [ "$1" == "-help" ] ; then
 fi
 
 if [ "$1" == "-u" ] || [ "$1" == "-update" ] ; then
-    update
+    updateBrick
 fi
 
 if ! [ -x "$(command -v php)" ] || [ "$1" == "-p" ] || [ "$1" == "-php" ] ; then
