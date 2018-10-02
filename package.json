@@ -1,0 +1,23 @@
+{
+  "name": "ev3dev-cod3r",
+  "version": "1.0.0",
+  "description": "Code tool, that lets you program in your browser Python & Javascript, and it comes with a file manager.\r Cod3r is  based on <a href=\"https://github.com/okanulas/Pathfind3r\">Pathfind3r</a> & <a href=\"https://github.com/prasathmani/tinyfilemanager\">Tiny File manager</a>\r ## Dependencies\r 1. Ev3 should be started using ev3dev debian linux distribution (https://www.ev3dev.org/docs/getting-started/).\r 2. Local git should be set up on the ev3dev. There is a good tutorial about setting up the development environment at this address -> http://www.ev3dev.org/docs/tutorials/setting-up-python-pycharm/",
+  "main": "term.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bru02/ev3dev-cod3r.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bru02/ev3dev-cod3r/issues"
+  },
+  "homepage": "https://github.com/bru02/ev3dev-cod3r#readme",
+  "devDependencies": {
+    "grunt": "^1.0.3",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-sass": "^3.0.1",
+    "load-grunt-tasks": "^4.0.0",
+    "node-sass": "^4.9.3"
+  }
+}
