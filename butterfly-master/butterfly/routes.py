@@ -244,9 +244,7 @@ class TermCtlWebSocket(Route, KeptAliveWebSocketHandler):
 
 
 @url(r'/ws/session/(?P<session>[^/]+)'
-     '(?:/user/(?P<user>[^/]+))?/?'
-     '(?:session/(?P<session>[^/]+))?/?'
-     '(?:/wd/(?P<path>.+))?')
+     '(?:/user/(?P<user>[^/]+))?/?')
 class TermWebSocket(Route, KeptAliveWebSocketHandler):
     # List of websockets per session
     sessions = defaultdict(list)
@@ -257,7 +255,7 @@ class TermWebSocket(Route, KeptAliveWebSocketHandler):
     # Session history
     history = {}
 
-    def open(self, user, path, session):
+    def open(self, session="", user=None, path=""):
         super(TermWebSocket, self).open(session)
 
         self.set_nodelay(True)
