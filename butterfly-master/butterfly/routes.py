@@ -41,9 +41,9 @@ def u(s):
     return s
 
 
-@url(r'/(?:session/(?P<session>[^/]+)/?)?')
+@url(r'/(?:user/(.+))?/?(?:wd/(.+))?/?(?:session/(.+))?')
 class Index(Route):
-    def get(self, session):
+    def get(self, user, path, session):
         user = self.request.query_arguments.get(
             'user', [b''])[0].decode('utf-8')
         if not tornado.options.options.unsecure and user:
@@ -243,7 +243,10 @@ class TermCtlWebSocket(Route, KeptAliveWebSocketHandler):
             sys.exit(0)
 
 
-@url(r'/ws/session/(?P<session>[^/]+)')
+@url(r'/ws/session/(?P<session>[^/]+)'
+     '(?:/user/(?P<user>[^/]+))?/?'
+     '(?:session/(?P<session>[^/]+))?/?'
+     '(?:/wd/(?P<path>.+))?')
 class TermWebSocket(Route, KeptAliveWebSocketHandler):
     # List of websockets per session
     sessions = defaultdict(list)
@@ -254,12 +257,14 @@ class TermWebSocket(Route, KeptAliveWebSocketHandler):
     # Session history
     history = {}
 
-    def open(self, session):
+    def open(self, user, path, session):
         super(TermWebSocket, self).open(session)
+
         self.set_nodelay(True)
         self.session = session
         self.closed = False
         self.sessions[session].append(self)
+        self.user = user if user else None
         self.__class__.last = self
         self.log.info('Websocket /ws opened %r' % self)
 

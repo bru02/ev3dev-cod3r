@@ -36,14 +36,14 @@ import stat
 import socket
 import sys
 
-tornado.options.define("debug", default=False, help="Debug mode")
-tornado.options.define("more", default=False,
+tornado.options.define("debug", default=True, help="Debug mode")
+tornado.options.define("more", default=True,
                        help="Debug mode with more verbosity")
-tornado.options.define("unminified", default=False,
+tornado.options.define("unminified", default=True,
                        help="Use the unminified js (for development only)")
 
 tornado.options.define("host", default='0.0.0.0', help="Server host")
-tornado.options.define("port", default=969696, type=int, help="Server port")
+tornado.options.define("port", default=12345, type=int, help="Server port")
 tornado.options.define("keepalive_interval", default=30, type=int,
                        help="Interval between ping packets sent from server "
                        "to client (in seconds)")
