@@ -168,4 +168,76 @@ function EV3BrickServer(appContext) {
       self.context.messageLogVM.addMessage(true, i18n.t("ev3brick.errors.cantDoSomethingEV3ConnectionNok", { "action": "stopGnikrap" }));
     }
   };
+  self.__buildXSensorMessage = function (sensorName, sensorType, sensorValue) {
+    return JSON.stringify({
+      act: "setXSnsValue",
+      xSnsNam: sensorName,
+      xSnsTyp: sensorType,
+      xSnsVal: sensorValue
+    });
+  };
+
+  // Instantaneously send the sensor value
+  self.sendXSensorValue = function (sensorName, sensorType, sensorValue) {
+    var jsonMsg = self.__buildXSensorMessage(sensorName, sensorType, sensorValue);
+    console.log("send xSensorValue - " + jsonMsg);
+    if (self.WSSend(jsonMsg) == false) {
+      // In case of connection lost: switch to stream behaviour (only the last event will be keep)
+      self.streamXSensorValue(sensorName, sensorType, sensorValue);
+    }
+  };
+
+  // Stream the xSensor values in order to avoid flood the EV3 brick
+  self.streamXSensorValue = function (sensorName, sensorType, sensorValue) {
+    var sensor = self.xSensorStream.sensors[sensorName];
+    var jsonMsg = self.__buildXSensorMessage(sensorName, sensorType, sensorValue);
+    if (sensor == undefined) {
+      self.xSensorStream.sensors[sensorName] = {
+        streamLifetime: 1, // Will be initialized at the right value in StreamXSensorValue
+        lastJsonSent: undefined,
+        currentJson: jsonMsg
+      };
+    } else {
+      if (jsonMsg == sensor.lastJsonSent) {
+        jsonMsg = undefined;
+      } else {
+        sensor.currentJson = jsonMsg;
+      }
+    }
+
+    if (jsonMsg && (self.xSensorStream.timeoutID == undefined)) {
+      self.xSensorStream.timeoutID = setTimeout(self.StreamXSensorValue, self.XSENSOR_STREAM_FREQUENCY / 2); // No send planned => send rather quickly. Real "message rate" is done in StreamXSensorValue.
+    }
+  };
+
+  // Send all waiting values
+  self.StreamXSensorValue = function () {
+    self.xSensorStream.timeoutID = undefined;
+    if (self.ws) { // TODO not correct error checking, see WSSend() - to be reworked
+      var messageSent = false;
+      Object.keys(self.xSensorStream.sensors).forEach(function (sensorName) {
+        var sensor = self.xSensorStream.sensors[sensorName];
+        if (sensor.currentJson) {
+          console.log("send xSensorValue - " + sensor.currentJson);
+          messageSent = true;
+          self.WSSend(sensor.currentJson);
+          sensor.lastJsonSent = sensor.currentJson;
+          sensor.currentJson = undefined;
+          sensor.streamLifetime = 6000; // At least 4 minutes of lifetime (6000/60/25)
+        } else {
+          if (sensor.streamLifetime-- < 0) { // Stream no more used: remove it
+            console.log("Remove useless stream for sensor '" + sensorName + "'");
+            delete self.xSensorStream.sensors[sensorName];
+          }
+        }
+      });
+
+      if (messageSent) {
+        self.xSensorStream.timeoutID = setTimeout(self.StreamXSensorValue, self.XSENSOR_STREAM_FREQUENCY);
+      }
+    } else {
+      // TODO error management - Reset the sensors ?
+      //self.xSensorStream.timeoutID = setTimeout(self.StreamXSensorValue, 1000); // Retry later
+    }
+  };
 }

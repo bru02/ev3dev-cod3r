@@ -132,6 +132,10 @@
   <script src="app/gnikrap_blocks.js" type="text/javascript"></script>
   <script src="app/message_log.js" type="text/javascript"></script>
   <script src="app/navigation_bar.js" type="text/javascript"></script>
+  <script src="app/tab_xGeo_sensor.js" type="text/javascript"></script>
+  <script src="app/tab_xVideo_sensor.js" type="text/javascript"></script>
+  <script src="app/tab_xGyroscope_sensor.js" type="text/javascript"></script>
+  <script src="app/tab_xKeyboard_sensor.js" type="text/javascript"></script>
   <script src="app/utils.js" type="text/javascript"></script>
   <script src="app/dialog_manage_files.js" type="text/javascript"></script>
   <script src="app/dialog_import_image.js" type="text/javascript"></script>
@@ -256,6 +260,211 @@
           </div>
           <!-- TOSEE: Is some gesture lib can be useful ? http://hammerjs.github.io/ -->
         </div>
+        <!-- Keyboard sensor tab -->
+        <!-- TOSEE: Is some gesture lib can be useful ? http://hammerjs.github.io/ -->
+        <div role="tabpanel" id="keyboardSensorTab" class="tab-pane">
+          <nav class="nav navOnOneLine" style="margin-bottom: 5px;">
+            <!-- Button bar -->
+            <!-- navbar-form navbar-input-group -->
+            <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form" onsubmit="return false;">
+              <div class="input-group input-group-sm">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></div>
+                <input class="form-control" type="text" placeholder="Sensor identifier" data-bind="value: sensorName, valueUpdate: 'input'">
+              </div>
+            </form>
+            <button class="btn btn-default btn-sm" data-bind="css: {active: isStarted}, click: onStart">
+              <span class="i18n" data-i18n="keyboardSensorTab.start">START</span></button>
+            <span class="visible-xs-block">&nbsp;</span>
+            <button class="btn btn-default btn-sm" data-bind="disabled: isStarted, click: onResetKeyboard">
+              <span class="glyphicon glyphicon-file"></span> <span class="i18n" data-i18n="keyboardSensorTab.clear">CLEAR</span></button>
+            <span class="visible-xs-block">&nbsp;</span>
+            <button class="btn btn-default btn-sm" data-bind="disabled: isStarted, click: onLoadKeyboard">
+              <span class="glyphicon glyphicon-open"></span> <span class="i18n" data-i18n="keyboardSensorTab.loadAndManage">LOAD_MANAGE</span></button>
+            <button class="btn btn-default btn-sm" data-bind="disabled: isStarted, click: onSaveKeyboard">
+              <span class="glyphicon glyphicon-save"></span> <span class="i18n" data-i18n="keyboardSensorTab.save">SAVE</span></button>
+          </nav>
+          <!-- Nest a bootstrap grid inside <=> 12 columns available -->
+          <div id="xTouchButtons" data-bind="foreach: buttons">
+            <div class="row" data-bind="foreach: $data">
+              <button class="col-xs-2 col-sm-2 btn btn-default btn-lg xkeyboard-touch" role="button" data-bind="disabled: isDisabled, text: name">BUTTON</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gyro sensor tab -->
+        <div role="tabpanel" id="gyroSensorTab" class="tab-pane">
+          <nav class="nav navOnOneLine" style="margin-bottom: 5px">
+            <!-- Button bar -->
+            <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form" onsubmit="return false;">
+              <div class="input-group input-group-sm">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></div>
+                <input class="form-control" type="text" placeholder="Sensor identifier" data-bind="value: sensorName, valueUpdate: 'input'">
+              </div>
+            </form>
+            <button class="btn btn-default btn-sm" data-bind="css: {active: isStarted}, click: onStart">
+              <span class="i18n" data-i18n="gyroSensorTab.start">START</span></button>
+            <span class="visible-xs-block">&nbsp;</span>
+            <button class="btn btn-default btn-sm" data-bind="click: onSetAxis">
+              <span class="glyphicon glyphicon-refresh"></span> <span class="i18n" data-i18n="gyroSensorTab.setAxis">SET_AXIS</span></button>
+          </nav>
+
+          <div>
+            <!-- Nest a bootstrap grid inside <=> 12 columns available -->
+            <div class="row">
+              <div class="col-sm-3">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <polyline points="70,50 140,50 120,65 50,65" style="fill: #aaaaaa;"></polyline>
+                  <polyline points="60,40 130,40 110,90 40,90" style="fill: #103BE7; fill-opacity: 0.9;"></polyline>
+                  <polyline points="50,65 120,65 100,80 30,80" style="fill: #aaaaaa; fill-opacity: 0.6;"></polyline>
+                  <line x1="0" y1="65" x2="170" y2="65" style="stroke:#FF0000; stroke-width: 3;"></line>
+                  <text x="10" y="60" font-size="24" fill="#FF0000" stroke="#FF0000">X</text>
+                </svg>
+              </div>
+              <div class="col-sm-9">
+                <span class="i18n text-info" data-i18n="gyroSensorTab.xAxis">X</span><br />
+                <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: xAxisValue">{}</span></strong>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-3">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <polyline points="110,50 145,60 95,90 60,80" style="fill: #aaaaaa;"></polyline>
+                  <polyline points="70,50 150,50 100,80 20,80" style="fill: #103BE7; fill-opacity: 0.9;"></polyline>
+                  <polyline points="75,40 110,50 60,80 25,70" style="fill: #aaaaaa; fill-opacity: 0.6;"></polyline>
+                  <line x1="145" y1="29" x2="30" y2="98" style="stroke:#FF0000; stroke-width: 4;"></line>
+                  <text x="10" y="108" font-size="24" fill="#FF0000" stroke="#FF0000">Y</text>
+                </svg>
+              </div>
+              <div class="col-sm-9">
+                <span class="i18n text-info" data-i18n="gyroSensorTab.yAxis">Y</span><br />
+                <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: yAxisValue">{}</span></strong>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-3">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <polyline points="70,50 150,50 100,80 20,80" style="fill: #103BE7; fill-opacity: 0.9;"></polyline>
+                  <polyline points="85,45 155,55 80,85 15,75" style="fill: #aaaaaa; fill-opacity: 0.6;"></polyline>
+                  <line x1="87.5" y1="29" x2="87.5" y2="98" style="stroke:#FF0000; stroke-width: 4;"></line>
+                  <text x="87.5" y="25" font-size="24" fill="#FF0000" stroke="#FF0000" style="text-anchor: middle">Z</text>
+                </svg>
+              </div>
+              <div class="col-sm-9">
+                <p>
+                  <span class="i18n text-info" data-i18n="gyroSensorTab.zAxis">Z</span><br />
+                  <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: zAxisValue">{}</span></strong>
+                </p>
+                <p><small><em><span class="i18n text-small text-muted" data-i18n="gyroSensorTab.zAxisNote">NOT_ALL_DEVICES_SUPPORT_Z</span></em></small></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video sensor tab -->
+        <div role="tabpanel" id="videoSensorTab" class="tab-pane">
+          <div class="nav navOnOneLine" style="margin-bottom: 5px">
+            <!-- Button bar -->
+            <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form" onsubmit="return false;">
+              <div class="input-group input-group-sm">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></div>
+                <input class="form-control" type="text" placeholder="Sensor identifier" data-bind="value: sensorName, valueUpdate: 'input'">
+              </div>
+            </form>
+            <button class="btn btn-default btn-sm" data-bind="css: {active: isStarted}, click: onStart">
+              <span class="i18n" data-i18n="videoSensorTab.start">START</span></button>
+            <div class="pull-right">
+              <p class="navbar-text" data-bind="visible: isStarted"><span class="i18n text-info" data-i18n="videoSensorTab.addPoints">CLICK_VIDEO_TO_ADD_POINTS</span></p>
+              <p id="xVideoSensorPerf" class="navbar-text text-info" data-bind="visible: isStarted, text: perfSummary"></p>
+            </div>
+          </div>
+
+          <div style="width: 640px; height: 480px; margin: 1px auto;">
+            <canvas id="xVideoSensorCanvas" width="640" height="480" data-bind="click: onCanvasClick"></canvas>
+          </div>
+          <!-- Webcam isn't displayed - Used only for acquisition -->
+          <video id="xVideoSensorWebcam" width="640" height="480" style="display:none;"></video>
+        </div>
+
+        <!-- Geo/GPS sensor tab -->
+        <div role="tabpanel" id="geoSensorTab" class="tab-pane">
+          <div class="nav navOnOneLine" style="margin-bottom: 5px">
+            <!-- Button bar -->
+            <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form" onsubmit="return false;">
+              <div class="input-group input-group-sm">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></div>
+                <input class="form-control" type="text" placeholder="Sensor identifier" data-bind="value: sensorName, valueUpdate: 'input'">
+              </div>
+            </form>
+            <button class="btn btn-default btn-sm" data-bind="css: {active: isStarted}, click: onStart">
+              <span class="i18n" data-i18n="geoSensorTab.start">START</span></button>
+          </div>
+
+          <div>
+            <!-- Nest a bootstrap grid inside <=> 12 columns available -->
+            <div class="row">
+              <div class="col-sm-3">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <circle cx="85" cy="55" r="40" style="fill:#103BE7" />
+                  <path d="M45,55 A50,30 0 0,0 125,55" style="stroke:#FF0000; stroke-width: 3; fill:none;"></path>
+                </svg>
+              </div>
+              <div class="col-sm-9">
+                <span class="i18n text-info" data-i18n="geoSensorTab.latitude">LATITUDE</span><br />
+                <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: latitude">{}</span></strong>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-3">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <circle cx="85" cy="55" r="40" style="fill:#103BE7" />
+                  <path d="M85,15 A30,50 0 0,1 85,95" style="stroke:#FF0000; stroke-width: 3; fill:none;"></path>
+                </svg>
+              </div>
+              <div class="col-sm-9">
+                <p>
+                  <span class="i18n text-info" data-i18n="geoSensorTab.longitude">LONGITUDE</span><br />
+                  <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: longitude">{}</span></strong>
+                </p>
+                <p><small><em>
+                      <span class="i18n text-info" data-i18n="geoSensorTab.accuracy">ACCURACY</span><br />
+                      <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: accuracy">{}</span></strong>
+                    </em></small></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-3">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <polygon points="40,90  70,40  100,90" style="fill:#aaaaaa;"></polygon>
+                  <polygon points="60,90  100,10  140,90" style="fill:#103BE7;"></polygon>
+                  <line x1="50" y1="30" x2="150" y2="30" style="stroke:#FF0000; stroke-width: 3;"></line>
+                </svg>
+              </div>
+              <div class="col-sm-9">
+                <p>
+                  <span class="i18n text-info" data-i18n="geoSensorTab.altitude">ALTITUDE</span><br />
+                  <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: altitude">{}</span></strong>
+                </p>
+                <p><small><em>
+                      <span class="i18n text-info" data-i18n="geoSensorTab.altitudeAccuracy">ALTITUDE_ACCURACY</span><br />
+                      <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: altitudeAccuracy">{}</span></strong>
+                    </em></small></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-3">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <circle cx="85" cy="55" r="40" style="stroke:#103BE7; stroke-width: 3; fill-opacity:0" />
+                  <line x1="85" y1="55" x2="85" y2="20" style="stroke:#FF0000; stroke-width: 3;"></line>
+                  <line x1="85" y1="55" x2="105" y2="65" style="stroke:#FF0000; stroke-width: 3;"></line>
+                </svg>
+              </div>
+              <div class="col-sm-9">
+                <span class="i18n text-info" data-i18n="geoSensorTab.timestamp">TIMESTAMP</span><br />
+                <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: timestamp">{}</span></strong>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Event notification part -->
@@ -276,6 +485,7 @@
       </div>
     </div>
   </div>
+
   <!-- End of the layout -->
 
 
