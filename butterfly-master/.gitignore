@@ -1,6 +1,0 @@
-node_modules
-gruntfile.js
-*.zip
-*.php
-vendor
-package-lock.json
