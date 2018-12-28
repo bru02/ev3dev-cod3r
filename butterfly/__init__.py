@@ -75,10 +75,6 @@ class Route(tornado.web.RequestHandler):
 # Imported from executable
 if hasattr(tornado.options.options, 'debug'):
     application = tornado.web.Application(
-        [
-            (r"/(.*)", tornado.web.StaticFileHandler,
-             {"path": "../", "default_filename": "index.html"})
-        ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
         debug=tornado.options.options.debug
     )

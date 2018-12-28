@@ -34,7 +34,8 @@ import tornado.options
 import tornado.process
 import tornado.web
 import tornado.websocket
-from butterfly import Route, url, utils
+import utils
+from butterfly import Route, url
 from butterfly.terminal import Terminal
 import mimetypes
 
@@ -712,3 +713,11 @@ class FileManagerHandler(tornado.web.RequestHandler):
                     self.write(json.dumps(result))
             except ValueError:
                 pass
+
+@url(r'/(.*)')
+class IndexDotHTMLAwareStaticFileHandler(tornado.web.StaticFileHandler):
+    def parse_url_path(self, url_path):
+        if not url_path or url_path.endswith('/'):
+            url_path += 'index.html'
+
+        return super(IndexDotHTMLAwareStaticFileHandler, self).parse_url_path(url_path)
