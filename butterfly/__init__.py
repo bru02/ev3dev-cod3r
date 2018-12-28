@@ -31,11 +31,11 @@ class url(object):
         self.url = url
 
     def __call__(self, cls):
-        if tornado.options.options.uri_root_path:
-            url = '/' + \
-                tornado.options.options.uri_root_path.strip('/') + self.url
-        else:
-            url = self.url
+        # if tornado.options.options.uri_root_path:
+        #     url = '/' + \
+        #         tornado.options.options.uri_root_path.strip('/') + self.url
+        # else:
+        #     url = self.url
         application.add_handlers(
             r'.*$',
             (tornado.web.url(url, cls, name=cls.__name__),)
@@ -75,8 +75,12 @@ class Route(tornado.web.RequestHandler):
 # Imported from executable
 if hasattr(tornado.options.options, 'debug'):
     application = tornado.web.Application(
+        static_path=os.path.join(os.path.dirname(__file__), "static"),
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
-        debug=tornado.options.options.debug
+        debug=tornado.options.options.debug,
+        static_url_prefix='%s/static/' % (
+            '/%s' % tornado.options.options.uri_root_path.strip('/')
+            if tornado.options.options.uri_root_path else '')
     )
 
     import butterfly.routes  # noqa: F401
