@@ -47,7 +47,7 @@ class Index(Route):
         if not tornado.options.options.unsecure and user:
             raise tornado.web.HTTPError(400)
         return self.render(
-            'index.html', session=session or str(uuid4()))
+            'index.html', session=session or str(uuid.uuid4()))
 
 
 @url(r'/theme/([^/]+)/style.css')
@@ -381,7 +381,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 @url('/bridge.py')
 class FileManagerHandler(tornado.web.RequestHandler):
     def initialize(self, root='/'):
-        self.filemanager = FileManager(root)
+        self.filemanager = utils.FileManager(root)
 
     def get(self):
 
@@ -420,6 +420,24 @@ class FileManagerHandler(tornado.web.RequestHandler):
                     self.write(json.dumps(result))
             except ValueError:
                 pass
+
+@url('/local.js')
+class LocalJsStatic(Route):
+    def get(self):
+        self.set_header("Content-Type", 'application/javascript')
+        if os.path.exists(self.local_js_dir):
+            for fn in os.listdir(self.local_js_dir):
+                if not fn.endswith('.js'):
+                    continue
+                with open(os.path.join(self.local_js_dir, fn), 'rb') as s:
+                    while True:
+                        data = s.read(16384)
+                        if data:
+                            self.write(data)
+                        else:
+                            self.write(';')
+                            break
+        self.finish()
 
 @url(r'/(.*)')
 class IndexDotHTMLAwareStaticFileHandler(tornado.web.StaticFileHandler):

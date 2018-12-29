@@ -35,7 +35,7 @@ class url(object):
         #     url = '/' + \
         #         tornado.options.options.uri_root_path.strip('/') + self.url
         # else:
-        #     url = self.url
+        url = self.url
         application.add_handlers(
             r'.*$',
             (tornado.web.url(url, cls, name=cls.__name__),)
