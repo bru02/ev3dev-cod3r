@@ -39,7 +39,7 @@ from butterfly import Route, url
 from butterfly.terminal import Terminal
 import mimetypes
 
-@url(r'/(?:index\.html)')
+@url(r'/(?:index.html)?')
 class Index(Route):
     def get(self):
         return self.render('index.html')

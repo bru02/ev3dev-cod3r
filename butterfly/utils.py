@@ -459,7 +459,7 @@ def change_permissions_recursive(path, mode):
 
 
 class FileManager:
-    def __init__(self, root='/'):
+    def __init__(self, root='/home/robot/'):
         self.root = os.path.abspath(root)
 
     def list(self, request):
