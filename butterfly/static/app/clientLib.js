@@ -54,30 +54,302 @@ class xGeo {
         return { x: xTile, y: yTile, z, }
     }
 }
-function sendIntent() {
-    let fn = arguments.shift();
-    let args = arguments;
-    EV3BrickServer.WSSend({ fn, args, });
+const multible = "multible";
+const fns = {
+    ev3: {
+        isOk: {},
+        log: {
+            args: [{
+                type: "text",
+                multible,
+            }]
+        }
+    },
+    battery: {
+
+    },
+    screen: {
+        textPixels: {
+            args: [
+                {
+                    type: "text"
+                },
+                {
+                    type: "number",
+                    default: 0
+
+                },
+                {
+                    type: "number",
+                    default: 0
+                },
+                {
+                    type: "text",
+                    default: "black"
+                },
+                {
+                    type: "boolean",
+                    default: true
+                },
+                {
+                    type: "text",
+                    default: ""
+                },
+            ]
+        },
+        textGrid: {
+            args: [
+                {
+                    type: "text"
+                },
+                {
+                    type: "number",
+                    default: 0
+
+                },
+                {
+                    type: "number",
+                    default: 0
+                },
+                {
+                    type: "text",
+                    default: "black"
+                },
+                {
+                    type: "boolean",
+                    default: true
+                },
+                {
+                    type: "text",
+                    default: ""
+                },
+            ]
+        },
+        line: {
+            args: [
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "text",
+                    default: "black"
+
+                },
+                {
+                    type: "boolean",
+                    default: true
+
+                },
+            ]
+        },
+        circle: {
+            args: [
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "text",
+                    default: "black"
+
+                },
+                {
+                    type: "text",
+                    default: "black"
+
+                },
+                {
+                    type: "boolean",
+                    default: true
+
+                },
+            ]
+        },
+        rect: {
+            args: [
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "text",
+                    default: "black"
+
+                },
+                {
+                    type: "text",
+                    default: "black"
+
+                },
+                {
+                    type: "boolean",
+                    default: true
+
+                },
+            ]
+        },
+        rect: {
+            args: [
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "text",
+                    default: "black"
+                },
+                {
+                    type: "boolean",
+                    default: true
+                }
+            ]
+        },
+        imageFromFile: {
+            args: [
+                {
+                    type: "text"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+            ]
+        },
+        imageFromString: {
+            args: [
+                {
+                    type: "text"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+            ]
+        }
+    },
+    leds: {
+        setColor: {
+            args: [
+                {
+                    type: "text",
+                    val: ['LEFT', 'RIGHT', 'BOTH']
+                },
+                {
+                    type: ["text", "array"]
+                }
+            ]
+        }
+    },
+    global: {
+        print: {
+            args: [{
+                type: "text",
+                multible,
+            }]
+        },
+        wrap: {
+            args: [
+                {
+                    type: "text"
+                },
+                {
+                    type: "number"
+                }
+            ]
+        }
+    }
+};
+for ([key, val] of fns) {
+    if (key == "global") {
+        t = window
+    } else {
+        window[key] = {};
+        t = window[key];
+    }
+    for ([name, props] of val) {
+        t[name] = function () {
+            $(props).each(function (e, i) {
+                if (arguments[i]) {
+                    let type = typeof arguments[i];
+                    let res = true;
+                    if (Array.isArray(e['type'])) {
+                        $(e['type']).each(e => {
+                            res = type !== e['type']
+                            if (!res) return false;
+                        });
+                    } else {
+                        res = type !== e['type']
+                    }
+                    if (res) {
+                        context.MessageLogViewModel.addError("Argument type mismatch for function " + namespace + "." + name + " argument " + i + ".");
+                    }
+                } else {
+                    if (e['default'] !== null) {
+                        arguments[i] = e['default']
+                    } else {
+                        context.MessageLogViewModel.addError("Too few arguments supplied to function " + namespace + "." + name + ".");
+
+                    }
+                }
+            });
+            return new Promise((resolve, reject) => {
+
+                context.EV3BrickServer.doWSSend({
+                    'act': 'ufn',
+                    'namespace': key,
+                    fn: name,
+                    args: arguments
+                })
+                context.EV3BrickServer.ws.addEventListener('message', function (msg) {
+                    msg = JSON.parse(msg);
+                    if (msg['err']) {
+                        reject(msg['err']);
+                        MessageLogViewModel.addError(msg['err']);
+                    } else {
+                        resolve(msg['res'])
+                    }
+                })
+            })
+        }
+    }
 }
-class Speaker {
-    constructor() {
-        this.volume = 100;
-    }
-    speak(txt) {
-        sendIntent("speak", txt, volume);
-    }
-    tone() {
-        sendIntent("tone", txt, volume);
-    }
+leds.off = function () {
+    leds.setColor('both', [0, 0])
 }
-class Ev3 {
-    constructor() {
-        this.battery = new Battery();
-        this.screen = new Screen();
-        this.motors = new Motors();
-        this.sensors = new Sensors();
-        this.lights = new Lights();
-        this.buttons = new Buttons();
-        this.speaker = new Speaker();
-    }
+window.sleep = function sleep(s) {
+    return new Promise(resolve => setTimeout(resolve, s * 500));
 }

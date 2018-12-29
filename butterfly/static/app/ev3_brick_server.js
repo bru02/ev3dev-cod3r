@@ -43,17 +43,17 @@ function EV3BrickServer(appContext) {
         self.ws.onerror = function (evt) { self.__onWSError(evt); };
       } catch (ex) {
         console.warn("Fail to create websocket for: '" + wsURI + "'");
-        self.context.messageLogVM.addMessage(true, i18n.t("ev3brick.errors.ev3ConnectionFailed", { cansedBy: ex }));
+        self.context.messageLogVM.addError(i18n.t("ev3brick.errors.ev3ConnectionFailed", { cansedBy: ex }));
         self.WSReconnection();
       }
     }
     else {
-      self.context.messageLogVM.addMessage(true, i18n.t("ev3brick.errors.websocketNotSupported"));
+      self.context.messageLogVM.addError(i18n.t("ev3brick.errors.websocketNotSupported"));
     }
   };
 
   self.__onWSOpen = function (evt) {
-    self.context.messageLogVM.addMessage(false, i18n.t("ev3brick.ev3ConnectionOk"));
+    self.context.messageLogVM.addSuccess(i18n.t("ev3brick.ev3ConnectionOk"));
   };
 
   self.__onWSMessage = function (evt) {
@@ -63,17 +63,17 @@ function EV3BrickServer(appContext) {
     console.log("Message received: " + received_msg);
 
     if (msgType == "ScriptException" || msgType == "Exception") {
-        self.context.messageLogVM.addMessage(true, i18n.t("server.errors." + received_data.code, received_data.params));
+      self.context.messageLogVM.addError(i18n.t("server.errors." + received_data.code, received_data.params));
     } else if (msgType == "InfoCoded") {
-      self.context.messageLogVM.addMessage(false, i18n.t("server.messages." + received_data.code, received_data.params));
+      self.context.messageLogVM.addInfo(i18n.t("server.messages." + received_data.code, received_data.params));
     } else {
       // Default: Assume this is a text message
-      self.context.messageLogVM.addMessage(false, received_data.txt);
+      self.context.messageLogVM.addInfo(received_data.txt);
     }
   };
 
   self.__onWSClose = function (evt) {
-    self.context.messageLogVM.addMessage(true, i18n.t("ev3brick.errors.ev3ConnectionNok"));
+    self.context.messageLogVM.addError(i18n.t("ev3brick.errors.ev3ConnectionNok"));
     self.WSReconnection();
   };
 
@@ -103,11 +103,14 @@ function EV3BrickServer(appContext) {
   // Send a message to the websocket (if opened)
   // Returns true if sent, false otherwise
   self.WSSend = function (message) {
-    let act = message['act'];
+    let msg = message;
     if (self.ws && (self.ws.readyState == 1)) { // OPEN
       try {
-        if(!typeof message == "string") {
-            message = JSON.stringify(message);
+        if (message['err']) {
+          delete message['err']
+        }
+        if (typeof !message == "string") {
+          message = JSON.stringify(message);
         }
         self.ws.send(message);
         return true;
@@ -118,8 +121,9 @@ function EV3BrickServer(appContext) {
     } else {
       console.log("Can't send a message because the ws isn't initialized or isn't opened - " + message);
     }
-    self.context.messageLogVM.addMessage(true, i18n.t("ev3brick.errors.cantRunScriptEV3ConnectionNok", {action: 
-          act
+    self.context.messageLogVM.addError(i18n.t(`ev3brick.errors.${msg['err'] || 'cantDoSomethingEV3ConnectionNok'}`, {
+      action:
+        msg['act']
     }));
 
     return false;
@@ -127,34 +131,31 @@ function EV3BrickServer(appContext) {
 
   self.runScript = function (scriptCode) {
     if (scriptCode) {
-      var jsonMsg = {
+      self.WSSend({
         act: "runScript",
         sLang: "javascript",
-        sText: scriptCode
-      };
-      // console.log("runScript - " + jsonMsg);
-      self.WSSend(jsonMsg)
+        sText: scriptCode,
+        err: "cantRunScriptEV3ConnectionNok"
+      })
     }
   };
 
   self.stopScript = function () {
-    var jsonMsg = {
-      act: "stopScript"
-    };
-    self.WSSend(jsonMsg)
+    self.WSSend({
+      act: "stopScript",
+      err: "cantStopScriptEV3ConnectionNok"
+    })
   };
 
   self.shutdownBrick = function () {
-    var jsonMsg = {
+    self.WSSend({
       act: "shutdownBrick"
-    };
-    self.WSSend(jsonMsg)
+    })
   };
 
   self.stopGnikrap = function () {
-    var jsonMsg = {
-      act: "stopGnikrap"
-    };
-    self.WSSend(jsonMsg)
+    self.WSSend({
+      act: "stopCod3r"
+    })
   }
 }

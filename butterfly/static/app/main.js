@@ -23,7 +23,7 @@
 //       Don't use i18n as it doesn't work on some 'old' browser (eg. IE8)
 if (!('WebSocket' in window &&
   'matchMedia' in window)) { // A minimal level of css for bootstrap
-  alert("Gnikrap can't run in this browser, consider using a more recent browser.\nThe page will be automatically closed.");
+  alert("Cod3r can't run in this browser, consider using a more recent browser.\nThe page will be automatically closed.");
   window.close();
 }
 

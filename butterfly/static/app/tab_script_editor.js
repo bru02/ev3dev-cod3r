@@ -39,64 +39,23 @@ function JavascriptEditor(appContext) {
     self.STORAGE_URL_PREFIX = "/rest/scriptfiles/";
     self.scriptFilename = undefined;
     self.langTools = ace.require("ace/ext/language_tools");
-    self.ace = ace.edit("aceEditor");
-    // Possible options: https://github.com/ajaxorg/ace/wiki/Configuring-Ace
-    self.ace.setOptions({
-      enableBasicAutocompletion: true,
-      vScrollBarAlwaysVisible: true
-    });
-    self.ace.setTheme("ace/theme/chrome");
-    self.ace.getSession().setMode("ace/mode/javascript");
-    self.ace.getSession().setTabSize(2);
-    self.ace.getSession().setUseSoftTabs(true); // Use spaces instead of tabs
-
-    // Enable auto-completion    
-    self.autoCompleteList = [];
-    self.keywordToCategories = {};
-    var tmp = i18n.t("autocompletion", { returnObjectTrees: true }); // The whole object as defined in the json
-    for (var type in tmp) {
-      var typeData = tmp[type];
-      self.autoCompleteList = self.autoCompleteList.concat(typeData.words.map(function (word) {
-        return { caption: word, value: word, score: typeData.score, meta: type };
-      }));
-
-      typeData.keywords.forEach(function (kw) {
-        var lkw = kw.toLowerCase();
-        if (!self.keywordToCategories[lkw]) {
-          self.keywordToCategories[lkw] = [];
-        }
-        self.keywordToCategories[lkw].push(type);
-      });
-    }
-
-    var staticWordCompleter = {
-      getCompletions: function (editor, session, pos, prefix, callback) {
-        var line = session.getLine(pos.row);
-        line = line.substring(0, pos.column);
-        var context = Utils.getJSContext(line);
-        var catKw = (context[0] ? context[0].toLowerCase() : "");
-        var categories = Object.keys(self.keywordToCategories).filter(function (kw) {
-          return (catKw == kw) || (kw.length > 0 && catKw.indexOf(kw) != -1);
-        }).reduce(function (acc, kw) {
-          return acc.concat(self.keywordToCategories[kw]);
-        }, []);
-        // var categories = self.keywordToCategories[catKw];
-        console.log("Context: " + JSON.stringify(context) + ", categories: " + JSON.stringify(categories));
-        var temp = JSON.parse(JSON.stringify(self.autoCompleteList)); // Need to clone each time otherwise the list is mixed
-        if (categories) {
-          callback(null, temp.map(function (item) {
-            if (categories.indexOf(item.meta) != -1) {
-              item.score = 1000;
-            }
-            return item;
-          }));
-        } else {
-          callback(null, temp);
-        }
-      }
-    }
-    // Reset the completers: The default completer add too much useless keyword for us
-    self.langTools.setCompleters([staticWordCompleter, self.langTools.textCompleter, self.langTools.snippetCompleter]);
+    self.ace = CodeMirror.fromTextArea($('#ace')[0], {
+      mode: { name: "javascript", globalVars: true },
+      gutters: ["CodeMirror-lint-markers"],
+      lint: true,
+      showCursorWhenSelecting: true,
+      lineNumbers: true,
+      firstLineNumber: 1,
+      indentUnit: 4,
+      tabSize: 4,
+      indentWithTabs: false,
+      matchBrackets: true,
+      extraKeys: {
+        "Tab": "indentMore",
+        "Shift-Tab": "indentLess",
+        "Ctrl-Space": "autocomplete"
+      },
+    });;
   })();
 
   self.doResize = function (workAreaHeight, usefullWorkAreaHeight) {
@@ -146,10 +105,10 @@ function JavascriptEditor(appContext) {
             type: "PUT",
             success: function (data, status) {
               self.scriptFilename = filename;
-              self.context.messageLogVM.addMessage(false, i18n.t("scriptEditorTab.scriptSuccessfullySaved", { "filename": filename }));
+              self.context.messageLogVM.addSuccess(i18n.t("scriptEditorTab.scriptSuccessfullySaved", { "filename": filename }));
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-              self.context.messageLogVM.addMessage(true, i18n.t("scriptEditorTab.errors.cantSaveScriptFile",
+              self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantSaveScriptFile",
                 { "filename": filename, causedBy: ("" + XMLHttpRequest.status + " - " + errorThrown) }));
             }
           });
@@ -181,7 +140,7 @@ function JavascriptEditor(appContext) {
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
         // XMLHttpRequest.status: HTTP response code
-        self.context.messageLogVM.addMessage(true, i18n.t("scriptEditorTab.errors.cantLoadScriptFile",
+        self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile",
           { "filename": filename, causedBy: ("" + XMLHttpRequest.status + " - " + errorThrown) }));
       }
     });
@@ -263,10 +222,10 @@ function BlocklyEditor(appContext) {
             type: "PUT",
             success: function (data, status) {
               self.scriptFilename = filename;
-              self.context.messageLogVM.addMessage(false, i18n.t("scriptEditorTab.scriptSuccessfullySaved", { "filename": filename }));
+              self.context.messageLogVM.addSuccess(i18n.t("scriptEditorTab.scriptSuccessfullySaved", { "filename": filename }));
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-              self.context.messageLogVM.addMessage(true, i18n.t("scriptEditorTab.errors.cantSaveScriptFile",
+              self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantSaveScriptFile",
                 { "filename": filename, causedBy: ("" + XMLHttpRequest.status + " - " + errorThrown) }));
             }
           });
@@ -280,10 +239,10 @@ function BlocklyEditor(appContext) {
     var result = self.blockly.buildJavascriptCode();
 
     result.warnings.forEach(function (warn) {
-      self.context.messageLogVM.addMessage(true, warn);
+      self.context.messageLogVM.addError(warn);
     });
     result.errors.forEach(function (err) {
-      self.context.messageLogVM.addMessage(true, err);
+      self.context.messageLogVM.addError(err);
     });
 
     return (result.errors.length > 0 ? undefined : result.code);
@@ -322,13 +281,13 @@ function BlocklyEditor(appContext) {
             self.scriptFilename = filename;
           }
         } catch (e) {
-          self.context.messageLogVM.addMessage(true, i18n.t("scriptEditorTab.errors.cantLoadScriptFile",
+          self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile",
             { "filename": filename, causedBy: ("" + e) }));
         }
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
         // XMLHttpRequest.status: HTTP response code
-        self.context.messageLogVM.addMessage(true, i18n.t("scriptEditorTab.errors.cantLoadScriptFile",
+        self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile",
           { "filename": filename, causedBy: ("" + XMLHttpRequest.status + " - " + errorThrown) }));
       }
     });
@@ -404,10 +363,6 @@ function ScriptEditorTabViewModel(appContext) {
   };
 
   self.onLoadScript = function () {
-    if (self.context.settings.demoMode) {
-      self.context.messageLogVM.addMessage(false, i18n.t("scriptEditorTab.demo.no_load"));
-      return;
-    }
     if (self.editor) {
       self.editor.displayLoadScriptDialog();
     } else {
@@ -416,10 +371,6 @@ function ScriptEditorTabViewModel(appContext) {
   };
 
   self.onSaveScript = function () {
-    if (self.context.settings.demoMode) {
-      self.context.messageLogVM.addMessage(false, i18n.t("scriptEditorTab.demo.no_save"));
-      return;
-    }
     if (self.editor) {
       self.editor.saveScript();
     } else {

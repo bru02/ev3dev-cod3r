@@ -90,7 +90,7 @@ DoubleEditor.prototype.initBlockly = function () {
 
     this.blockly = Blockly.inject(this.blocklyDiv[0],
         {
-            "path": "../lib/blockly-20160417/",
+            "path": "static/lib/blockly-20160417/",
             "scrollbars": true,
             "readOnly": false,
             "zoom": { "enabled": false },
@@ -234,17 +234,16 @@ DoubleEditor.prototype.hideSplitMenu = function () {
  * the CodeMirror instance.
  */
 DoubleEditor.prototype.showSplitMenu = function () {
-
     this.showBlockMenu();
     this.showTextMenu();
 
-    this.textTag.css("width", "calc(40%-5px)");
-    this.blockTag.css("width", "calc(60%-5px)");
+    this.textTag.css("width", "calc(40% - 5px)");
+    this.blockTag.css("width", "calc(60% - 5px)");
     this.textSidebarTag.css("width", "0px");
+    this.blocklyDiv.css("width", "");
     this.textTag.addClass("col-md-6");
     this.blockTag.addClass("col-md-6");
     Blockly.svgResize(this.blockly);
-
 };
 
 /**
@@ -442,7 +441,7 @@ DoubleEditor.prototype.editorError = function (original, message, line) {
     //this.title.html("Editor Error");
     //this.original.show().html(original);
     //this.body.html(message);
-    context.messageLogVM.addMessage(true, "Python Error: " + original + "\n" + message, 1);
+    context.messageLogVM.addError("Python Error: " + original + "\n" + message, 1);
     this.highlightError(line - 1);
 }
 DoubleEditor.prototype.prettyPrintError = function (error) {

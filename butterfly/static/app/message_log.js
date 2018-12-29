@@ -35,12 +35,12 @@ function MessageLogViewModel(appContext) { // appContext not used for MessageLog
     });
   }
 
-  self.addMessage = function (isError, message) {
-    function doAddMessage(isError, message, count) {
+  self.addMessage = function (type, message) {
+    function doAddMessage(type, message, count) {
       self.messages.unshift({
         "time": new Date().toLocaleTimeString(),
-        "isError": isError,
-        "cssClazz": (isError ? "list-group-item-danger" : "list-group-item-info"),
+        "cssClass": "list-group-item-" + type,
+        type,
         "text": message,
         "count": count
       });
@@ -49,13 +49,22 @@ function MessageLogViewModel(appContext) { // appContext not used for MessageLog
 
     // Manage the message count
     var m0 = (self.messages().length > 0 ? self.messages()[0] : undefined);
-    if (m0 && (m0.isError == isError) && (m0.text == message)) {
+    if (m0 && (m0.type == type) && (m0.text == message)) {
       self.messages.shift();
-      doAddMessage(isError, message, m0.count + 1);
+      doAddMessage(type, message, m0.count + 1);
     } else {
-      doAddMessage(isError, message, 1);
+      doAddMessage(type, message, 1);
     }
   };
+  self.addError = function (msg) {
+    self.addMessage('danger', msg)
+  }
+  self.addInfo = function (msg) {
+    self.addMessage('info', msg)
+  }
+  self.addSuccess = function (msg) {
+    self.addMessage('success', msg)
+  }
 
   self.onResetMessages = function () {
     self.messages.removeAll();

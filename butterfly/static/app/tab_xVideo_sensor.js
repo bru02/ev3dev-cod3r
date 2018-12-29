@@ -95,7 +95,7 @@ function PointTrackingComputationEngine(appContext) {
                 }
                 j++;
             } else {
-                self.context.messageLogVM.addMessage(true, i18n.t("videoSensorTab.pointsNoMoreTracked", { "name": name[i] }));
+                self.context.messageLogVM.addError( i18n.t("videoSensorTab.pointsNoMoreTracked", { "name": name[i] }));
             }
         }
         self.points.number = j;

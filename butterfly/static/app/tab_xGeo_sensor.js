@@ -99,7 +99,7 @@ function GeoSensorTabViewModel(appContext) {
                 errorMsg = i18n.t("geoSensorTab.errors.unknownError", { "detail": error.message });
                 break;
         }
-        self.context.messageLogVM.addMessage(true, errorMsg);
+        self.context.messageLogVM.addError( errorMsg);
     };
 
     self.onStart = function () {

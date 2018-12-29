@@ -69,7 +69,7 @@ function ManageFilesViewModel(appContext) {
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
           // XMLHttpRequest.status: HTTP response code
-          self.context.messageLogVM.addMessage(true, i18n.t("manageFilesModal.errors.cantRetrieveListOfFiles",
+          self.context.messageLogVM.addError( i18n.t("manageFilesModal.errors.cantRetrieveListOfFiles",
             { causedBy: ("" + XMLHttpRequest.status + " - " +  errorThrown)}));
           self.hide();
         }

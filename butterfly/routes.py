@@ -372,18 +372,30 @@ class ThemesList(Route):
             'dir': self.themes_dir
         }))
 @url('/connect')
-class WSHandler(tornado.websocket.WebSocketHandler):
+class WSHandler(KeptAliveWebSocketHandler):
     def open(self):
+        super(WSHandler, self).open()
         print('new connection')
 
     def on_message(self, message):
         print('message received:  %s' % message)
         data = tornado.escape.json_decode(message)
+        act = data['act']
+        if(act is "shutdownBrick" or act is "stopCod3r"):
+            self.write_message("Bye")
+            self.close()
+            tornado.ioloop.IOLoop.instance().stop()
+            if(act is "shutdownBrick"):
+                import os
+                os.system('sudo shutdown now')
+            exit()
+
         # Reverse Message and send it back
         print('sending back message: %s' % message[::-1])
         self.write_message(message[::-1])
 
     def on_close(self):
+        super(WSHandler, self).on_close()
         print('connection closed')
 
     def check_origin(self, origin):
