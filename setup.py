@@ -24,11 +24,9 @@ setup(
     platforms="Any",
     scripts=['butterfly.server.py', 'scripts/butterfly', 'scripts/b'],
     packages=['butterfly'],
-    install_requires=["tornado>=3.2", "pyOpenSSL"],
+    install_requires=["tornado>=3.2"],
     extras_require={
-        'themes': ["libsass"],
-        'systemd': ['tornado_systemd'],
-        'lint': ['pytest', 'pytest-flake8', 'pytest-isort']
+        'systemd': ['tornado_systemd']
     },
     package_data={
         'butterfly': [

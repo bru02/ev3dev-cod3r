@@ -39,15 +39,26 @@ from butterfly import Route, url
 from butterfly.terminal import Terminal
 import mimetypes
 
+@url(r'/(?:index)')
+class Index(tornado.web.RequestHandler):
+    def get(self):
+        return self.render('index.html')
+
+@url(r'/manage')
+class Manage(tornado.web.RequestHandler):
+    def get(self):
+        return self.render('manage.html')
+
+
 @url(r'/(?:user/(.+))?/?(?:wd/(.+))?/?(?:session/(.+))?')
-class Index(Route):
+class Shell(Route):
     def get(self, user, path, session):
         user = self.request.query_arguments.get(
             'user', [b''])[0].decode('utf-8')
         if not tornado.options.options.unsecure and user:
             raise tornado.web.HTTPError(400)
         return self.render(
-            'index.html', session=session or str(uuid.uuid4()))
+            'shell.html', session=session or str(uuid.uuid4()))
 
 
 @url(r'/theme/([^/]+)/style.css')
@@ -420,29 +431,3 @@ class FileManagerHandler(tornado.web.RequestHandler):
                     self.write(json.dumps(result))
             except ValueError:
                 pass
-
-@url('/local.js')
-class LocalJsStatic(Route):
-    def get(self):
-        self.set_header("Content-Type", 'application/javascript')
-        if os.path.exists(self.local_js_dir):
-            for fn in os.listdir(self.local_js_dir):
-                if not fn.endswith('.js'):
-                    continue
-                with open(os.path.join(self.local_js_dir, fn), 'rb') as s:
-                    while True:
-                        data = s.read(16384)
-                        if data:
-                            self.write(data)
-                        else:
-                            self.write(';')
-                            break
-        self.finish()
-
-@url(r'/(.*)')
-class IndexDotHTMLAwareStaticFileHandler(tornado.web.StaticFileHandler):
-    def parse_url_path(self, url_path):
-        if not url_path or url_path.endswith('/'):
-            url_path += 'index.html'
-
-        return super(IndexDotHTMLAwareStaticFileHandler, self).parse_url_path(url_path)

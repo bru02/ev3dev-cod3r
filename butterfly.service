@@ -1,5 +1,5 @@
 [Unit]
-Description=Butterfly Terminal Server
+Description=Cod3r code editor
 
 [Service]
-ExecStart=/usr/bin/butterfly.server.py
+ExecStart=/cod3r/butterfly.server.py
