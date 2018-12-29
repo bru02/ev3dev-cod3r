@@ -293,14 +293,14 @@ const fns = {
         }
     }
 };
-for ([key, val] of fns) {
+for ([key, val] in fns) {
     if (key == "global") {
         t = window
     } else {
         window[key] = {};
         t = window[key];
     }
-    for ([name, props] of val) {
+    for ([name, props] in val) {
         t[name] = function () {
             $(props).each(function (e, i) {
                 if (arguments[i]) {

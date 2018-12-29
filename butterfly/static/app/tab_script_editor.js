@@ -38,7 +38,6 @@ function JavascriptEditor(appContext) {
     self.context = appContext; // The application context
     self.STORAGE_URL_PREFIX = "/rest/scriptfiles/";
     self.scriptFilename = undefined;
-    self.langTools = ace.require("ace/ext/language_tools");
     self.ace = CodeMirror.fromTextArea($('#ace')[0], {
       mode: { name: "javascript", globalVars: true },
       gutters: ["CodeMirror-lint-markers"],
