@@ -59,7 +59,7 @@ function JavascriptEditor(appContext) {
 
   self.doResize = function (workAreaHeight, usefullWorkAreaHeight) {
     $('#aceEditor').css('height', Math.max(350, usefullWorkAreaHeight - 10).toString() + 'px');
-    self.ace.resize();
+    self.ace.refresh();
   };
 
   self.setVisible = function (visible) {
@@ -122,7 +122,6 @@ function JavascriptEditor(appContext) {
 
   self.setValue = function (value) {
     self.ace.setValue(value);
-    self.ace.moveCursorTo(0, 0);
   };
 
   self.loadScriptFile = function (filename) {

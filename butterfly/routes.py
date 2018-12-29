@@ -372,7 +372,7 @@ class ThemesList(Route):
             'dir': self.themes_dir
         }))
 @url('/connect')
-class WSHandler(KeptAliveWebSocketHandler):
+class WSHandler(Routes, KeptAliveWebSocketHandler):
     def open(self):
         super(WSHandler, self).open()
         print('new connection')
