@@ -80,7 +80,7 @@ tornado.options.define("generate_current_user_pkcs", default=False,
 tornado.options.define("generate_user_pkcs", default='',
                        help="Generate user pfx for client authentication "
                        "(Must be root to create for another user)")
-tornado.options.define("uri_root_path", default='shell',
+tornado.options.define("uri_root_path", default='',
                        help="Sets the servier root path: "
                        "example.com/<uri_root_path>/static/")
 

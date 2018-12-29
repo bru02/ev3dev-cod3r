@@ -39,7 +39,7 @@ from butterfly import Route, url
 from butterfly.terminal import Terminal
 import mimetypes
 
-@url(r'/(?:index)')
+@url(r'/(?:index\.html)')
 class Index(Route):
     def get(self):
         return self.render('index.html')
@@ -50,7 +50,7 @@ class Manage(Route):
         return self.render('manage.html')
 
 
-@url(r'/(?:user/(.+))?/?(?:wd/(.+))?/?(?:session/(.+))?')
+@url(r'/shell(?:user/(.+))?/?(?:wd/(.+))?/?(?:session/(.+))?')
 class Shell(Route):
     def get(self, user, path, session):
         user = self.request.query_arguments.get(
