@@ -40,12 +40,12 @@ from butterfly.terminal import Terminal
 import mimetypes
 
 @url(r'/(?:index)')
-class Index(tornado.web.RequestHandler):
+class Index(Route):
     def get(self):
         return self.render('index.html')
 
 @url(r'/manage')
-class Manage(tornado.web.RequestHandler):
+class Manage(Route):
     def get(self):
         return self.render('manage.html')
 
