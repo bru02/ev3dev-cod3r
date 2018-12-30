@@ -386,13 +386,13 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
             pass
         act = data['act']
         msg = {}
-        if(act is "shutdownBrick" or act is "stopCod3r"):
+        if(act == "shutdownBrick" or act == "stopCod3r"):
             self.write_message("Bye")
             self.close()
             tornado.ioloop.IOLoop.instance().stop()
             if(act is "shutdownBrick"):
                 import os
-                os.system('sudo shutdown now')
+                os.system('sudo shutdown')
             exit()
 
         # Reverse Message and send it back
@@ -411,7 +411,7 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
 
 @url('/bridge.py')
 class FileManagerHandler(tornado.web.RequestHandler):
-    def initialize(self, root='/'):
+    def initialize(self, root='/home/robot/'):
         self.filemanager = utils.FileManager(root)
 
     def get(self):

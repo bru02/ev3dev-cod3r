@@ -352,20 +352,20 @@ for ([key, val] of Object.entries(fns)) {
                         res = type !== e['type']
                     }
                     if (res) {
-                        constring.MessageLogViewModel.addError("Argument type mismatch for function " + namespace + "." + name + " argument " + i + ".");
+                        context.messageLogVM.addError("Argument type mismatch for function " + namespace + "." + name + " argument " + i + ".");
                     }
                 } else {
                     if (e['default'] !== null) {
                         arguments[i] = e['default']
                     } else {
-                        constring.MessageLogViewModel.addError("Too few arguments supplied to function " + namespace + "." + name + ".");
+                        context.messageLogVM.addError("Too few arguments supplied to function " + namespace + "." + name + ".");
 
                     }
                 }
             });
             return new Promise((resolve, reject) => {
                 let id = "cfn_" + +new Date()
-                if (constring.EV3BrickServer.doWSSend({
+                if (context.ev3BrickServer.doWSSend({
                     'act': 'ufn',
                     'namespace': key,
                     fn: name,
@@ -378,7 +378,7 @@ for ([key, val] of Object.entries(fns)) {
                             return;
                         }
                         if (msg['id'] !== id) return;
-                        constring.EV3BrickServer.ws.removeEventListener('message', cb)
+                        context.ev3BrickServer.ws.removeEventListener('message', cb)
                         if (msg['err']) {
                             reject(msg['err']);
                             MessageLogViewModel.addError(msg['err']);
@@ -386,7 +386,7 @@ for ([key, val] of Object.entries(fns)) {
                             resolve(msg['res'])
                         }
                     }
-                    constring.EV3BrickServer.ws.addEventListener('message', cb)
+                    context.EV3BrickServer.ws.addEventListener('message', cb)
                 }
             })
         }

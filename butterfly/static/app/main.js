@@ -119,7 +119,8 @@ $(document).ready(function () {
 
     // Technical objects
     context.compatibility = compatibility;
-
+    context.fileName = ko.observable("default.py")
+    context.isSaved = ko.observable(true)
 
     context.ev3BrickServer = new EV3BrickServer(context);
     context.navigationBarVM = new NavigationBarViewModel(context);
@@ -131,10 +132,9 @@ $(document).ready(function () {
     context.videoSensorTabVM = new VideoSensorTabViewModel(context);
     context.geoSensorTabVM = new GeoSensorTabViewModel(context);
     // Dialogs
-    context.manageFilesVM = new ManageFilesViewModel(context);
     context.settingsVM = new SettingsViewModel(context);
     context.importImagesVM = new ImportImagesViewModel(context);
-    context.viewCodeVM = new ViewCodeViewModel(context);
+    context.saveAsVM = new SaveAsDialogViewModel(context);
 
     // Knockout bindings
     ko.applyBindings(context.navigationBarVM, $("#navigationBar")[0]);
@@ -146,12 +146,12 @@ $(document).ready(function () {
     ko.applyBindings(context.videoSensorTabVM, $("#videoSensorTab")[0]);
     ko.applyBindings(context.geoSensorTabVM, $("#geoSensorTab")[0]);
     // Dialogs
-    ko.applyBindings(context.manageFilesVM, $("#manageFilesModal")[0]);
     ko.applyBindings(context.settingsVM, $("#settingsModal")[0]);
     ko.applyBindings(context.importImagesVM, $("#importImagesModal")[0]);
-    ko.applyBindings(context.viewCodeVM, $("#viewCodeModal")[0]);
+    ko.applyBindings(context.saveAsVM, $("#saveAsModal")[0]);
 
     // Other initialization
+    context.scriptEditorTabVM.loadScript(localStorage['script'] || 'default.py');
     context.ev3BrickServer.initialize(); // WebSsocket connexion with the server
 
     // Register config events to update translation if needed
@@ -166,7 +166,6 @@ $(document).ready(function () {
 
 
     // Publish events for settings
-    context.events.changeSettings.fire("programmingStyle", context.settings.programmingStyle);
     context.events.changeSettings.fire("language", context.settings.language);
 
 
@@ -184,28 +183,15 @@ $(document).ready(function () {
         if (e.keyCode == 83) { // Ctrl+S
           e.preventDefault();
           e.stopPropagation();
+          if (e.shiftKey) saveAsVM.display()
           context.scriptEditorTabVM.onSaveScript();
           return false;
         }
       }
     };
-    var mode = ko.observable("Split");
-    window.dbl = new DoubleEditor($('#scriptEditorTab'), { lang: "python", editor: mode })
-    window.spl = Split([".blockpy-blocks", ".blockpy-text"], {
-      cursor: 'row-resize', onDrag: () => {
-        Blockly.svgResize(dbl.blockly);
-      },
-      sizes: [60, 40]
-    });
-    $(window).click(function (e) {
-      let t = $(e.target);
-      if (t.is(".blockpy-mode-set") || (t.parents(".blockpy-mode-set").length && (t = t.parents(".blockpy-mode-set")))) {
-        dbl.setMode(t.text().trim())
-      }
-    })
     // Register windows event to ask confirmation while the user leave the page (avoid loosing scripts)
     window.onbeforeunload = function () {
-      //  return "";
+      if (!context.isSaved()) return "";
     };
   });
 });

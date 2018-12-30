@@ -495,13 +495,13 @@ class FileManager:
             dst = os.path.abspath(self.root + request['newItemPath'])
             print('rename {} {}'.format(src, dst))
             if not (os.path.exists(src) and src.startswith(self.root) and dst.startswith(self.root)):
-                return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                return {'result': {'success': False, 'error': 'Invalid path'}}
 
             shutil.move(src, dst)
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def copy(self, request):
         try:
@@ -510,20 +510,20 @@ class FileManager:
             if len(items) == 1 and 'singleFilename' in request:
                 src = os.path.abspath(self.root + items[0])
                 if not (os.path.exists(src) and src.startswith(self.root) and path.startswith(self.root)):
-                    return {'result': {'success': 'false', 'error': 'File not found'}}
+                    return {'result': {'success': False, 'error': 'File not found'}}
 
                 shutil.copy(src, path)
             else:
                 for item in items:
                     src = os.path.abspath(self.root + item)
                     if not (os.path.exists(src) and src.startswith(self.root) and path.startswith(self.root)):
-                        return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                        return {'result': {'success': False, 'error': 'Invalid path'}}
 
                     shutil.copy(src, path)
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def move(self, request):
         try:
@@ -532,13 +532,13 @@ class FileManager:
             for item in items:
                 src = os.path.abspath(self.root + item)
                 if not (os.path.exists(src) and src.startswith(self.root) and path.startswith(self.root)):
-                    return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                    return {'result': {'success': False, 'error': 'Invalid path'}}
 
                 shutil.move(src, path)
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def remove(self, request):
         try:
@@ -546,36 +546,36 @@ class FileManager:
             for item in items:
                 path = os.path.abspath(self.root + item)
                 if not (os.path.exists(path) and path.startswith(self.root)):
-                    return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                    return {'result': {'success': False, 'error': 'Invalid path'}}
 
                 if os.path.isdir(path):
                     shutil.rmtree(path)
                 else:
                     os.remove(path)
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def edit(self, request):
         try:
             path = os.path.abspath(self.root + request['item'])
             if not path.startswith(self.root):
-                return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                return {'result': {'success': False, 'error': 'Invalid path'}}
 
             content = request['content']
             with open(path, 'w') as f:
                 f.write(content)
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def getContent(self, request):
         try:
             path = os.path.abspath(self.root + request['item'])
             if not path.startswith(self.root):
-                return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                return {'result': {'success': False, 'error': 'Invalid path'}}
 
             with open(path, 'r') as f:
                 content = f.read()
@@ -588,13 +588,13 @@ class FileManager:
         try:
             path = os.path.abspath(self.root + request['newPath'])
             if not path.startswith(self.root):
-                return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                return {'result': {'success': False, 'error': 'Invalid path'}}
 
             os.makedirs(path)
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def changePermissions(self, request):
         try:
@@ -605,23 +605,23 @@ class FileManager:
             for item in items:
                 path = os.path.abspath(self.root + item)
                 if not (os.path.exists(path) and path.startswith(self.root)):
-                    return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                    return {'result': {'success': False, 'error': 'Invalid path'}}
 
-                if recursive == 'true':
+                if recursive == True:
                     change_permissions_recursive(path, permissions)
                 else:
                     os.chmod(path, permissions)
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def compress(self, request):
         try:
             items = request['items']
             path = os.path.abspath(os.path.join(self.root + request['destination'], request['compressedFilename']))
             if not path.startswith(self.root):
-                return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                return {'result': {'success': False, 'error': 'Invalid path'}}
 
             zip_file = zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED)
             for item in items:
@@ -642,24 +642,24 @@ class FileManager:
 
             zip_file.close()
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def extract(self, request):
         try:
             src = os.path.abspath(self.root + request['item'])
             dst = os.path.abspath(self.root + request['destination'])
             if not (os.path.isfile(src) and src.startswith(self.root) and dst.startswith(self.root)):
-                return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                return {'result': {'success': False, 'error': 'Invalid path'}}
 
             zip_file = zipfile.ZipFile(src, 'r')
             zip_file.extractall(dst)
             zip_file.close()
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def upload(self, handler):
         try:
@@ -669,13 +669,13 @@ class FileManager:
                 filename = fileinfo['filename']
                 path = os.path.abspath(os.path.join(self.root, destination, filename))
                 if not path.startswith(self.root):
-                    return {'result': {'success': 'false', 'error': 'Invalid path'}}
+                    return {'result': {'success': False, 'error': 'Invalid path'}}
                 with open(path, 'wb') as f:
                     f.write(fileinfo['body'])
         except Exception as e:
-            return {'result': {'success': 'false', 'error': e.message}}
+            return {'result': {'success': False, 'error': e.message}}
 
-        return {'result': {'success': 'true', 'error': ''}}
+        return {'result': {'success': True, 'error': ''}}
 
     def download(self, path):
         path = os.path.abspath(self.root + path)
@@ -709,3 +709,14 @@ class FileManager:
         f.close()
         os.remove(zipfile_path)
         return content
+    def createFile(self, request):
+        path = os.path.abspath(self.root + request['item'])
+        if not path.startswith(self.root):
+            return {'result': {'success': False, 'error': 'Invalid path'}}
+        
+        try:
+             with open(path, "x") as fout:
+                fout.write("\n\r")
+                return {'result': {'success': True, 'error': ''}}
+        except FileExistsError:
+            return {'result': {'success': False, 'error': 'File exists'}}

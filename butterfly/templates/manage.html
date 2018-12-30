@@ -39,22 +39,37 @@
 
     <script type="text/javascript">
         //example to override angular-filemanager default config
+
+        var params = {};
+        window.location.search
+            .replace(/[?&]+([^=&]+)=([^&]*)/gi, function (str, key, value) {
+                params[key] = value;
+            }
+            );
         angular.module('FileManagerApp').config(['fileManagerConfigProvider', function (config) {
             var defaults = config.$get();
-            config.set({
+            let pickFiles = params['load'] !== null;
+            let pickFolders = params['save'] !== null;
+            let allowedActions = angular.extend(defaults.allowedActions, {
+                pickFiles,
+                pickFolders,
+            })
+            let cf = {
                 appName: 'angular-filemanager',
                 pickCallback: function (item) {
-                    var msg = 'Picked %s "%s" for external use'
-                        .replace('%s', item.type)
-                        .replace('%s', item.fullPath());
-                    window.alert(msg);
+                    var msg = JSON.stringify({ dir: item.fullPath() });
+                    window.parent.postMessage(msg);
+                    window.close();
                 },
 
-                allowedActions: angular.extend(defaults.allowedActions, {
-                    pickFiles: false,
-                    pickFolders: false,
-                }),
-            });
+                allowedActions,
+            }
+            if (pickFiles || pickFolders) {
+                cf.sidenav = false;
+                cf.breadcrumb = false;
+
+            }
+            config.set(cf);
         }]);
     </script>
 </head>

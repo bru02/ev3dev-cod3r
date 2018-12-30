@@ -294,6 +294,8 @@
                 <li class="divider"></li>
                 <li><a data-bind="click: onDisplaySettings"><span class="i18n" data-i18n="navigationBar.gnikrap.settings">SETTINGS</span></a></li>
                 <li class="divider"></li>
+                <li><a href="/manage" target="_blank"><span class="i18n" data-i18n="navigationBar.gnikrap.manager">FILE_MANAGER</span></a></li>
+                <li><a href="/shell" target="_blank"><span class="i18n" data-i18n="navigationBar.gnikrap.shell">SHELL</span></a></li>
                 <li><a href="gnikrap-doc/index.html" target="_blank"><span class="i18n" data-i18n="navigationBar.gnikrap.documentation">DOCUMENTATION</span></a></li>
                 <li><a data-bind="click: onDisplayAbout"><span class="i18n" data-i18n="navigationBar.gnikrap.about">ABOUT</span></a></li>
               </ul>
@@ -319,11 +321,9 @@
               <button class="btn btn-default btn-sm" data-bind="click: onClearScript">
                 <span class="glyphicon glyphicon-file"></span> <span class="i18n" data-i18n="scriptEditorTab.clear">CLEAR</span></button>
               <button class="btn btn-default btn-sm" data-bind="click: onLoadScript">
-                <span class="glyphicon glyphicon-open"></span> <span class="i18n" data-i18n="scriptEditorTab.loadAndManage">LOAD_MANAGE</span></button>
+                <span class="glyphicon glyphicon-open"></span> <span class="i18n" data-i18n="scriptEditorTab.load">LOAD</span></button>
               <button class="btn btn-default btn-sm" data-bind="click: onSaveScript">
                 <span class="glyphicon glyphicon-save"></span> <span class="i18n" data-i18n="scriptEditorTab.save">SAVE</span></button>
-              <button class="btn btn-default btn-sm" data-bind="visible: isJSViewable, click: onViewJS">
-                <span class="glyphicon glyphicon-eye-open"></span> <span class="i18n" data-i18n="scriptEditorTab.viewJavaScript">VIEW_JAVASCRIPT</span></button>
               <div class="btn-group" data-toggle="buttons">
                 <label class="btn btn-default blockpy-mode-set">
                   <span class='glyphicon glyphicon-th-large'></span>
@@ -597,39 +597,25 @@
 
   <!-- End of the layout -->
   <!-- File management modal -->
-  <div id="manageFilesModal" class="modal fade" tabindex="-1" role="dialog">
+  <div id="saveAsModal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">CrossCloseButton</span></button>
-          <h4 class="modal-title"><span class="i18n" data-i18n="manageFilesModal.title">MANAGE_FILES</span></h4>
+          <h4 class="modal-title"><span class="i18n" data-i18n="saveAsModal.title">Save As</span></h4>
         </div>
         <div class="modal-body">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th class="i18n" style="width:70%" data-i18n="manageFilesModal.c1.title">FILENAME</th>
-                <th style="width:30%"></th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: files">
-              <tr>
-                <td data-bind="text: name">nameOfTheFile</td>
-                <td>
-                  <button type="button" class="btn btn-xs btn-primary" data-bind="click: $parent.onLoad">
-                    <span class="i18n" data-i18n="manageFilesModal.load">LOAD</span></button>
-                  <button type="button" class="btn btn-xs btn-primary" data-bind="click: $parent.onDelete, visible: isReadWrite">
-                    <span class="i18n" data-i18n="manageFilesModal.delete">DELETE</span></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <!-- TODO: Manage paging: https://blog.safaribooksonline.com/2014/02/03/creating-basic-re-usable-component-knockout-3-0/ -->
+          <label for="basic-url">Save script here: </label>
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span data-bind="text: folder" class="input-group-text">/</span>
+              <button data-bind="click: changeFolder" class="btn btn-outline-secondary" type="button">Change</button>
+            </div>
+            <input data-bind="value: fileName" type="text" class="form-control" id="basic-url">
+          </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">
-            <span class="i18n" data-i18n="manageFilesModal.close">CLOSE</span></button>
-        </div>
+        <div class="modal-footer"><button data-bb-handler="cancel" type="button" class="btn btn-default">Cancel</button><button
+            data-bind="click: onSave" type="button" class="btn btn-primary">OK</button></div>
       </div>
     </div>
   </div>
@@ -740,27 +726,6 @@
       </div>
     </div>
   </div>
-
-
-  <!-- View code modal -->
-  <div id="viewCodeModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">CrossCloseButton</span></button>
-          <h4 class="modal-title"><span class="i18n" data-i18n="viewCodeModal.title">JAVASCRIPT_CODE</span></h4>
-        </div>
-        <div class="modal-body">
-          <textarea class="form-control" rows="20" data-bind="value: code" readonly></textarea>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">
-            <span class="i18n" data-i18n="viewCodeModal.close">CLOSE</span></button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 
   <!-- About modal -->
   <div id="aboutModal" class="modal fade" role="dialog">
