@@ -105,16 +105,16 @@ function ScriptEditorTabViewModel(appContext) {
   self.loadScript = function () {
     $.post("/bridge.py", {
       action: "getContent",
-      item: self.fileName()
+      item: self.context.fileName()
     }, function (e) {
       e = JSON.parse(e);
       self.codeMirror.setValue(e.result)
       self.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', e.result.error || "Loaded file!")
-      localStorage['script'] = self.fileName()
+      localStorage['script'] = self.context.fileName()
     });
   }
   self.onSaveScript = function () {
-    if (self.fileName) {
+    if (self.context.fileName) {
       let val = self.editor.codeMirror.getValue();
       if (!val.startsWith("#!/usr/bin/env python3")) {
         val = "#!/usr/bin/env python3\n\r" + val;
@@ -122,7 +122,7 @@ function ScriptEditorTabViewModel(appContext) {
       $.post("/bridge.py", {
         action: "edit",
         content: val,
-        item: self.fileName
+        item: self.context.fileName
       }, function (e) {
         e = JSON.parse(e);
         self.context.messageLogVM.addMessage(e.result.success ? 'success' : 'danger', e.result.error || "Saved file!")
