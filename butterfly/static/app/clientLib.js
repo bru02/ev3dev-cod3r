@@ -60,7 +60,7 @@ const fns = {
         isOk: {},
         log: {
             args: [{
-                type: "text",
+                type: "string",
                 multible,
             }]
         }
@@ -69,10 +69,10 @@ const fns = {
 
     },
     screen: {
-        textPixels: {
+        stringPixels: {
             args: [
                 {
-                    type: "text"
+                    type: "string"
                 },
                 {
                     type: "number",
@@ -84,7 +84,7 @@ const fns = {
                     default: 0
                 },
                 {
-                    type: "text",
+                    type: "string",
                     default: "black"
                 },
                 {
@@ -92,15 +92,15 @@ const fns = {
                     default: true
                 },
                 {
-                    type: "text",
+                    type: "string",
                     default: ""
                 },
             ]
         },
-        textGrid: {
+        stringGrid: {
             args: [
                 {
-                    type: "text"
+                    type: "string"
                 },
                 {
                     type: "number",
@@ -112,7 +112,7 @@ const fns = {
                     default: 0
                 },
                 {
-                    type: "text",
+                    type: "string",
                     default: "black"
                 },
                 {
@@ -120,7 +120,7 @@ const fns = {
                     default: true
                 },
                 {
-                    type: "text",
+                    type: "string",
                     default: ""
                 },
             ]
@@ -143,7 +143,7 @@ const fns = {
                     type: "number"
                 },
                 {
-                    type: "text",
+                    type: "string",
                     default: "black"
 
                 },
@@ -166,46 +166,12 @@ const fns = {
                     type: "number"
                 },
                 {
-                    type: "text",
+                    type: "string",
                     default: "black"
 
                 },
                 {
-                    type: "text",
-                    default: "black"
-
-                },
-                {
-                    type: "boolean",
-                    default: true
-
-                },
-            ]
-        },
-        rect: {
-            args: [
-                {
-                    type: "number"
-                },
-                {
-                    type: "number"
-                },
-                {
-                    type: "number"
-                },
-                {
-                    type: "number"
-                },
-                {
-                    type: "number"
-                },
-                {
-                    type: "text",
-                    default: "black"
-
-                },
-                {
-                    type: "text",
+                    type: "string",
                     default: "black"
 
                 },
@@ -225,7 +191,41 @@ const fns = {
                     type: "number"
                 },
                 {
-                    type: "text",
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "string",
+                    default: "black"
+
+                },
+                {
+                    type: "string",
+                    default: "black"
+
+                },
+                {
+                    type: "boolean",
+                    default: true
+
+                },
+            ]
+        },
+        rect: {
+            args: [
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "string",
                     default: "black"
                 },
                 {
@@ -237,7 +237,7 @@ const fns = {
         imageFromFile: {
             args: [
                 {
-                    type: "text"
+                    type: "string"
                 },
                 {
                     type: "number"
@@ -250,7 +250,7 @@ const fns = {
         imageFromString: {
             args: [
                 {
-                    type: "text"
+                    type: "string"
                 },
                 {
                     type: "number"
@@ -265,11 +265,48 @@ const fns = {
         setColor: {
             args: [
                 {
-                    type: "text",
+                    type: "string",
                     val: ['LEFT', 'RIGHT', 'BOTH']
                 },
                 {
-                    type: ["text", "array"]
+                    type: ["string", "array"]
+                }
+            ]
+        }
+    },
+    sound: {
+        beep: {},
+        tone: {
+            args: [
+                {
+                    type: ['number', 'array']
+                }
+            ]
+        },
+        play: {
+            args: [
+                {
+                    type: "string"
+                }
+            ]
+        },
+        speak: {
+            args: [
+                {
+                    type: "string"
+                },
+                {
+                    type: "number",
+                    default: 200
+                },
+                {
+                    type: "number",
+                    default: 130
+                },
+                ,
+                {
+                    type: "string",
+                    default: "en-gb"
                 }
             ]
         }
@@ -277,14 +314,14 @@ const fns = {
     global: {
         print: {
             args: [{
-                type: "text",
+                type: "string",
                 multible,
             }]
         },
         wrap: {
             args: [
                 {
-                    type: "text"
+                    type: "string"
                 },
                 {
                     type: "number"
@@ -301,7 +338,7 @@ for ([key, val] of Object.entries(fns)) {
         t = window[key];
     }
     for ([name, props] of Object.entries(val)) {
-        t[name] = function () {
+        t[name] = async function () {
             $(props).each(function (e, i) {
                 if (arguments[i]) {
                     let type = typeof arguments[i];
@@ -315,38 +352,47 @@ for ([key, val] of Object.entries(fns)) {
                         res = type !== e['type']
                     }
                     if (res) {
-                        context.MessageLogViewModel.addError("Argument type mismatch for function " + namespace + "." + name + " argument " + i + ".");
+                        constring.MessageLogViewModel.addError("Argument type mismatch for function " + namespace + "." + name + " argument " + i + ".");
                     }
                 } else {
                     if (e['default'] !== null) {
                         arguments[i] = e['default']
                     } else {
-                        context.MessageLogViewModel.addError("Too few arguments supplied to function " + namespace + "." + name + ".");
+                        constring.MessageLogViewModel.addError("Too few arguments supplied to function " + namespace + "." + name + ".");
 
                     }
                 }
             });
             return new Promise((resolve, reject) => {
-
-                context.EV3BrickServer.doWSSend({
+                let id = "cfn_" + +new Date()
+                if (constring.EV3BrickServer.doWSSend({
                     'act': 'ufn',
                     'namespace': key,
                     fn: name,
                     args: arguments
-                })
-                context.EV3BrickServer.ws.addEventListener('message', function (msg) {
-                    msg = JSON.parse(msg);
-                    if (msg['err']) {
-                        reject(msg['err']);
-                        MessageLogViewModel.addError(msg['err']);
-                    } else {
-                        resolve(msg['res'])
+                })) {
+                    function cb(msg) {
+                        try {
+                            msg = JSON.parse(msg);
+                        } catch (e) {
+                            return;
+                        }
+                        if (msg['id'] !== id) return;
+                        constring.EV3BrickServer.ws.removeEventListener('message', cb)
+                        if (msg['err']) {
+                            reject(msg['err']);
+                            MessageLogViewModel.addError(msg['err']);
+                        } else {
+                            resolve(msg['res'])
+                        }
                     }
-                })
+                    constring.EV3BrickServer.ws.addEventListener('message', cb)
+                }
             })
         }
     }
 }
+
 leds.off = function () {
     leds.setColor('both', [0, 0])
 }

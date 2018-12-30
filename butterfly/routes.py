@@ -372,15 +372,20 @@ class ThemesList(Route):
             'dir': self.themes_dir
         }))
 @url('/connect')
-class WSHandler(Routes, KeptAliveWebSocketHandler):
+class WSHandler(Route, KeptAliveWebSocketHandler):
     def open(self):
         super(WSHandler, self).open()
         print('new connection')
 
     def on_message(self, message):
         print('message received:  %s' % message)
-        data = tornado.escape.json_decode(message)
+        try:
+            data = tornado.escape.json_decode(message) # TO DO
+        except Exception as e:
+            print(e.message)
+            pass
         act = data['act']
+        msg = {}
         if(act is "shutdownBrick" or act is "stopCod3r"):
             self.write_message("Bye")
             self.close()
@@ -391,8 +396,11 @@ class WSHandler(Routes, KeptAliveWebSocketHandler):
             exit()
 
         # Reverse Message and send it back
-        print('sending back message: %s' % message[::-1])
-        self.write_message(message[::-1])
+        if('id' in data):
+            msg['id'] = data['id']
+        msg = json.dumps(msg)
+        print('sending back message: %s' % msg[::-1])
+        self.write_message(msg)
 
     def on_close(self):
         super(WSHandler, self).on_close()

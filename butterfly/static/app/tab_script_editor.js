@@ -58,15 +58,15 @@ function JavascriptEditor(appContext) {
   })();
 
   self.doResize = function (workAreaHeight, usefullWorkAreaHeight) {
-    $('#aceEditor').css('height', Math.max(350, usefullWorkAreaHeight - 10).toString() + 'px');
+    self.ace.setSize(Math.max(350, usefullWorkAreaHeight - 10).toString() + 'px');
     self.ace.refresh();
   };
 
   self.setVisible = function (visible) {
     if (visible) {
-      $('#aceEditor').css('display', '');
+      $('#ace').show();
     } else {
-      $('#aceEditor').css('display', 'none');
+      $('#ace').hide();
     }
   };
 

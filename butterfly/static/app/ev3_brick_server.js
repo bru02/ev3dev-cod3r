@@ -109,7 +109,7 @@ function EV3BrickServer(appContext) {
         if (message['err']) {
           delete message['err']
         }
-        if (typeof !message == "string") {
+        if (typeof (message) !== "string") {
           message = JSON.stringify(message);
         }
         self.ws.send(message);
@@ -117,6 +117,7 @@ function EV3BrickServer(appContext) {
       } catch (ex) {
         console.log("Fail to send a message - " + JSON.stringify(ex));
         self.WSReconnection();
+        return false;
       }
     } else {
       console.log("Can't send a message because the ws isn't initialized or isn't opened - " + message);
