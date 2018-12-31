@@ -151,4 +151,5 @@ function NavigationBarViewModel(appContext) {
   self.onDisplayImportImages = function () {
     self.context.importImagesVM.display();
     self.__collapseNavbar();
-  };
+  }
+};

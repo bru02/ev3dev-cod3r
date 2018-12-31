@@ -544,8 +544,22 @@ var cbs = {
     bottom: [],
     middle: [],
 };
+var listener = false;
 button.on = function (pos, fn) {
-    if (cbs[pos]) cbs[pos].push(fn);
+    if (cbs[pos]) {
+        cbs[pos].push(fn);
+        if (!listener) {
+            listener = true;
+            context.ev3BrickServer.ws.addEventListener('message', function (e) {
+                try {
+                    e = JSON.parse(e)
+                    if (e['btnPressed'] && cbs[e['grp']]) {
+                        $(cbs[e['grp']]).each(e => e())
+                    }
+                } catch (e) { }
+            })
+        }
+    }
 }
 button.off = function (pos, fn) {
     if (cbs[pos]) {
@@ -554,15 +568,6 @@ button.off = function (pos, fn) {
         });
     }
 }
-context.ev3BrickServer.ws.addEventListener('message', function (e) {
-    try {
-        e = JSON.parse(e)
-        if (e['btnPressed'] && cbs[e['grp']]) {
-            $(cbs[e['grp']]).each(e => e())
-        }
-    } catch (e) { }
-})
-
 window.sleep = function sleep(s) {
     return new Promise(resolve => setTimeout(resolve, s * 500));
 }

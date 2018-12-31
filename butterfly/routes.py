@@ -34,7 +34,7 @@ import tornado.options
 import tornado.process
 import tornado.web
 import tornado.websocket
-import utils
+import butterfly.utils
 from butterfly import Route, url
 from butterfly.terminal import Terminal
 import mimetypes
