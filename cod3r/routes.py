@@ -384,9 +384,9 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
     def on_message(self, message):
         print('message received:  %s' % message)
         try:
-            data = tornado.escape.json_decode(message) # TO DO
+            data = tornado.escape.json_decode(message)
         except Exception as e:
-            print(e.message)
+            print(str(e))
             pass
         act = data['act']
         msg = {}
@@ -396,7 +396,7 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
                 try:
                     msg = method(data['args']) or {}
                 except Exception as e:
-                    msg = {'err': e}
+                    msg = {'err': str(e)}
 
         if(act == "shutdownBrick" or act == "stopCod3r"):
             self.write_message('{"txt":"Bye"}')

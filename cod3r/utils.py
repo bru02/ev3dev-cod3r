@@ -737,7 +737,8 @@ def get_motor_class(isM):
     else:
         return LargeMotor
 
-def get_output(port):
+def get_output(p):
+    port = str(p).upper()
     if(port=="A"):
         return OUTPUT_A
     if(port=="B"):
@@ -748,7 +749,8 @@ def get_output(port):
         return OUTPUT_D        
 
 
-def get_input(port):
+def get_input(p):
+    port = int(float(p))
     if(port==1):
         return INPUT_1
     if(port==2):
@@ -830,11 +832,12 @@ class APIWrapper:
         
 
     def leds_setColor(self, args):
-        if(args[0] == "BOTH"):
+        addr = str(args[0]).upper()
+        if(addr == "BOTH"):
             self.leds.set_color('LEFT', args[1])
             self.leds.set_color('RIGHT', args[1])
         else:
-            self.leds.set_color(args[0], args[1])
+            self.leds.set_color(addr, args[1])
         
         
 

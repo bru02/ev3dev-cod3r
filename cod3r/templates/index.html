@@ -13,6 +13,7 @@
   <!-- Load bootstrap styles -->
   <link href="{{ static_url('bootstrap.min.css') }}" rel="stylesheet" />
   <link href="{{ static_url('codemirror.css') }}" rel="stylesheet" />
+  <script src="{{ static_url('lib/jailed/jailed.js') }}"></script>
   <script src="{{ static_url('lib/split.js') }}"></script>
   <script src="{{ static_url('codemirror.js') }}"></script>
   <script src="{{ static_url('foldcode.js') }}"></script>
@@ -25,6 +26,7 @@
   <script src="{{ static_url('matchbrackets.js') }}"></script>
   <script src="{{ static_url('closebrackets.js') }}"></script>
   <script src="{{ static_url('lib/artyom.js') }}"></script>
+
   <!-- /!\ To be defined after the css import in order to overwrite it (see http://getbootstrap.com/components/#navbar-fixed-bottom) -->
   <style type="text/css" media="screen">
     /* Needed for the fixed nav-bar */
@@ -306,12 +308,12 @@
                 <span class="glyphicon glyphicon-save"></span> <span class="i18n" data-i18n="scriptEditorTab.saveAs">Save
                   As</span></button>
               <div class="btn-group" data-toggle="buttons">
-                <label class="btn btn-default blockpy-mode-set" data-bind="click: setModeToBlocks, disabled: isJs()">
+                <label class="btn btn-default blockpy-mode-set" data-bind="click: setModeToBlocks, disabled: isJs">
                   <span class='glyphicon glyphicon-th-large'></span>
                   <input type="radio" name="blockpy-mode-set" autocomplete="off" checked> Blocks
                 </label>
 
-                <label class="btn btn-default blockpy-mode-set" data-bind="click: setModeToSplit, disabled: isJs()">
+                <label class="btn btn-default blockpy-mode-set" data-bind="click: setModeToSplit, disabled: isJs">
                   <span class='glyphicon glyphicon-resize-horizontal'></span>
                   <input type="radio" name="blockpy-mode-set" autocomplete="off"> Split
                 </label>
@@ -739,6 +741,12 @@
             <li>
               <a href="https://github.com/jbenech/gnikrap" target="_blank" title="A JavaScript and Scratch-like development environment for the Lego Mindstrom EV3 - GPL v3"
                 s>Gnikrap</a>
+            </li>
+            <li>
+              <a href="https://github.com/asvd/jailed
+              " target="_blank" title="Execute untrusted code with custom permissions
+              - MIT"
+                s>Jailed</a>
             </li>
           </ul>
           <p></p>

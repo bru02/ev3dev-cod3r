@@ -6,6 +6,7 @@ function SaveAsDialogViewModel(appContext) {
     self.context = appContext; // The application context
     self.folder = ko.observable("/");
     self.fileName = ko.observable("/script.py");
+    self.isJs = ko.observable(self.context.settings.lang == 'js')
     self.folderDialog = undefined;
   })();
 
@@ -66,14 +67,13 @@ function ScriptEditorTabViewModel(appContext) {
       if ("lang" == keyChanged) {
         self.onSaveScript();
         self.editor.codeMirror.setValue("");
-        if (newValue == "js") self.editor.setMode('text');
+        self.isJs(newValue == 'js')
+        if (self.isJs()) { self.editor.setMode('Text'); }
         self.editor.setCodeLang(newValue == "js" ? "javascript" : "python")
       }
     });
   })();
-  self.isJs = function () {
-    return self.context.settings.lang == 'js';
-  }
+
   self.setModeToBlocks = function () {
     if (!self.isJs()) {
       self.editor.setMode("Blocks");

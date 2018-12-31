@@ -466,34 +466,35 @@ const fns = {
         }
     }
 };
+window.evalContext = {};
 for (let [key, val] of Object.entries(fns)) {
     if (key == "global") {
-        t = window
+        t = window = evalContext
     } else {
-        window[key] = {};
-        t = window[key];
+        window[key] = evalContext[key] = {};
+        t = window[key] = evalContext[key];
     }
     for (let [name, props] of Object.entries(val)) {
         t[name] = async function () {
             let args = Array.from(arguments);
-            $(props).each(function (i, e) {
+            $(props.args).each(function (i, e) {
                 if (args[i]) {
                     let type = typeof args[i];
                     let res = true;
-                    if (Array.isArray(e['args'][i]['type'])) {
+                    if (Array.isArray(e.args[i].type)) {
                         $(e['args'][i]['type']).each((j, e) => {
                             res = type !== e['args'][i]['type'][j]
                             if (!res) return false;
                         });
                     } else {
-                        res = type !== e['args'][i]['type']
+                        res = type !== e.args[i].type
                     }
                     if (res) {
                         context.messageLogVM.addError("Argument type mismatch for function " + key + "." + name + " argument " + i + ".");
                     }
                 } else {
-                    if (e['default'] !== null) {
-                        args[i] = e['default']
+                    if ('default' in e) {
+                        args[i] = e.default
                     } else {
                         context.messageLogVM.addError("Too few arguments supplied to function " + key + "." + name + ".");
 
@@ -514,13 +515,13 @@ for (let [key, val] of Object.entries(fns)) {
                         } catch (e) {
                             return;
                         }
-                        if (msg['id'] !== id) return;
+                        if (msg.id !== id) return;
                         context.ev3BrickServer.ws.removeEventListener('message', cb)
-                        if (msg['err']) {
-                            reject(msg['err']);
-                            MessageLogViewModel.addError(msg['err']);
+                        if (msg.err) {
+                            reject(msg.err);
+                            MessageLogViewModel.addError(msg.err);
                         } else {
-                            resolve(msg['res'])
+                            resolve(msg.res)
                         }
                     }
                     context.ev3BrickServer.ws.addEventListener('message', cb)
@@ -530,8 +531,8 @@ for (let [key, val] of Object.entries(fns)) {
     }
 }
 
-leds.off = function () {
-    return leds.setColor('both', [0, 0])
+evalContext.leds.off = leds.off = function () {
+    return leds.setColor('BOTH', [0, 0])
 }
 infraredSensor.distanceCM = function () {
     return infraredSensor.proximity.call(this, arguments).then(e => {
@@ -547,7 +548,7 @@ var cbs = {
     middle: [],
 };
 var listener = false;
-button.on = function (pos, fn) {
+evalContext.button.on = button.on = function (pos, fn) {
     if (cbs[pos]) {
         cbs[pos].push(fn);
         if (!listener) {
@@ -555,21 +556,21 @@ button.on = function (pos, fn) {
             context.ev3BrickServer.ws.addEventListener('message', function (e) {
                 try {
                     e = JSON.parse(e.data)
-                    if (e['btnPressed'] && cbs[e['grp']]) {
-                        $(cbs[e['grp']]).each((i, e) => e())
+                    if (e.btnPressed && cbs[e.grp]) {
+                        $(cbs[e.grp]).each((i, e) => e())
                     }
                 } catch (e) { }
             })
         }
     }
 }
-button.off = function (pos, fn) {
+evalContext.button.off = button.off = function (pos, fn) {
     if (cbs[pos]) {
         return cbs[pos].filter(function (ele) {
             return ele != fn;
         });
     }
 }
-window.sleep = function sleep(s) {
+evalContext.sleep = window.sleep = function sleep(s) {
     return new Promise(resolve => setTimeout(resolve, s * 500));
 }

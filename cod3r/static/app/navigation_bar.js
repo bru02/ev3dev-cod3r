@@ -5,7 +5,11 @@ function NavigationBarViewModel(appContext) {
   var self = this;
   self.context = appContext; // The application context
   self.workAreaItems = ko.observableArray();
-  self.running = false;
+  self.running = ko.observable(false);
+  self.running.subscribe(() => {
+    $('#runBtn').toggleClass('btn-warning', self.running()).toggleClass('btn-success', !self.running()).find('span').toggleClass('glyphicon-play', !self.running()).toggleClass('glyphicon-stop', self.running());
+  })
+  self._runner = null;
   self.btnScript = {
     name: "SCRIPT_EDITOR",
     data_i18n: "workArea.scriptEditorTab",
@@ -78,18 +82,33 @@ function NavigationBarViewModel(appContext) {
   self.onRunScript = function () {
     /*     <button class="btn btn-warning navbar-btn" data-bind="click: onStopScript">
        <span class="glyphicon glyphicon-stop"></span> <span class="i18n" data-i18n="navigationBar.stop">STOP</span></button>*/
-    if (self.running) {
-      self.context.ev3BrickServer.stopScript();
+    if (self._runner) self._runner.disconnect();
+    if (self.running()) {
+      self._runner = null;
     } else {
-      var value = (self.context.scriptEditorTabVM ? self.context.scriptEditorTabVM.editor.getValue() : null);
+      var value = (self.context.scriptEditorTabVM ? self.context.scriptEditorTabVM.editor.codeMirror.getValue() : null);
       if (value) {
-        self.context.ev3BrickServer.runScript(true);
+        if (self.context.settings.lang == "js") {
+          self._runner = new jailed.DynamicPlugin(value, window.evalContext);
+          self._runner.whenFailed(function () {
+            self._runner = null;
+            self.running(false);
+            self.context.messageLogVM.addError('Failed to run code!');
+          })
+          self._runner.whenDisconnected(function () {
+            self._runner = null;
+            self.running(false);
+          })
+          self._runner.whenDone(function () {
+            self._runner = null;
+            self.running(false);
+            self.context.messageLogVM.addSuccess('Successfully ran code!');
+          })
+        }
       }
     }
-    self.running = !self.running;
-    $('#runBtn').toggleClass('btn-warning btn-success').find('span').toggleClass('glyphicon-play glyphicon-stop');
+    self.running(!self.running());
   };
-
   self.onDisplayAbout = function () {
     $('#aboutModal').modal("show");
     self.__collapseNavbar();
