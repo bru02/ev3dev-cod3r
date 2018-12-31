@@ -115,7 +115,7 @@ $(document).ready(function () {
 
     // Technical objects
     context.compatibility = compatibility;
-    context.fileName = ko.observable("default.py")
+    context.fileName = ko.observable("")
     context.isSaved = ko.observable(true)
 
     context.ev3BrickServer = new EV3BrickServer(context);
@@ -179,7 +179,7 @@ $(document).ready(function () {
         if (e.keyCode == 83) { // Ctrl+S
           e.preventDefault();
           e.stopPropagation();
-          if (e.shiftKey) saveAsVM.display()
+          if (e.shiftKey) context.saveAsVM.display()
           context.scriptEditorTabVM.onSaveScript();
           return false;
         }

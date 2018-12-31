@@ -93,15 +93,15 @@ function ScriptEditorTabViewModel(appContext) {
   }
   self.setModeToBlocks = function () {
     if (!self.isJs()) {
-      self.editor.setMode("blocks");
+      self.editor.setMode("Blocks");
     }
   }
   self.setModeToText = function () {
-    self.editor.setMode("text");
+    self.editor.setMode("Text");
   }
   self.setModeToSplit = function () {
     if (!self.isJs()) {
-      self.editor.setMode("split");
+      self.editor.setMode("Split");
     }
   }
   self.onClearScript = function () {

@@ -501,7 +501,7 @@ for ([key, val] of Object.entries(fns)) {
             });
             return new Promise((resolve, reject) => {
                 let id = Utils.generateUUID();
-                if (context.ev3BrickServer.doWSSend({
+                if (context.ev3BrickServer.WSSend({
                     'act': 'ufn',
                     fn: key + "_" + name,
                     args: arguments
