@@ -465,7 +465,7 @@ const fns = {
         }
     }
 };
-Function.prototype.toJSON = function () { return this.toString(); }
+Function.prototype.toJSON = function () { return "FUNK_START" + this.toString().replace(/(\s\s|\n|\r)/g, "") + "FUNK_END"; }
 window.evalContext = {};
 for (let [key, val] of Object.entries(fns)) {
     if (key == "global") {
