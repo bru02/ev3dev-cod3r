@@ -1,5 +1,0 @@
-[Unit]
-Description=Cod3r code editor
-
-[Service]
-ExecStart=/cod3r/butterfly.server.py

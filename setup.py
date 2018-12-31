@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Butterfly - A sleek web based terminal emulator
+cod3r - A sleek web based terminal emulator
 """
 import os
 
@@ -10,7 +10,7 @@ from setuptools import setup
 
 about = {}
 with open(os.path.join(
-        os.path.dirname(__file__), "butterfly", "__about__.py")) as f:
+        os.path.dirname(__file__), "cod3r", "__about__.py")) as f:
     exec(f.read(), about)
 
 setup(
@@ -22,14 +22,14 @@ setup(
     author_email=about['__email__'],
     license=about['__license__'],
     platforms="Any",
-    scripts=['butterfly.server.py', 'scripts/butterfly', 'scripts/b'],
-    packages=['butterfly'],
+    scripts=['cod3r.server.py', 'scripts/cod3r', 'scripts/b'],
+    packages=['cod3r'],
     install_requires=["tornado>=3.2"],
     extras_require={
         'systemd': ['tornado_systemd']
     },
     package_data={
-        'butterfly': [
+        'cod3r': [
             'sass/*.sass',
             'themes/*.*',
             'themes/*/*.*',
@@ -42,7 +42,7 @@ setup(
             'templates/index.html',
             'bin/*',
             'templates/motd',
-            'butterfly.conf.default'
+            'cod3r.conf.default'
         ]
     },
     classifiers=[
