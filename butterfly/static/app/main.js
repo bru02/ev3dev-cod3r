@@ -79,18 +79,14 @@ function GnikrapSettings() {
     }
 
     // ProgrammingStyle
-    if (!self.programmingStyle) {
-      self.programmingStyle = "TEXT";
+    if (!self.lang) {
+      self.lang = "py";
     }
     // Override with url param if exist
-    var param = Utils.getUrlParameter("programmingStyle");
-    if (param && (param == "TEXT" || param == "VISUAL")) {
-      self.programmingStyle = param;
+    var param = Utils.getUrlParameter("programmingLanguage");
+    if (param && (param == "js" || param == "py")) {
+      self.lang = param;
     }
-
-    // Demo mode (not http and no demo_mode parameter)
-    // !((window.location.protocol.indexOf('http') == 0) && (Utils.getUrlParameter("demoMode") != "true"))
-    self.demoMode = false;
   })();
 
   self.update = function (newSettings) {
@@ -151,7 +147,7 @@ $(document).ready(function () {
     ko.applyBindings(context.saveAsVM, $("#saveAsModal")[0]);
 
     // Other initialization
-    context.scriptEditorTabVM.loadScript(localStorage['script'] || 'default.py');
+    context.scriptEditorTabVM.loadScript(localStorage['script'] || false);
     context.ev3BrickServer.initialize(); // WebSsocket connexion with the server
 
     // Register config events to update translation if needed

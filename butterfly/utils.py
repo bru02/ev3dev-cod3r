@@ -31,6 +31,17 @@ import stat
 import zipfile
 from collections import namedtuple
 from logging import getLogger
+from textwrap import wrap
+from PIL import Image
+from io import BytesIO
+import numpy as np
+from ev3dev2.display import Display
+from ev3dev2.sound import Sound
+from ev3dev2.led import Leds
+from ev3dev2.motor import LargeMotor, MediumMotor, MoveSteering, MoveTank, OUTPUT_A, OUTPUT_B, OUTPUT_C, OUTPUT_D
+from ev3dev2.button import Button
+from ev3dev2.sensor.lego import TouchSensor, InfraredSensor, ColorSensor, GyroSensor, UltrasonicSensor
+from ev3dev2.sensor import INPUT_1, INPUT_2, INPUT_3, INPUT_4,
 
 log = getLogger('butterfly')
 
@@ -720,3 +731,343 @@ class FileManager:
                 return {'result': {'success': True, 'error': ''}}
         except FileExistsError:
             return {'result': {'success': False, 'error': 'File exists'}}
+
+def get_motor_class(isM):
+    if(isM):
+        return MediumMotor
+    else:
+        return LargeMotor
+
+def get_output(port):
+    if(port=="A"):
+        return OUTPUT_A
+    if(port=="B"):
+        return OUTPUT_B
+    if(port=="C"):
+        return OUTPUT_C
+    if(port=="D"):
+        return OUTPUT_D        
+
+
+def get_input(port):
+    if(port==1):
+        return INPUT_1
+    if(port==2):
+        return INPUT_2
+    if(port==3):
+        return INPUT_3
+    if(port==4):
+        return INPUT_4        
+
+
+class APIWrapper:
+    def __init__(self):
+        self.lcd = Display()
+        self.spk = Sound()
+        self.leds = Leds()
+        self.btn = Button()
+
+    def ev3_isOk(self):
+        return {'res': True}
+    
+    def ev3_log(self, args):
+        txt="" 
+        for arg in args:
+            print(str(arg), file=sys.stderr)
+            txt += "\r\n " + str(arg)
+
+        return {'txt': txt} 
+    
+    def screen_textPixels(self, args):
+        self.lcd.text_pixels(args[0], clear_screen=args[4], x=args[1], y=args[2], text_color=args[3], font=args[5])
+        
+
+    def screen_textGrid(self, args):
+        self.lcd.text_grid(args[0], clear_screen=args[4], x=args[1], y=args[2], text_color=args[3], font=args[5])
+        
+
+    def global_wrap(self, args):
+        return {'res': wrap(args[0], args[1])}
+
+    def global_print(self, args):
+        for arg in args:
+            print(str(arg))
+
+    def screen_line(self, args):
+        self.lcd.line(clear_screen=args[6], x1=args[0], y1=args[1], x2=args[2], y2=args[3], line_color=args[5], width=args[4])
+        
+
+    def screen_circle(self, args):
+        self.lcd.circle(clear_screen=args[5], x=args[0], y=args[1], radius=args[2], fill_color=args[3], outline_color=args[4])
+        
+
+
+    def screen_point(self, args):
+        self.lcd.point(clear_screen=args[3], x=args[0], y=args[1], point_color=args[2])
+        
+
+    def screen_rect(self, args):
+        self.lcd.rectangle(clear_screen=args[5], x=args[0], y=args[1], width=args[2], height=args[3], fill_color=args[4], outline_color=args[5])
+        
+
+
+    def screen_imageFromFile(self, args):
+        logo = Image.open(args[0])
+        self.lcd.image.paste(logo, (args[1],args[2]))
+        
+
+    def screen_imageFromString(self, args):
+        output = BytesIO(args[0])
+        logo = Image.open(output)
+        self.lcd.image.paste(logo, (args[1],args[2]))
+        
+
+    def screen_update(self):
+        self.lcd.update()
+        
+
+    def screen_clear(self):
+        self.lcd.clear()
+        
+
+    def leds_setColor(self, args):
+        if(args[0] == "BOTH"):
+            self.leds.set_color('LEFT', args[1])
+            self.leds.set_color('RIGHT', args[1])
+        else:
+            self.leds.set_color(args[0], args[1])
+        
+        
+
+    def sound_beep(self, args):
+        self.spk.beep()
+        
+
+    def sound_tone(self, args):
+        if(len(args) == 2):
+            self.spk.play_tone(args[0], args[1])
+        else:
+            self.spk.tone(args[0])
+        
+
+    def sound_play(self, args):
+        self.spk.play(args[0])
+        
+
+    def sound_speak(self, args):
+        opts = '-a '+ args[1]+' -s '+args[2]+' -v'
+        self.spk.speak(args[0], espeak_opts=opts+args[3])
+
+    def motor_on(self, args):
+        if(len(args) == 2):
+            m = get_motor_class(args[1])
+            m = m()
+            m.on(speed=args[0])
+        else:
+            arr = np.array(args[0])
+            for p in arr:
+                m = get_motor_class(args[2])
+                m = m(get_output(p))
+                m.on(speed=args[1])
+
+    def motor_off(self, args):
+        if(len(args) == 2):
+            arr = np.array(args[0])
+            for p in arr:
+                m = get_motor_class(args[1])
+                m = m(get_output(p))
+                m.off()
+        else:
+            m = get_motor_class(args[0])
+            m = m()
+            m.off()
+
+    def motor_turn(self, args):
+        if(len(args) == 4):
+            arr = np.array(args[0])
+            for p in arr:
+                m = get_motor_class(args[3])
+                m = m(get_output(p))
+                m.on_for_rotations(args[2], args[1], brake=True, block=True)
+        else:
+            m = get_motor_class(args[2])
+            m.on_for_rotations(args[1], args[0], brake=True, block=True)
+
+    def motor_waitUntilNotMoving(self, args):
+        if(len(args) == 2):
+            m = get_motor_class(args[1])
+            m = m(args[0])
+            m.wait_until_not_moving()
+        else:
+            m = get_motor_class(args[0])
+            m = m()
+            m.wait_until_not_moving()
+
+    def motor_steer(self, args):
+        if(isinstance(args[0], list)):
+            arr = args[0]
+        else:
+            import re
+            arr = re.compile(r"\+|\,").split(args[0])
+
+        steer_pair = MoveSteering(get_output(arr[0]), get_output(arr[1]), motor_class=get_motor_class(args[4]))
+        if(args[3] == 0):
+                    steer_pair.on(steering=args[2], speed=args[1], rotations=args[3])
+        else:
+            steer_pair.on_for_rotations(steering=args[2], speed=args[1], rotations=args[3])
+
+    def touchSensor_isPressed(self, args):
+        if(len(args) == 1):
+            ts = TouchSensor(get_input(args[0]))
+        else:
+            ts = TouchSensor()
+        return {'res': ts.is_pressed}
+
+    def touchSensor_waitForPress(self, args):
+        if(len(args) == 1):
+            ts = TouchSensor(get_input(args[0]))
+        else:
+            ts = TouchSensor()
+        ts.wait_for_pressed()
+
+    def touchSensor_waitForRelease(self, args):
+        if(len(args) == 1):
+            ts = TouchSensor(get_input(args[0]))
+        else:
+            ts = TouchSensor()
+        ts.wait_for_released()
+
+    def touchSensor_waitForBump(self, args):
+        if(len(args) == 1):
+            ts = TouchSensor(get_input(args[0]))
+        else:
+            ts = TouchSensor()
+        ts.wait_for_bump()
+
+    def colorSensor_raw(self, args):
+        if(len(args) == 1):
+            cs = ColorSensor(get_input(args[0]))
+        else:
+            cs = ColorSensor()
+        return {'ret': cs.raw}
+
+    def colorSensor_rgb(self, args):
+        if(len(args) == 1):
+            cs = ColorSensor(get_input(args[0]))
+        else:
+            cs = ColorSensor()
+        return {'ret': cs.rgb}
+
+    def colorSensor_color(self, args):
+        if(len(args) == 1):
+            cs = ColorSensor(get_input(args[0]))
+        else:
+            cs = ColorSensor()
+        return {'ret': cs.color}
+
+    def colorSensor_colorName(self, args):
+        if(len(args) == 1):
+            cs = ColorSensor(get_input(args[0]))
+        else:
+            cs = ColorSensor()
+        return {'ret': cs.color_name}
+
+    def colorSensor_reflectedLightIntensity(self, args):
+        if(len(args) == 1):
+            cs = ColorSensor(get_input(args[0]))
+        else:
+            cs = ColorSensor()
+        return {'ret': cs.reflected_light_intensity}
+    
+    def colorSensor_ambientLightIntensity(self, args):
+        if(len(args) == 1):
+            cs = ColorSensor(get_input(args[0]))
+        else:
+            cs = ColorSensor()
+        return {'ret': cs.ambient_light_intensity}
+
+    def colorSensor_calibrateWhite(self, args):
+        if(len(args) == 1):
+            cs = ColorSensor(get_input(args[0]))
+        else:
+            cs = ColorSensor()
+        return {'ret': cs.calibrate_white}
+
+    def gyroSensor_rate(self, args):
+        if(len(args) == 1):
+            gs = GyroSensor(get_input(args[0]))
+        else:
+            gs = GyroSensor()
+        return {'ret': gs.rate}
+
+    def gyroSensor_angle(self, args):
+        if(len(args) == 1):
+            gs = GyroSensor(get_input(args[0]))
+        else:
+            gs = GyroSensor()
+        return {'ret': gs.angle}
+
+    def gyroSensor_angleAndRate(self, args):
+        if(len(args) == 1):
+            gs = GyroSensor(get_input(args[0]))
+        else:
+            gs = GyroSensor()
+        return {'ret': gs.angle_and_rate}
+
+    def gyroSensor_waitUntilAngleIsChangedBy(self, args):
+        if(len(args) == 2):
+            gs = GyroSensor(get_input(args[0]))
+            gs.wait_until_angle_changed_by(args[1])
+        else:
+            gs = GyroSensor()
+            gs.wait_until_angle_changed_by(args[0])
+
+    def ultraSonicSensor_distanceCM(self, args):
+        if(len(args) == 2):
+            us = UltrasonicSensor(get_input(args[0]))
+        else:
+            us = UltrasonicSensor()
+        return {'ret': us.distance_centimeters}
+
+    def ultraSonicSensor_distanceInch(self, args):
+        if(len(args) == 2):
+            us = UltrasonicSensor(get_input(args[0]))
+        else:
+            us = UltrasonicSensor()
+        return {'ret': us.distance_inches}
+
+    def button_waitForBump(self, args):
+        self.btn.wait_for_bump(args[0])
+
+    def button_waitForPress(self, args):
+        self.btn.wait_for_pressed(args[0])
+
+    def button_waitForRelease(self, args):
+        self.btn.wait_for_released(args[0])
+
+    def button_any(self, args):
+        return {'res':self.btn.any}
+
+    def button_process(self, args):
+        self.btn.process()
+
+    def button_left(self, args):
+        return {'res':self.btn.left}
+
+    def button_right(self, args):
+        return {'res':self.btn.right}
+
+    def button_top(self, args):
+        return {'res':self.btn.top}
+
+    def button_bottom(self, args):
+        return {'res':self.btn.bottom} 
+
+    def button_enter(self, args):
+        return {'res':self.btn.enter} 
+
+    def button_backspace(self, args):
+        return {'res':self.btn.backspace}
+
+    def button_buttonsPressed(self, args):
+        return {'res':self.btn.buttons_pressed}

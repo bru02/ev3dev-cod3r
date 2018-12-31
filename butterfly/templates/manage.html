@@ -58,7 +58,7 @@
                 appName: 'angular-filemanager',
                 pickCallback: function (item) {
                     var msg = JSON.stringify({ dir: item.fullPath() });
-                    window.parent.postMessage(msg);
+                    window.opener.postMessage(msg);
                     window.close();
                 },
 

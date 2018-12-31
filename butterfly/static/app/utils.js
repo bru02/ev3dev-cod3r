@@ -20,90 +20,90 @@
 // Stuff reworked from things found on the internet without explicit copyright
 
 // Manage compatibility for accessing to the webcam (getUserMedia) and video rendering (requestAnimationFrame)
-var compatibility = (function() {
+var compatibility = (function () {
   var lastTime = 0,
-  URL = window.URL || window.webkitURL,
+    URL = window.URL || window.webkitURL,
 
-  requestAnimationFrame = function(callback, element) {
-    var requestAnimationFrame =
-      window.requestAnimationFrame        ||
-      window.webkitRequestAnimationFrame  ||
-      window.mozRequestAnimationFrame     ||
-      window.oRequestAnimationFrame       ||
-      window.msRequestAnimationFrame      ||
-      function(callback, element) {
-        var currTime = new Date().getTime();
-        var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-        var id = window.setTimeout(function() {
+    requestAnimationFrame = function (callback, element) {
+      var requestAnimationFrame =
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback, element) {
+          var currTime = new Date().getTime();
+          var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+          var id = window.setTimeout(function () {
             callback(currTime + timeToCall);
           }, timeToCall);
-        lastTime = currTime + timeToCall;
-        return id;
-      };
+          lastTime = currTime + timeToCall;
+          return id;
+        };
 
-    return requestAnimationFrame.call(window, callback, element);
-  },
+      return requestAnimationFrame.call(window, callback, element);
+    },
 
-  cancelAnimationFrame = function(id) {
-    var cancelAnimationFrame = window.cancelAnimationFrame ||
-      function(id) {
-        clearTimeout(id);
-      };
-    return cancelAnimationFrame.call(window, id);
-  },
+    cancelAnimationFrame = function (id) {
+      var cancelAnimationFrame = window.cancelAnimationFrame ||
+        function (id) {
+          clearTimeout(id);
+        };
+      return cancelAnimationFrame.call(window, id);
+    },
 
-  getUserMedia = function(options, success, error) {
-    var getUserMedia =
-      window.navigator.getUserMedia ||
-      window.navigator.mozGetUserMedia ||
-      window.navigator.webkitGetUserMedia ||
-      window.navigator.msGetUserMedia ||
-      function(options, success, error) {
-        error();
-      };
+    getUserMedia = function (options, success, error) {
+      var getUserMedia =
+        window.navigator.getUserMedia ||
+        window.navigator.mozGetUserMedia ||
+        window.navigator.webkitGetUserMedia ||
+        window.navigator.msGetUserMedia ||
+        function (options, success, error) {
+          error();
+        };
 
-    return getUserMedia.call(window.navigator, options, success, error);
-  },
+      return getUserMedia.call(window.navigator, options, success, error);
+    },
 
-  isUserMediaSupported = function() {
-    return (window.navigator.getUserMedia ||
-      window.navigator.mozGetUserMedia ||
-      window.navigator.webkitGetUserMedia ||
-      window.navigator.msGetUserMedia) != undefined;
-  },
+    isUserMediaSupported = function () {
+      return (window.navigator.getUserMedia ||
+        window.navigator.mozGetUserMedia ||
+        window.navigator.webkitGetUserMedia ||
+        window.navigator.msGetUserMedia) != undefined;
+    },
 
-  // Adapted from: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
-  // Note: Currently MUST be triggered by the user and can't be done automatically (eg. based on screen size)
-  toggleFullScreen = function() {
-    var elem = document.body;
-    var isFullScreen = (document.fullscreenElement || 
-                        document.mozFullScreenElement || 
-                        document.webkitFullscreenElement || 
-                        document.msFullscreenElement);
+    // Adapted from: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
+    // Note: Currently MUST be triggered by the user and can't be done automatically (eg. based on screen size)
+    toggleFullScreen = function () {
+      var elem = document.body;
+      var isFullScreen = (document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement);
 
-    if(isFullScreen) {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen(); // Element.ALLOW_KEYBOARD_INPUT
+      if (isFullScreen) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen(); // Element.ALLOW_KEYBOARD_INPUT
+        }
+      } else {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        }
       }
-    } else {
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      }
-    }
-  };
-  
+    };
+
   return {
     requestAnimationFrame: requestAnimationFrame,
     cancelAnimationFrame: cancelAnimationFrame,
@@ -114,7 +114,7 @@ var compatibility = (function() {
   };
 })();
 
-var CanvasUtils = (function() {
+var CanvasUtils = (function () {
   var roundedRect = function (ctx, x, y, width, height, radius) {
     ctx.beginPath();
     ctx.moveTo(x, y + radius);
@@ -136,7 +136,7 @@ var CanvasUtils = (function() {
   };
 })();
 
-var Utils = (function() {
+var Utils = (function () {
   // Round by keeping only 2 decimal
   var round2dec = function (n) {
     // return Number(n.toFixed(2));
@@ -146,26 +146,26 @@ var Utils = (function() {
   // Generate a UUID
   var generateUUID = function () {
     var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
-        d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = (d + Math.random() * 16) % 16 | 0;
+      d = Math.floor(d / 16);
+      return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
     return uuid;
   };
-  
+
   // From: http://www.jquerybyexample.net/2012/06/get-url-parameters-using-jquery.html
   var getUrlParameter = function (sParam) {
     var sPageURL = window.location.search.substring(1);
     var sURLVariables = sPageURL.split('&');
     for (var i = 0; i < sURLVariables.length; i++) {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam) {
-            return sParameterName[1];
-        }
+      var sParameterName = sURLVariables[i].split('=');
+      if (sParameterName[0] == sParam) {
+        return sParameterName[1];
+      }
     }
   };
-    
+
   /**
    * From a JS line, compute the last 2 significant identifier for the current context. 
    * Return an array of 2 element (elements can be undefined)
@@ -184,43 +184,43 @@ var Utils = (function() {
    * Things that can be improved:
    *  getJSContext("(abc).xxx"): [undefined, xxx] // Will be more accurate with [abc, xxx]
    */
-  var getJSContext = function(line) {
+  var getJSContext = function (line) {
     var temp = line.split(/[=;\+\-\/\*\%\&\|\!\?\:\<\>\~]/).pop().trim(); // Last element of the array
     // eat matching parenthesis
     function eatMatchingChars(text, open, close) {
-      var acc = text.split("").reduceRight(function(acc, b) {
-        if(acc.level < 0) {
+      var acc = text.split("").reduceRight(function (acc, b) {
+        if (acc.level < 0) {
           return acc;
         }
-        if(b == close) {
+        if (b == close) {
           acc.level = acc.level + 1;
-        } else if(b == open) {
+        } else if (b == open) {
           acc.level = acc.level - 1;
-        } else if(acc.level == 0) {
+        } else if (acc.level == 0) {
           acc.data.push(b);
         }
         return acc;
-      }, {level: 0, data: []});
+      }, { level: 0, data: [] });
       return acc.data.reverse().join("");
     }
     temp = eatMatchingChars(temp, "(", ")");
     temp = eatMatchingChars(temp, "[", "]");
     temp = eatMatchingChars(temp, "{", "}");
-    
+
     temp = temp.split(",").pop().trim();
     var significantToken = temp.split(".");
     var current = significantToken.pop().trim();
     var previous = significantToken.pop();
-    if(previous) {
+    if (previous) {
       previous = previous.trim();
     }
-    if(previous && (previous.indexOf("\"") != -1 || previous.indexOf("'") != -1)) {
+    if (previous && (previous.indexOf("\"") != -1 || previous.indexOf("'") != -1)) {
       previous = undefined;
     }
-    
+
     return [previous, current];
   };
-  
+
   return {
     round2dec: round2dec,
     generateUUID: generateUUID,
@@ -237,10 +237,10 @@ var Utils = (function() {
 ko.bindingHandlers['disabled'] = {
   update: function (element, valueAccessor) {
     var valueUnwrapped = ko.unwrap(valueAccessor());
-    if(valueUnwrapped) {
-      $(element).attr("disabled", "true");
+    if (valueUnwrapped) {
+      $(element).attr("disabled", "true").addClass("disabled");
     } else {
-      $(element).removeAttr("disabled");
+      $(element).removeAttr("disabled").removeClass("disabled");
     }
   }
 };
@@ -249,7 +249,7 @@ ko.bindingHandlers['disabled'] = {
 ko.bindingHandlers['i18n'] = {
   update: function (element, valueAccessor) {
     var valueUnwrapped = ko.unwrap(valueAccessor());
-    if(valueUnwrapped) {
+    if (valueUnwrapped) {
       $(element)
         .attr("data-i18n", valueUnwrapped)
         .removeClass("i18n") // Remove in order to avoid duplicate i18n (maybe useless ?)
@@ -263,3 +263,20 @@ ko.bindingHandlers['i18n'] = {
     }
   }
 };
+
+function PopupCenter(url, title, w, h) {
+  // Fixes dual-screen position                         Most browsers      Firefox
+  var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
+  var dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
+
+  var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+  var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+  var systemZoom = width / window.screen.availWidth;
+  var left = (width - w) / 2 / systemZoom + dualScreenLeft
+  var top = (height - h) / 2 / systemZoom + dualScreenTop
+  var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w / systemZoom + ', height=' + h / systemZoom + ', top=' + top + ', left=' + left);
+
+  // Puts focus on the newWindow
+  if (window.focus) newWindow.focus();
+}

@@ -22,28 +22,28 @@ function SettingsViewModel(appContext) {
   'use strict';
 
   var self = this;
-  (function() { // Init
+  (function () { // Init
     self.context = appContext; // The application context
     self.language = ko.observable("");
-    self.programmingStyle = ko.observable("TEXT");
+    self.lang = ko.observable("js");
   })();
-  
-  self.display = function() {
+
+  self.display = function () {
     // Initialize the values
     self.language(self.context.settings.language);
-    self.programmingStyle(self.context.settings.programmingStyle);
+    self.lang(self.context.settings.lang);
 
     $('#settingsModal').modal('show');
   };
-  
-  self.hide = function() {
+
+  self.hide = function () {
     $('#settingsModal').modal('hide');
   };
 
-  self.onSave = function() {
+  self.onSave = function () {
     self.context.settings.update({
       language: self.language(),
-      programmingStyle: self.programmingStyle()
+      lang: self.lang()
     });
 
     self.hide();

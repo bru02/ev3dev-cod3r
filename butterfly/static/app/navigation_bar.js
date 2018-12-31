@@ -60,26 +60,10 @@ function NavigationBarViewModel(appContext) {
       tabId: "geoSensorTab",
       active: ko.observable(false)
     };
-
-    self.context.events.changeSettings.add(function (keyChanged, newValue) {
-      if ("programmingStyle" == keyChanged) {
-        self.ChangeProgrammingStyle();
-      }
-    });
-  })();
-
-  // Auto collapse navbar while collapse feature is enabled (screen width is < 768)
-  self.__collapseNavbar = function () {
-    if ($("#bs-navbar-collapse-1-button").css("display") != "none") {
-      $("#bs-navbar-collapse-1-button").click();
-    }
-  };
-
-  self.ChangeProgrammingStyle = function () {
     self.workAreaItems.removeAll();
     self.workAreaItems.push(self.btnScript);
-    if ("TEXT" == self.context.settings.programmingStyle) {
-      self.workAreaItems.push(self.btnKeyboard);
+    self.workAreaItems.push(self.btnKeyboard);
+    if (location.protocol == "https:") {
       if (window.DeviceOrientationEvent) {
         self.workAreaItems.push(self.btnGyro);
       } // else: Don't show xGyro, not supported by the browser
@@ -91,18 +75,25 @@ function NavigationBarViewModel(appContext) {
       } // else: Don't show xGeo, GPS not supported by the browser
     }
     self.onShowWorkAreaItem(self.btnScript);
-  }
+  })();
+
+  // Auto collapse navbar while collapse feature is enabled (screen width is < 768)
+  self.__collapseNavbar = function () {
+    if ($("#bs-navbar-collapse-1-button").css("display") != "none") {
+      $("#bs-navbar-collapse-1-button").click();
+    }
+  };
 
   self.onRunScript = function () {
-         /*     <button class="btn btn-warning navbar-btn" data-bind="click: onStopScript">
-            <span class="glyphicon glyphicon-stop"></span> <span class="i18n" data-i18n="navigationBar.stop">STOP</span></button>*/
-    if(self.running) {
-          self.context.ev3BrickServer.stopScript();
+    /*     <button class="btn btn-warning navbar-btn" data-bind="click: onStopScript">
+       <span class="glyphicon glyphicon-stop"></span> <span class="i18n" data-i18n="navigationBar.stop">STOP</span></button>*/
+    if (self.running) {
+      self.context.ev3BrickServer.stopScript();
     } else {
-          var value = (self.context.scriptEditorTabVM ? self.context.scriptEditorTabVM.getValue() : null);
-        if(value) {
-            self.context.ev3BrickServer.runScript(true);
-        }
+      var value = (self.context.scriptEditorTabVM ? self.context.scriptEditorTabVM.getValue() : null);
+      if (value) {
+        self.context.ev3BrickServer.runScript(true);
+      }
     }
     self.running = !self.running;
     $('#runBtn').toggleClass('btn-warning btn-success').find('span').toggleClass('glyphicon-play glyphicon-stop');

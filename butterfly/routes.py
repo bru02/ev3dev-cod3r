@@ -375,6 +375,10 @@ class ThemesList(Route):
 class WSHandler(Route, KeptAliveWebSocketHandler):
     def open(self):
         super(WSHandler, self).open()
+        self.wrapper = utils.APIWrapper()
+        def change(changed_buttons): 
+            print('These buttons changed state: ' + str(changed_buttons))
+        self.wrapper.btn.on_change = change
         print('new connection')
 
     def on_message(self, message):
@@ -386,6 +390,14 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
             pass
         act = data['act']
         msg = {}
+        if(act == "ufn"):
+            if 'fn' in data and hasattr(self.wrapper, data['fn']):
+                method = getattr(self.wrapper, data['fn']) or {}
+                try:
+                    msg = method(data['args'])
+                except Exception as e:
+                    msg = {'err': e.message}
+
         if(act == "shutdownBrick" or act == "stopCod3r"):
             self.write_message("Bye")
             self.close()

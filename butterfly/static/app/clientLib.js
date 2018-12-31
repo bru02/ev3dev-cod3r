@@ -65,11 +65,8 @@ const fns = {
             }]
         }
     },
-    battery: {
-
-    },
     screen: {
-        stringPixels: {
+        textPixels: {
             args: [
                 {
                     type: "string"
@@ -97,7 +94,7 @@ const fns = {
                 },
             ]
         },
-        stringGrid: {
+        textGrid: {
             args: [
                 {
                     type: "string"
@@ -197,9 +194,6 @@ const fns = {
                     type: "number"
                 },
                 {
-                    type: "number"
-                },
-                {
                     type: "string",
                     default: "black"
 
@@ -216,7 +210,7 @@ const fns = {
                 },
             ]
         },
-        rect: {
+        point: {
             args: [
                 {
                     type: "number"
@@ -259,7 +253,9 @@ const fns = {
                     type: "number"
                 },
             ]
-        }
+        },
+        clear: {},
+        update: {}
     },
     leds: {
         setColor: {
@@ -310,6 +306,146 @@ const fns = {
                 }
             ]
         }
+    },
+    motors: {
+        on: {
+            args: [
+                {
+                    type: ["array", "string"]
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "boolean",
+                    default: false
+                }
+            ]
+        },
+        off: {
+            args: [
+                {
+                    type: ["array", "string"]
+                },
+                {
+                    type: "boolean",
+                    default: false
+                }
+            ]
+        },
+        turn: {
+            args: [
+                {
+                    type: ["array", "string"]
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number",
+                    default: 100
+                },
+                {
+                    type: "boolean",
+                    default: false
+                },
+            ]
+        },
+        waitUntilNotMoving: {
+            args: [
+                {
+                    type: "string"
+                },
+                {
+                    type: "boolean",
+                    default: false
+                },
+            ]
+        },
+        steer: {
+            args: [
+                {
+                    type: ["string", "array"]
+                },
+                {
+                    type: "number"
+                },
+                {
+                    type: "number"
+                }, {
+                    type: "number",
+                    default: 0
+                }, {
+                    type: "boolean",
+                    default: false
+                },
+            ]
+        }
+    },
+    touchSensor: {
+        isPressed: {},
+        waitForPress: {},
+        waitForRelease: {},
+        waitForBump: {},
+    },
+    gyroSensor: {
+        rate: {},
+        angle: {},
+        angleAndRate: {},
+        waitUntilAngleIsChangedBy: {},
+    },
+    ultraSonicSensor: {
+        distanceCM: {},
+        distanceInch: {},
+    },
+    colorSensor: {
+        raw: {},
+        rgb: {},
+        color: {},
+        colorName: {},
+        reflectedLightIntensity: {},
+        ambientLightIntensity: {},
+        calibrateWhite: {},
+    },
+    infraredSensor: {
+        proximity: {},
+        heading: {},
+        distance: {},
+        headingAndDistance: {},
+        beacon: {},
+        buttonsPressed: {}
+    },
+    button: {
+        waitForPress: {
+            args: [
+                {
+                    type: ["string", "array"]
+                }
+            ]
+        },
+        waitForRelease: {
+            args: [
+                {
+                    type: ["string", "array"]
+                }
+            ]
+        },
+        waitForBump: {
+            args: [
+                {
+                    type: ["string", "array"]
+                }
+            ]
+        },
+        any: {},
+        process: {},
+        backspace: {},
+        left: {},
+        right: {},
+        top: {},
+        bottom: {},
+        enter: {},
+        buttonsPressed: {}
     },
     global: {
         print: {
@@ -364,11 +500,10 @@ for ([key, val] of Object.entries(fns)) {
                 }
             });
             return new Promise((resolve, reject) => {
-                let id = "cfn_" + +new Date()
+                let id = Utils.generateUUID();
                 if (context.ev3BrickServer.doWSSend({
                     'act': 'ufn',
-                    'namespace': key,
-                    fn: name,
+                    fn: key + "_" + name,
                     args: arguments
                 })) {
                     function cb(msg) {
@@ -394,8 +529,40 @@ for ([key, val] of Object.entries(fns)) {
 }
 
 leds.off = function () {
-    leds.setColor('both', [0, 0])
+    return leds.setColor('both', [0, 0])
 }
+infraredSensor.distanceCM = function () {
+    return infraredSensor.proximity.call(this, arguments).then(e => {
+        return e * 0.7
+    })
+}
+var cbs = {
+    back: [],
+    left: [],
+    right: [],
+    top: [],
+    bottom: [],
+    middle: [],
+};
+button.on = function (pos, fn) {
+    if (cbs[pos]) cbs[pos].push(fn);
+}
+button.off = function (pos, fn) {
+    if (cbs[pos]) {
+        return cbs[pos].filter(function (ele) {
+            return ele != fn;
+        });
+    }
+}
+context.EV3BrickServer.ws.addEventListener('message', function (e) {
+    try {
+        e = JSON.parse(e)
+        if (e['btnPressed'] && cbs[e['grp']]) {
+            $(cbs[e['grp']]).each(e => e())
+        }
+    } catch (e) { }
+})
+
 window.sleep = function sleep(s) {
     return new Promise(resolve => setTimeout(resolve, s * 500));
 }

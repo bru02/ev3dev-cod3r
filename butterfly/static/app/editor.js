@@ -209,7 +209,7 @@ DoubleEditor.prototype.addAvailableModule = function (name) {
 };
 DoubleEditor.prototype.setCodeLang = function (lang) {
 
-    this.codeMirror.setOption(lang);
+    this.codeMirror.setOption("mode", lang);
     this.converter = lang == "python" ? window.pyConv : window.jsConv;
     if (lang == "python")
         this.updateToolbox(true);

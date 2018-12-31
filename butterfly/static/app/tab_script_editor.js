@@ -35,7 +35,7 @@ function SaveAsDialogViewModel(appContext) {
   };
 
   self.changeFolder = function () {
-    self.folderDialog = window.open("/manage?save=1", "Pick a folder");
+    PopupCenter("/manage?save=1", "Pick a folder", 600, 600);
     window.addEventListener('message', function (e) {
       e = JSON.parse(e);
       self.folder(e['dir']);
@@ -48,7 +48,12 @@ function SaveAsDialogViewModel(appContext) {
       action: "createFile",
       item: path
     }, function (e) {
-      e = JSON.parse(e);
+      try {
+        e = JSON.parse(e);
+      } catch (e) {
+        self.context.messageLogVM.addError('Failed to create file!');
+        return;
+      }
       self.context.messageLogVM.addMessage(e.result.success ? 'success' : 'danger', e.result.error || "Saved file!")
     });
     self.context.fileName.update(path);
@@ -74,14 +79,31 @@ function ScriptEditorTabViewModel(appContext) {
     self.editor.codeMirror.on('change', function () {
       self.context.isSaved(false);
     })
-    $(window).click(function (e) {
-      let t = $(e.target);
-      if (t.is(".blockpy-mode-set") || (t.parents(".blockpy-mode-set").length && (t = t.parents(".blockpy-mode-set")))) {
-        dbl.setMode(t.text().trim())
+    self.context.events.changeSettings.add(function (keyChanged, newValue) {
+      if ("lang" == keyChanged) {
+        self.onSaveScript();
+        self.editor.codeMirror.setValue("");
+        if (newValue == "js") self.editor.setMode('text');
+        self.editor.setCodeLang(newValue == "js" ? "javascript" : "python")
       }
-    })
+    });
   })();
-
+  self.isJs = function () {
+    return self.context.settings.lang == 'js';
+  }
+  self.setModeToBlocks = function () {
+    if (!self.isJs()) {
+      self.editor.setMode("blocks");
+    }
+  }
+  self.setModeToText = function () {
+    self.editor.setMode("text");
+  }
+  self.setModeToSplit = function () {
+    if (!self.isJs()) {
+      self.editor.setMode("split");
+    }
+  }
   self.onClearScript = function () {
     if (self.editor) {
       bootbox.confirm(i18n.t("scriptEditorTab.clearScriptModal.title"), function (result) {
@@ -94,7 +116,7 @@ function ScriptEditorTabViewModel(appContext) {
     }
   };
   self.onLoadScript = function () {
-    self.folderDialog = window.open("/manage?load=1", "Pick a file");
+    PopupCenter("/manage?load=1", "Pick a file", 600, 600);
     window.addEventListener('message', function (e) {
       e = JSON.parse(e);
       self.context.fileName(e['dir']);
@@ -107,9 +129,14 @@ function ScriptEditorTabViewModel(appContext) {
       action: "getContent",
       item: self.context.fileName()
     }, function (e) {
-      e = JSON.parse(e);
+      try {
+        e = JSON.parse(e);
+      } catch (e) {
+        self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
+        return;
+      }
       self.codeMirror.setValue(e.result)
-      self.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', e.result.error || "Loaded file!")
+      self.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: e.result.error }) || "Loaded file!")
       localStorage['script'] = self.context.fileName()
     });
   }
@@ -124,8 +151,14 @@ function ScriptEditorTabViewModel(appContext) {
         content: val,
         item: self.context.fileName
       }, function (e) {
-        e = JSON.parse(e);
-        self.context.messageLogVM.addMessage(e.result.success ? 'success' : 'danger', e.result.error || "Saved file!")
+        try {
+          e = JSON.parse(e);
+        } catch (e) {
+          self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantSaveScriptFile", { filename: self.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
+          return;
+        }
+        let s = e.result.success == false;
+        self.context.messageLogVM.addMessage(s ? 'danger' : 'success', i18n.t(`scriptEditorTab.${s ? "errors.cantSaveScriptFile" : "scriptSuccessfullySaved"}`, { filename: self.context.fileName(), causedBy: e.result.error }))
       });
     } else {
       self.context.saveAsVM.display();

@@ -319,19 +319,19 @@
                 <span class="glyphicon glyphicon-file"></span> <span class="i18n" data-i18n="scriptEditorTab.clear">CLEAR</span></button>
               <button class="btn btn-default btn-sm" data-bind="click: onLoadScript">
                 <span class="glyphicon glyphicon-open"></span> <span class="i18n" data-i18n="scriptEditorTab.load">LOAD</span></button>
-              <button class="btn btn-default btn-sm" data-bind="click: onSaveScript">
+              <button class="btn btn-default btn-sm" data-bind="disabled: context.isStarted, click: onSaveScript">
                 <span class="glyphicon glyphicon-save"></span> <span class="i18n" data-i18n="scriptEditorTab.save">SAVE</span></button>
               <div class="btn-group" data-toggle="buttons">
-                <label class="btn btn-default blockpy-mode-set">
+                <label class="btn btn-default blockpy-mode-set" data-bind="click: setModeToBlocks, disabled: isJs()">
                   <span class='glyphicon glyphicon-th-large'></span>
                   <input type="radio" name="blockpy-mode-set" autocomplete="off" checked> Blocks
                 </label>
 
-                <label class="btn btn-default blockpy-mode-set">
+                <label class="btn btn-default blockpy-mode-set" data-bind="click: setModeToSplit, disabled: isJs()">
                   <span class='glyphicon glyphicon-resize-horizontal'></span>
                   <input type="radio" name="blockpy-mode-set" autocomplete="off"> Split
                 </label>
-                <label class="btn btn-default blockpy-mode-set">
+                <label class="btn btn-default blockpy-mode-set" data-bind="click: setModeToText">
                   <span class='glyphicon glyphicon-pencil'></span>
                   <input type="radio" name="blockpy-mode-set" autocomplete="off"> Text
                 </label>
@@ -640,17 +640,17 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="programmingStyle" class="col-sm-3 control-label">
+              <label for="lang" class="col-sm-3 control-label">
                 <span class="i18n" data-i18n="settingsModal.programmingStyle">STYLE</span>
               </label>
-              <div class="col-sm-9" id="programmingStyle">
+              <div class="col-sm-9" id="lang">
                 <label class="radio-inline">
-                  <input type="radio" value="TEXT" data-bind="checked: programmingStyle">
-                  <span class="i18n" data-i18n="settingsModal.programmingStyleText">TEXT</span>
+                  <input type="radio" value="js" data-bind="checked: lang">
+                  <span>Javascript</span>
                 </label>
                 <label class="radio-inline">
-                  <input type="radio" value="VISUAL" data-bind="checked: programmingStyle">
-                  <span class="i18n" data-i18n="settingsModal.programmingStyleVisual">VISUAL</span>
+                  <input type="radio" value="py" data-bind="checked: lang">
+                  <span>Python</span>
                 </label>
               </div>
             </div>
