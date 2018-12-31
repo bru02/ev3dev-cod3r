@@ -54,7 +54,7 @@ function cod3rSettings() {
   var self = this;
   (function () { // Init
     self.STORAGE_SETTINGS = "cod3r_settings";
-    self.JSON_FIELDS = ['language', 'programmingStyle'];
+    self.JSON_FIELDS = ['language', 'lang'];
 
     // Load 
     var loaded = localStorage[self.STORAGE_SETTINGS];
@@ -80,7 +80,7 @@ function cod3rSettings() {
 
     // ProgrammingStyle
     if (!self.lang) {
-      self.lang = "py";
+      self.lang = "js";
     }
     // Override with url param if exist
     var param = Utils.getUrlParameter("programmingLanguage");

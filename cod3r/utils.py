@@ -796,8 +796,6 @@ class APIWrapper:
 
     def screen_circle(self, args):
         self.lcd.circle(clear_screen=args[5], x=args[0], y=args[1], radius=args[2], fill_color=args[3], outline_color=args[4])
-        
-
 
     def screen_point(self, args):
         self.lcd.point(clear_screen=args[3], x=args[0], y=args[1], point_color=args[2])

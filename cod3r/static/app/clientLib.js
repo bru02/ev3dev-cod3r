@@ -465,6 +465,7 @@ const fns = {
         }
     }
 };
+Function.prototype.toJSON = function () { return this.toString(); }
 window.evalContext = {};
 for (let [key, val] of Object.entries(fns)) {
     if (key == "global") {
@@ -481,8 +482,8 @@ for (let [key, val] of Object.entries(fns)) {
                     let type = typeof args[i];
                     let res = true;
                     if (Array.isArray(e.type)) {
-                        $(e[i]['type']).each((j, e) => {
-                            res = type !== e['type'][j]
+                        $(e['type']).each((j, e) => {
+                            res = res && type !== e
                             if (!res) return false;
                         });
                     } else {
