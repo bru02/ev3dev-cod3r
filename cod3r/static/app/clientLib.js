@@ -299,7 +299,6 @@ const fns = {
                     type: "number",
                     default: 130
                 },
-                ,
                 {
                     type: "string",
                     default: "en-gb"
@@ -481,13 +480,13 @@ for (let [key, val] of Object.entries(fns)) {
                 if (args[i]) {
                     let type = typeof args[i];
                     let res = true;
-                    if (Array.isArray(e[i].type)) {
+                    if (Array.isArray(e.type)) {
                         $(e[i]['type']).each((j, e) => {
-                            res = type !== e[i]['type'][j]
+                            res = type !== e['type'][j]
                             if (!res) return false;
                         });
                     } else {
-                        res = type !== e[i].type
+                        res = type !== e.type
                     }
                     if (res) {
                         context.messageLogVM.addError("Argument type mismatch for function " + key + "." + name + " argument " + i + ".");
@@ -519,7 +518,7 @@ for (let [key, val] of Object.entries(fns)) {
                         context.ev3BrickServer.ws.removeEventListener('message', cb)
                         if (msg.err) {
                             reject(msg.err);
-                            MessageLogViewModel.addError(msg.err);
+                            context.messageLogVM.addError(msg.err);
                         } else {
                             resolve(msg.res)
                         }

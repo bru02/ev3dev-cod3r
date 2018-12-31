@@ -599,7 +599,7 @@ DoubleEditor.prototype.updateBlocks = function () {
 var timerGuard = null;
 DoubleEditor.prototype.updateText = function () {
 
-    if (!this.silenceText || this.converter == window.jsConv) {
+    if (!(this.silenceText || this.converter == window.jsConv)) {
 
         let newCode = this.codeMirror.getValue();
         // Update Model

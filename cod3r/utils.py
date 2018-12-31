@@ -780,11 +780,7 @@ class APIWrapper:
         return {'txt': txt} 
     
     def screen_textPixels(self, args):
-        self.lcd.text_pixels(args[0], clear_screen=args[4], x=args[1], y=args[2], text_color=args[3], font=args[5])
-        
-
-    def screen_textGrid(self, args):
-        self.lcd.text_grid(args[0], clear_screen=args[4], x=args[1], y=args[2], text_color=args[3], font=args[5])
+        self.lcd.text_pixels(args[0], clear_screen=args[4], x=args[1], y=args[2], text_color=args[3], font=args[5] or None)
         
 
     def global_wrap(self, args):
@@ -818,6 +814,7 @@ class APIWrapper:
         
 
     def screen_imageFromString(self, args):
+        import re
         image_data = re.sub('^data:image/.+;base64,', '', args[0]).decode('base64')
         im = Image.open(BytesIO(image_data))
         self.lcd.image.paste(im, (args[1],args[2]))
@@ -857,8 +854,8 @@ class APIWrapper:
         
 
     def sound_speak(self, args):
-        opts = '-a '+ args[1]+' -s '+args[2]+' -v'
-        self.spk.speak(args[0], espeak_opts=opts+args[3])
+        opts = '-a '+ str(args[1])+' -s '+str(args[2])+' -v'
+        self.spk.speak(args[0], espeak_opts=opts+str(args[3]))
 
     def motor_on(self, args):
         if(len(args) == 2):
