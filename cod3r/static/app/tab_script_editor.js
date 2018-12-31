@@ -6,7 +6,6 @@ function SaveAsDialogViewModel(appContext) {
     self.context = appContext; // The application context
     self.folder = ko.observable("/");
     self.fileName = ko.observable("/script.py");
-    self.isJs = ko.observable(self.context.settings.lang == 'js')
     self.folderDialog = undefined;
   })();
 
@@ -52,6 +51,7 @@ function ScriptEditorTabViewModel(appContext) {
   var self = this;
   (function () { // Init
     self.context = appContext; // The application context
+    self.isJs = ko.observable(self.context.settings.lang == 'js')
     var mode = ko.observable("Split");
     self.editor = window.dbl = new DoubleEditor($('#scriptEditorTab'), { lang: "python", editor: mode })
     window.spl = Split([".blockpy-blocks", ".blockpy-text"], {
@@ -124,7 +124,7 @@ function ScriptEditorTabViewModel(appContext) {
     });
   }
   self.onSaveScript = function () {
-    if (self.context.fileName) {
+    if (!!self.context.fileName) {
       let val = self.editor.codeMirror.getValue();
       if (!val.startsWith("#!/usr/bin/env python3")) {
         val = "#!/usr/bin/env python3\n\r" + val;

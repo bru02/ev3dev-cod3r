@@ -4,8 +4,8 @@
  * site, and by each plugin
  */
 
-(function(){
-     
+(function () {
+
     /**
      * JailedSite object represents a single site in the
      * communication protocol between the application and the plugin
@@ -14,23 +14,23 @@
      * and receive messages from the opposite site (basically it
      * should only provide send() and onMessage() methods)
      */
-    JailedSite = function(connection) {
+    JailedSite = function (connection) {
         this._interface = {};
         this._remote = null;
-        this._remoteUpdateHandler = function(){};
-        this._getInterfaceHandler = function(){};
-        this._interfaceSetAsRemoteHandler = function(){};
-        this._disconnectHandler = function(){};
+        this._remoteUpdateHandler = function () { };
+        this._getInterfaceHandler = function () { };
+        this._interfaceSetAsRemoteHandler = function () { };
+        this._disconnectHandler = function () { };
         this._store = new ReferenceStore;
 
         var me = this;
         this._connection = connection;
         this._connection.onMessage(
-            function(data){ me._processMessage(data); }
+            function (data) { me._processMessage(data); }
         );
 
         this._connection.onDisconnect(
-            function(m){
+            function (m) {
                 me._disconnectHandler(m);
             }
         );
@@ -43,7 +43,7 @@
      * 
      * @param {Function} handler
      */
-    JailedSite.prototype.onRemoteUpdate = function(handler) {
+    JailedSite.prototype.onRemoteUpdate = function (handler) {
         this._remoteUpdateHandler = handler;
     }
 
@@ -55,7 +55,7 @@
      * 
      * @param {Function} handler
      */
-    JailedSite.prototype.onInterfaceSetAsRemote = function(handler) {
+    JailedSite.prototype.onInterfaceSetAsRemote = function (handler) {
         this._interfaceSetAsRemoteHandler = handler;
     }
 
@@ -69,7 +69,7 @@
      * 
      * @param {Function} handler
      */
-    JailedSite.prototype.onGetInterface = function(handler) {
+    JailedSite.prototype.onGetInterface = function (handler) {
         this._getInterfaceHandler = handler;
     }
 
@@ -77,7 +77,7 @@
     /**
      * @returns {Object} set of remote interface methods
      */
-    JailedSite.prototype.getRemote = function() {
+    JailedSite.prototype.getRemote = function () {
         return this._remote;
     }
 
@@ -88,7 +88,7 @@
      * 
      * @param {Object} _interface to set
      */
-    JailedSite.prototype.setInterface = function(_interface) {
+    JailedSite.prototype.setInterface = function (_interface) {
         this._interface = _interface;
         this._sendInterface();
     }
@@ -98,48 +98,41 @@
      * Sends the actual interface to the remote site upon it was
      * updated or by a special request of the remote site
      */
-    JailedSite.prototype._sendInterface = function() {
-        var names = [];
-        for (var name in this._interface) {
-            if (this._interface.hasOwnProperty(name)) {
-                names.push(name);
-            }
-        }
-
-        this._connection.send({type:'setInterface', api: names});
+    JailedSite.prototype._sendInterface = function () {
+        this._connection.send({ type: 'setInterface', api: this._interface });
     }
 
 
     /**
      * Handles a message from the remote site
      */
-    JailedSite.prototype._processMessage = function(data) {
-         switch(data.type) {
-         case 'method':
-             var method = this._interface[data.name];
-             var args = this._unwrap(data.args);
-             method.apply(null, args);
-             break;
-         case 'callback':
-             var method = this._store.fetch(data.id)[data.num];
-             var args = this._unwrap(data.args);
-             method.apply(null, args);
-             break;
-         case 'setInterface':
-             this._setRemote(data.api);
-             break;
-         case 'getInterface':
-             this._sendInterface();
-             this._getInterfaceHandler();
-             break;
-         case 'interfaceSetAsRemote':
-             this._interfaceSetAsRemoteHandler();
-             break;
-         case 'disconnect':
-             this._disconnectHandler();
-             this._connection.disconnect();
-             break;
-         }
+    JailedSite.prototype._processMessage = function (data) {
+        switch (data.type) {
+            case 'method':
+                var method = this._interface[data.name];
+                var args = this._unwrap(data.args);
+                method.apply(null, args);
+                break;
+            case 'callback':
+                var method = this._store.fetch(data.id)[data.num];
+                var args = this._unwrap(data.args);
+                method.apply(null, args);
+                break;
+            case 'setInterface':
+                this._setRemote(data.api);
+                break;
+            case 'getInterface':
+                this._sendInterface();
+                this._getInterfaceHandler();
+                break;
+            case 'interfaceSetAsRemote':
+                this._interfaceSetAsRemoteHandler();
+                break;
+            case 'disconnect':
+                this._disconnectHandler();
+                this._connection.disconnect();
+                break;
+        }
     }
 
 
@@ -147,8 +140,8 @@
      * Sends a requests to the remote site asking it to provide its
      * current interface
      */
-    JailedSite.prototype.requestRemote = function() {
-        this._connection.send({type:'getInterface'});
+    JailedSite.prototype.requestRemote = function () {
+        this._connection.send({ type: 'getInterface' });
     }
 
 
@@ -157,49 +150,21 @@
      * 
      * @param {Array} names list of function names
      */
-    JailedSite.prototype._setRemote = function(names) {
-        this._remote = {};
-        var i, name;
-        for (i = 0; i < names.length; i++) {
-            name = names[i];
-            this._remote[name] = this._genRemoteMethod(name);
-        }
+    JailedSite.prototype._setRemote = function (names) {
+        this._remote = names;
 
         this._remoteUpdateHandler();
         this._reportRemoteSet();
     }
-     
-     
-    /**
-     * Generates the wrapped function corresponding to a single remote
-     * method. When the generated function is called, it will send the
-     * corresponding message to the remote site asking it to execute
-     * the particular method of its interface
-     * 
-     * @param {String} name of the remote method
-     * 
-     * @returns {Function} wrapped remote method
-     */
-    JailedSite.prototype._genRemoteMethod = function(name) {
-        var me = this;
-        var remoteMethod = function() {
-            me._connection.send({
-                type: 'method',
-                name: name,
-                args: me._wrap(arguments)
-            });
-        };
 
-        return remoteMethod;
-    }
 
 
     /**
      * Sends a responce reporting that interface just provided by the
      * remote site was sucessfully set by this site as remote
      */
-    JailedSite.prototype._reportRemoteSet = function() {
-        this._connection.send({type:'interfaceSetAsRemote'});
+    JailedSite.prototype._reportRemoteSet = function () {
+        this._connection.send({ type: 'interfaceSetAsRemote' });
     }
 
 
@@ -212,21 +177,21 @@
      * 
      * @returns {Array} wrapped arguments
      */
-    JailedSite.prototype._wrap = function(args) {
+    JailedSite.prototype._wrap = function (args) {
         var wrapped = [];
         var callbacks = {};
         var callbacksPresent = false;
         for (var i = 0; i < args.length; i++) {
             if (typeof args[i] == 'function') {
                 callbacks[i] = args[i];
-                wrapped[i] = {type: 'callback', num : i};
+                wrapped[i] = { type: 'callback', num: i };
                 callbacksPresent = true;
             } else {
-                wrapped[i] = {type: 'argument', value : args[i]};
+                wrapped[i] = { type: 'argument', value: args[i] };
             }
         }
 
-        var result = {args: wrapped};
+        var result = { args: wrapped };
 
         if (callbacksPresent) {
             result.callbackId = this._store.put(callbacks);
@@ -245,23 +210,23 @@
      * 
      * @returns {Array} unwrapped args
      */
-    JailedSite.prototype._unwrap = function(args) {
+    JailedSite.prototype._unwrap = function (args) {
         var called = false;
-        
+
         // wraps each callback so that the only one could be called
-        var once = function(cb) {
-            return function() {
+        var once = function (cb) {
+            return function () {
                 if (!called) {
                     called = true;
                     cb.apply(this, arguments);
                 } else {
                     var msg =
-                      'A callback from this set has already been executed';
+                        'A callback from this set has already been executed';
                     throw new Error(msg);
                 }
             };
         }
-        
+
         var result = [];
         var i, arg, cb, me = this;
         for (i = 0; i < args.args.length; i++) {
@@ -278,8 +243,8 @@
 
         return result;
     }
-     
-     
+
+
     /**
      * Generates the wrapped function corresponding to a single remote
      * callback. When the generated function is called, it will send
@@ -292,42 +257,42 @@
      * 
      * @returns {Function} wrapped remote callback
      */
-    JailedSite.prototype._genRemoteCallback = function(id, argNum) {
+    JailedSite.prototype._genRemoteCallback = function (id, argNum) {
         var me = this;
-        var remoteCallback = function() {
+        var remoteCallback = function () {
             me._connection.send({
-                type : 'callback',
-                id   : id,
-                num  : argNum,
-                args : me._wrap(arguments)
+                type: 'callback',
+                id: id,
+                num: argNum,
+                args: me._wrap(arguments)
             });
         };
 
         return remoteCallback;
     }
 
-     
+
     /**
      * Sends the notification message and breaks the connection
      */
-    JailedSite.prototype.disconnect = function() {
-        this._connection.send({type: 'disconnect'});
+    JailedSite.prototype.disconnect = function () {
+        this._connection.send({ type: 'disconnect' });
         this._connection.disconnect();
     }
-    
-     
+
+
     /**
      * Set a handler to be called when received a disconnect message
      * from the remote site
      * 
      * @param {Function} handler
      */
-    JailedSite.prototype.onDisconnect = function(handler) {
+    JailedSite.prototype.onDisconnect = function (handler) {
         this._disconnectHandler = handler;
     }
-     
-     
-     
+
+
+
 
     /**
      * ReferenceStore is a special object which stores other objects
@@ -352,7 +317,7 @@
      * order to postpone the overflow, which should not likely happen,
      * but anyway).
      */
-    var ReferenceStore = function() {
+    var ReferenceStore = function () {
         this._store = {};    // stored object
         this._indices = [0]; // smallest available indices
     }
@@ -363,7 +328,7 @@
      * 
      * @returns {Number} smallest available id and reserves it
      */
-    ReferenceStore.prototype._genId = function() {
+    ReferenceStore.prototype._genId = function () {
         var id;
         if (this._indices.length == 1) {
             id = this._indices[0]++;
@@ -381,7 +346,7 @@
      * 
      * @param {Number} id to release
      */
-    ReferenceStore.prototype._releaseId = function(id) {
+    ReferenceStore.prototype._releaseId = function (id) {
         for (var i = 0; i < this._indices.length; i++) {
             if (id < this._indices[i]) {
                 this._indices.splice(i, 0, id);
@@ -390,8 +355,8 @@
         }
 
         // cleaning-up the sequence tail
-        for (i = this._indices.length-1; i >= 0; i--) {
-            if (this._indices[i]-1 == this._indices[i-1]) {
+        for (i = this._indices.length - 1; i >= 0; i--) {
+            if (this._indices[i] - 1 == this._indices[i - 1]) {
                 this._indices.pop();
             } else {
                 break;
@@ -407,7 +372,7 @@
      * 
      * @returns {Number} reference id of the stored object
      */
-    ReferenceStore.prototype.put = function(obj) {
+    ReferenceStore.prototype.put = function (obj) {
         var id = this._genId();
         this._store[id] = obj;
         return id;
@@ -419,7 +384,7 @@
      * 
      * @param {Number} id of an object to retrieve
      */
-    ReferenceStore.prototype.fetch = function(id) {
+    ReferenceStore.prototype.fetch = function (id) {
         var obj = this._store[id];
         this._store[id] = null;
         delete this._store[id];
