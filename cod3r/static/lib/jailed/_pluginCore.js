@@ -5,22 +5,23 @@
  * Initializes the plugin-site API global methods.
  */
 
-(function(){
-     
+(function () {
+
     // localize
     var site = new JailedSite(connection);
     delete JailedSite;
     delete connection;
-     
-    site.onGetInterface(function(){
+
+    site.onGetInterface(function () {
         launchConnected();
     });
-     
-    site.onRemoteUpdate(function(){
+
+    site.onRemoteUpdate(function () {
         application.remote = site.getRemote();
+        Object.assign(window, application.remote)
     });
-     
-     
+
+
 
     /**
      * Simplified clone of Whenable instance (the object can not be
@@ -29,19 +30,19 @@
      */
     var connected = false;
     var connectedHandlers = [];
-     
-    var launchConnected = function() {
+
+    var launchConnected = function () {
         if (!connected) {
             connected = true;
 
             var handler;
-            while(handler = connectedHandlers.pop()) {
+            while (handler = connectedHandlers.pop()) {
                 handler();
             }
         }
     }
-     
-    var checkHandler = function(handler){
+
+    var checkHandler = function (handler) {
         var type = typeof handler;
         if (type != 'function') {
             var msg =
@@ -53,8 +54,8 @@
 
         return handler;
     }
-    
-     
+
+
     /**
      * Sets a function executed after the connection to the
      * application is estaplished, and the initial interface-exchange
@@ -62,7 +63,7 @@
      * 
      * @param {Function} handler to be called upon initialization
      */
-    application.whenConnected = function(handler) {
+    application.whenConnected = function (handler) {
         handler = checkHandler(handler);
         if (connected) {
             handler();
@@ -77,17 +78,17 @@
      * 
      * @param {Object} _interface to set
      */
-    application.setInterface = function(_interface) {
+    application.setInterface = function (_interface) {
         site.setInterface(_interface);
     }
 
- 
- 
+
+
     /**
      * Disconnects the plugin from the application (sending
      * notification message) and destroys itself
      */
-    application.disconnect = function(_interface) {
+    application.disconnect = function (_interface) {
         site.disconnect();
     }
 

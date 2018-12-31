@@ -20,7 +20,7 @@ function SaveAsDialogViewModel(appContext) {
   self.changeFolder = function () {
     PopupCenter("/manage?save=1", "Pick a folder", 600, 600);
     window.addEventListener('message', function (e) {
-      e = JSON.parse(e);
+      e = JSON.parse(e.data);
       self.folder(e['dir']);
     })
   }
@@ -101,27 +101,29 @@ function ScriptEditorTabViewModel(appContext) {
   self.onLoadScript = function () {
     PopupCenter("/manage?load=1", "Pick a file", 600, 600);
     window.addEventListener('message', function (e) {
-      e = JSON.parse(e);
+      e = JSON.parse(e.data);
       self.context.fileName(e['dir']);
       self.loadScript();
     })
 
   }
   self.loadScript = function () {
-    $.post("/bridge.py", {
-      action: "getContent",
-      item: self.context.fileName()
-    }, function (e) {
-      try {
-        e = JSON.parse(e);
-      } catch (e) {
-        self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
-        return;
-      }
-      self.codeMirror.setValue(e.result)
-      self.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: e.result.error }) || "Loaded file!")
-      localStorage['script'] = self.context.fileName()
-    });
+    if (self.context.fileName()) {
+      $.post("/bridge.py", {
+        action: "getContent",
+        item: self.context.fileName()
+      }, function (e) {
+        try {
+          e = JSON.parse(e);
+        } catch (e) {
+          self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
+          return;
+        }
+        self.codeMirror.setValue(e.result)
+        self.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: e.result.error }) || "Loaded file!")
+        localStorage['script'] = self.context.fileName()
+      });
+    }
   }
   self.onSaveScript = function () {
     if (!!self.context.fileName) {

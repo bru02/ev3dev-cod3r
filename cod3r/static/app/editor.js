@@ -1,10 +1,10 @@
 window.pyConv = new PythonToBlocks();
 window.jsConv = {
     convertSourceToCodeBlock: function (s) {
-        return Blocklify.JavaScript.importer.codeToDom(s, 'atomic')
+        //return Blocklify.JavaScript.importer.codeToDom(s, 'atomic')
     },
     convertSource: function (s) {
-        return Blockly.Xml.domToText(Blocklify.JavaScript.importer.codeToDom(s, 'atomic'))
+        //return Blockly.Xml.domToText(Blocklify.JavaScript.importer.codeToDom(s, 'atomic'))
     }
 }
 function DoubleEditor(tag, settings) {

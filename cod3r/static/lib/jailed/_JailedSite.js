@@ -99,7 +99,8 @@
      * updated or by a special request of the remote site
      */
     JailedSite.prototype._sendInterface = function () {
-        this._connection.send({ type: 'setInterface', api: this._interface });
+        this._setRemote(this._interface);
+
     }
 
 
@@ -117,9 +118,6 @@
                 var method = this._store.fetch(data.id)[data.num];
                 var args = this._unwrap(data.args);
                 method.apply(null, args);
-                break;
-            case 'setInterface':
-                this._setRemote(data.api);
                 break;
             case 'getInterface':
                 this._sendInterface();
