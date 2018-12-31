@@ -21,7 +21,7 @@ import pwd
 import re
 import struct
 import subprocess
-import sys
+from sys import version_info, stderr, platform
 import time
 import datetime
 import json
@@ -34,14 +34,13 @@ from logging import getLogger
 from textwrap import wrap
 from PIL import Image
 from io import BytesIO
-import numpy as np
 from ev3dev2.display import Display
 from ev3dev2.sound import Sound
 from ev3dev2.led import Leds
 from ev3dev2.motor import LargeMotor, MediumMotor, MoveSteering, MoveTank, OUTPUT_A, OUTPUT_B, OUTPUT_C, OUTPUT_D
 from ev3dev2.button import Button
 from ev3dev2.sensor.lego import TouchSensor, InfraredSensor, ColorSensor, GyroSensor, UltrasonicSensor
-from ev3dev2.sensor import INPUT_1, INPUT_2, INPUT_3, INPUT_4,
+from ev3dev2.sensor import INPUT_1, INPUT_2, INPUT_3, INPUT_4
 
 log = getLogger('butterfly')
 
@@ -281,7 +280,7 @@ def get_socket_env(inode, user):
 utmp_struct = struct.Struct('hi32s4s32s256shhiii4i20s')
 
 
-if sys.version_info[0] == 2:
+if version_info[0] == 2:
     b = lambda x: x
 else:
     def b(x):
@@ -343,7 +342,7 @@ def utmp_line(id, type, pid, fd, user, host, ts):
 def add_user_info(id, fd, pid, user, host):
     # Freebsd format is not yet supported.
     # Please submit PR
-    if sys.platform != 'linux':
+    if platform != 'linux':
         return
     utmp = utmp_line(id, 7, pid, fd, user, host, time.time())
     for kind, file in {
@@ -369,7 +368,7 @@ def add_user_info(id, fd, pid, user, host):
 
 
 def rm_user_info(id, pid):
-    if sys.platform != 'linux':
+    if platform != 'linux':
         return
     utmp = utmp_line(id, 8, pid, '', '', '', time.time())
     for kind, file in {
@@ -430,7 +429,7 @@ class AnsiColors(object):
 ansi_colors = AnsiColors()
 
 def u(s):
-    if sys.version_info[0] == 2:
+    if version_info[0] == 2:
         return s.decode('utf-8')
     return s
 
@@ -773,7 +772,7 @@ class APIWrapper:
     def ev3_log(self, args):
         txt="" 
         for arg in args:
-            print(str(arg), file=sys.stderr)
+            print(str(arg), file=stderr)
             txt += "\r\n " + str(arg)
 
         return {'txt': txt} 
@@ -864,7 +863,7 @@ class APIWrapper:
             m = m()
             m.on(speed=args[0])
         else:
-            arr = np.array(args[0])
+            arr = args[0]
             for p in arr:
                 m = get_motor_class(args[2])
                 m = m(get_output(p))
@@ -872,7 +871,7 @@ class APIWrapper:
 
     def motor_off(self, args):
         if(len(args) == 2):
-            arr = np.array(args[0])
+            arr = args[0]
             for p in arr:
                 m = get_motor_class(args[1])
                 m = m(get_output(p))
@@ -884,7 +883,7 @@ class APIWrapper:
 
     def motor_turn(self, args):
         if(len(args) == 4):
-            arr = np.array(args[0])
+            arr = args[0]
             for p in arr:
                 m = get_motor_class(args[3])
                 m = m(get_output(p))

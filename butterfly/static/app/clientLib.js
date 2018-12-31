@@ -521,7 +521,7 @@ for ([key, val] of Object.entries(fns)) {
                             resolve(msg['res'])
                         }
                     }
-                    context.EV3BrickServer.ws.addEventListener('message', cb)
+                    context.ev3BrickServer.ws.addEventListener('message', cb)
                 }
             })
         }
@@ -554,7 +554,7 @@ button.off = function (pos, fn) {
         });
     }
 }
-context.EV3BrickServer.ws.addEventListener('message', function (e) {
+context.ev3BrickServer.ws.addEventListener('message', function (e) {
     try {
         e = JSON.parse(e)
         if (e['btnPressed'] && cbs[e['grp']]) {

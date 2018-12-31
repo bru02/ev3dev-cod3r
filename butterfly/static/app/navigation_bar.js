@@ -74,7 +74,13 @@ function NavigationBarViewModel(appContext) {
         self.workAreaItems.push(self.btnGeo);
       } // else: Don't show xGeo, GPS not supported by the browser
     }
-    self.onShowWorkAreaItem(self.btnScript);
+    var items = self.workAreaItems(); // return a regular array
+    for (var i = 0; i < items.length; i++) {
+      items[i].active(items[i].tabId == self.btnScript.tabId);
+      $("#" + items[i].tabId).toggleClass("active", items[i].active());
+      self.context.events.tabDisplayedChanged.fire(items[i].tabId, items[i].active());
+    }
+    self.__collapseNavbar();
   })();
 
   // Auto collapse navbar while collapse feature is enabled (screen width is < 768)
@@ -146,15 +152,3 @@ function NavigationBarViewModel(appContext) {
     self.context.importImagesVM.display();
     self.__collapseNavbar();
   };
-
-  self.onShowWorkAreaItem = function (workAreaItem) {
-    // Set the active item in the model and on screen
-    var items = self.workAreaItems(); // return a regular array
-    for (var i = 0; i < items.length; i++) {
-      items[i].active(items[i].tabId == workAreaItem.tabId);
-      $("#" + items[i].tabId).toggleClass("active", items[i].active());
-      self.context.events.tabDisplayedChanged.fire(items[i].tabId, items[i].active());
-    }
-    self.__collapseNavbar();
-  };
-}
