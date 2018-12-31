@@ -585,27 +585,7 @@ if (__is__node__) {
 
 
 
-    /**
-     * Plugin constructor, represents a plugin initialized by a script
-     * with the given path
-     * 
-     * @param {String} url of a plugin source
-     * @param {Object} _interface to provide for the plugin
-     */
-    var Plugin = function (url, _interface) {
-        this._path = url;
-        this._initialInterface = _interface || {};
-        this._connect();
-    };
 
-
-    /**
-     * DynamicPlugin constructor, represents a plugin initialized by a
-     * string containing the code to be executed
-     * 
-     * @param {String} code of the plugin
-     * @param {Object} _interface to provide to the plugin
-     */
     var DynamicPlugin = function (code, _interface) {
         this._code = code;
         this._initialInterface = _interface || {};
@@ -617,7 +597,7 @@ if (__is__node__) {
      * Creates the connection to the plugin site
      */
     DynamicPlugin.prototype._connect =
-        Plugin.prototype._connect = function () {
+        function () {
             this.remote = null;
 
             this._connect = new Whenable;
@@ -645,7 +625,7 @@ if (__is__node__) {
      * common routines (_JailedSite.js)
      */
     DynamicPlugin.prototype._init =
-        Plugin.prototype._init = function () {
+        function () {
             this._site = new JailedSite(this._connection);
 
             var me = this;
@@ -667,7 +647,7 @@ if (__is__node__) {
      * Loads the core scirpt into the plugin
      */
     DynamicPlugin.prototype._loadCore =
-        Plugin.prototype._loadCore = function () {
+        function () {
             var me = this;
             var sCb = function () {
                 me._sendInterface();
@@ -683,31 +663,17 @@ if (__is__node__) {
      * Sends to the remote site a signature of the interface provided
      * upon the Plugin creation
      */
-    DynamicPlugin.prototype._sendInterface =
-        Plugin.prototype._sendInterface = function () {
-            var me = this;
-            this._site.onInterfaceSetAsRemote(function () {
-                if (!me._connected) {
-                    me._loadPlugin();
-                }
-            });
-
-            this._site.setInterface(this._initialInterface);
-        }
-
-
-    /**
-     * Loads the plugin body (loads the plugin url in case of the
-     * Plugin)
-     */
-    Plugin.prototype._loadPlugin = function () {
+    DynamicPlugin.prototype._sendInterface = function () {
         var me = this;
-        var sCb = function () {
-            me._requestRemote();
-        }
+        this._site.onInterfaceSetAsRemote(function () {
+            if (!me._connected) {
+                me._loadPlugin();
+            }
+        });
 
-        this._connection.importJailedScript(this._path, sCb, this._fCb);
+        this._site.setInterface(this._initialInterface);
     }
+
 
 
     /**
@@ -733,7 +699,7 @@ if (__is__node__) {
      * interfaces provided to each other)
      */
     DynamicPlugin.prototype._requestRemote =
-        Plugin.prototype._requestRemote = function () {
+        function () {
             var me = this;
             this._site.onRemoteUpdate(function () {
                 me.remote = me._site.getRemote();
@@ -750,7 +716,7 @@ if (__is__node__) {
      * will not hang up on the infinite loop in the untrusted code
      */
     DynamicPlugin.prototype.hasDedicatedThread =
-        Plugin.prototype.hasDedicatedThread = function () {
+        function () {
             return this._connection.hasDedicatedThread();
         }
 
@@ -759,7 +725,7 @@ if (__is__node__) {
      * Disconnects the plugin immideately
      */
     DynamicPlugin.prototype.disconnect =
-        Plugin.prototype.disconnect = function () {
+        function () {
             this._connection.disconnect();
             this._disconnect.emit();
         }
@@ -772,11 +738,11 @@ if (__is__node__) {
      * @param {Function} handler to be issued upon disconnect
      */
     DynamicPlugin.prototype.whenFailed =
-        Plugin.prototype.whenFailed = function (handler) {
+        function (handler) {
             this._fail.whenEmitted(handler);
         }
     DynamicPlugin.prototype.whenDone =
-        Plugin.prototype.whenDone = function (handler) {
+        function (handler) {
             this._scs.whenEmitted(handler);
         }
 
@@ -787,7 +753,7 @@ if (__is__node__) {
      * @param {Function} handler to be issued upon connection
      */
     DynamicPlugin.prototype.whenConnected =
-        Plugin.prototype.whenConnected = function (handler) {
+        function (handler) {
             this._connect.whenEmitted(handler);
         }
 
@@ -799,13 +765,12 @@ if (__is__node__) {
      * @param {Function} handler to be issued upon connection failure
      */
     DynamicPlugin.prototype.whenDisconnected =
-        Plugin.prototype.whenDisconnected = function (handler) {
+        function (handler) {
             this._disconnect.whenEmitted(handler);
         }
 
 
 
-    exports.Plugin = Plugin;
     exports.DynamicPlugin = DynamicPlugin;
 
 }));

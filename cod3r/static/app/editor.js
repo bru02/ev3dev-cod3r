@@ -195,14 +195,51 @@ DoubleEditor.prototype.addAvailableModule = function (name) {
 
 };
 DoubleEditor.prototype.setCodeLang = function (lang) {
-
-    this.codeMirror.setOption("mode", lang);
     this.converter = lang == "python" ? window.pyConv : window.jsConv;
-    if (lang == "python")
+    let opts;
+    if (lang == "python") {
         this.updateToolbox(true);
-    else {
-        this.blockly.updateToolbox(Blocklify.JavaScript.toolbox);
+        opts = {
+            mode: {
+                name: "python",
+                version: 3,
+                singleLineStringErrors: false
+            },
+            showCursorWhenSelecting: true,
+            lineNumbers: true,
+            firstLineNumber: 1,
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: false,
+            matchBrackets: true,
+            extraKeys: {
+                "Tab": "indentMore",
+                "Shift-Tab": "indentLess"
+            },
+        }
 
+    } else {
+        opts = {
+            mode: { name: "javascript", globalVars: true },
+            gutters: ["CodeMirror-lint-markers"],
+            lint: true,
+            showCursorWhenSelecting: true,
+            lineNumbers: true,
+            firstLineNumber: 1,
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: false,
+            matchBrackets: true,
+            extraKeys: {
+                "Tab": "indentMore",
+                "Shift-Tab": "indentLess",
+                "Ctrl-Space": "autocomplete"
+            },
+        };
+
+    }
+    for (let [key, val] of Object.entries(opts)) {
+        this.codeMirror.setOption(key, val)
     }
 };
 
@@ -562,7 +599,7 @@ DoubleEditor.prototype.updateBlocks = function () {
 var timerGuard = null;
 DoubleEditor.prototype.updateText = function () {
 
-    if (!this.silenceText) {
+    if (!this.silenceText || this.converter == window.jsConv) {
 
         let newCode = this.codeMirror.getValue();
         // Update Model

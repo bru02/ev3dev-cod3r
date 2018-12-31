@@ -18,7 +18,6 @@
 
     site.onRemoteUpdate(function () {
         application.remote = site.getRemote();
-        Object.assign(window, application.remote)
     });
 
 

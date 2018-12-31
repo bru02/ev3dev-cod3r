@@ -481,13 +481,13 @@ for (let [key, val] of Object.entries(fns)) {
                 if (args[i]) {
                     let type = typeof args[i];
                     let res = true;
-                    if (Array.isArray(e.args[i].type)) {
-                        $(e['args'][i]['type']).each((j, e) => {
-                            res = type !== e['args'][i]['type'][j]
+                    if (Array.isArray(e[i].type)) {
+                        $(e[i]['type']).each((j, e) => {
+                            res = type !== e[i]['type'][j]
                             if (!res) return false;
                         });
                     } else {
-                        res = type !== e.args[i].type
+                        res = type !== e[i].type
                     }
                     if (res) {
                         context.messageLogVM.addError("Argument type mismatch for function " + key + "." + name + " argument " + i + ".");

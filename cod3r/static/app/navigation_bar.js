@@ -89,7 +89,7 @@ function NavigationBarViewModel(appContext) {
       var value = (self.context.scriptEditorTabVM ? self.context.scriptEditorTabVM.editor.codeMirror.getValue() : null);
       if (value) {
         if (self.context.settings.lang == "js") {
-          self._runner = new jailed.DynamicPlugin(value, window.evalContext);
+          self._runner = new jailed.DynamicPlugin(`(function(self){Object.assign(self, ${JSON.stringify(evalContext)})})(this);${value}`);
           self._runner.whenFailed(function () {
             self._runner = null;
             self.running(false);
