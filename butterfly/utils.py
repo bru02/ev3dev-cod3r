@@ -816,9 +816,9 @@ class APIWrapper:
         
 
     def screen_imageFromString(self, args):
-        output = BytesIO(args[0])
-        logo = Image.open(output)
-        self.lcd.image.paste(logo, (args[1],args[2]))
+        image_data = re.sub('^data:image/.+;base64,', '', args[0]).decode('base64')
+        im = Image.open(BytesIO(image_data))
+        self.lcd.image.paste(im, (args[1],args[2]))
         
 
     def screen_update(self):

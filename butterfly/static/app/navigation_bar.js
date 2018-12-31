@@ -1,22 +1,3 @@
-/*
- * Gnikrap is a simple scripting environment for the Lego Mindstrom EV3
- * Copyright (C) 2014-2017 Jean BENECH
- *
- * Gnikrap is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Gnikrap is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Gnikrap.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
 // Model to manage the navigation bar actions
 function NavigationBarViewModel(appContext) {
   'use strict';
@@ -119,25 +100,25 @@ function NavigationBarViewModel(appContext) {
     self.__collapseNavbar();
   };
 
-  self.onStopGnikrap = function () {
+  self.onStopcod3r = function () {
     bootbox.dialog({
-      title: i18n.t("navigationBar.confirmStopGnikrap.title"),
-      message: i18n.t("navigationBar.confirmStopGnikrap.message"),
+      title: i18n.t("navigationBar.confirmStopcod3r.title"),
+      message: i18n.t("navigationBar.confirmStopcod3r.message"),
       buttons: {
         cancel: {
-          label: i18n.t("navigationBar.confirmStopGnikrap.cancel"),
+          label: i18n.t("navigationBar.confirmStopcod3r.cancel"),
           className: "btn-primary",
           callback: function () { /* Cancel */ }
         },
-        stopGnikrap: {
-          label: i18n.t("navigationBar.confirmStopGnikrap.stopGnikrap"),
+        stopcod3r: {
+          label: i18n.t("navigationBar.confirmStopcod3r.stopcod3r"),
           className: "btn-default",
           callback: function () {
-            self.context.ev3BrickServer.stopGnikrap();
+            self.context.ev3BrickServer.stopcod3r();
           }
         },
         shutdownBrick: {
-          label: i18n.t("navigationBar.confirmStopGnikrap.shutdownBrick"),
+          label: i18n.t("navigationBar.confirmStopcod3r.shutdownBrick"),
           className: "btn-default",
           callback: function () {
             self.context.ev3BrickServer.shutdownBrick();

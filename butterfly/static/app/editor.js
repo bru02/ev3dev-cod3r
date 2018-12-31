@@ -1,16 +1,3 @@
-/**
- * An object that manages the various editors, where users can edit their program. Also manages the
- * movement between editors.
- * There are currently four editors:
- *  - Blocks: A Blockly instance
- *  - Text: A CodeMirror instance
- *  - Instructor: Features for changing the assignment and environment settings
- *
- * @constructor
- * @this {DoubleEditor}
- * @param {Object} main - The main BlockPy instance
- * @param {HTMLElement} tag - The HTML object this is attached to.
- */
 window.pyConv = new PythonToBlocks();
 window.jsConv = {
     convertSourceToCodeBlock: function (s) {
@@ -470,9 +457,9 @@ DoubleEditor.prototype.setBlocks = function (python_code) {
             this.blocksFailed = result.error;
             let editor = this;
             this.blocksFailedTimeout = window.setTimeout(() => {
-                /*if (editor.main.model.settings.editor() != 'Text') {*/
+
                 editor.showConversionError();
-                /* }*/
+
             }, 500);
 
         } else {

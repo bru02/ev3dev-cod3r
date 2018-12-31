@@ -1,19 +1,19 @@
 /*
- * Gnikrap is a simple scripting environment for the Lego Mindstrom EV3
+ * cod3r is a simple scripting environment for the Lego Mindstrom EV3
  * Copyright (C) 2014-2017 Jean BENECH
  *
- * Gnikrap is free software: you can redistribute it and/or modify
+ * cod3r is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Gnikrap is distributed in the hope that it will be useful,
+ * cod3r is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Gnikrap.  If not, see <http://www.gnu.org/licenses/>.
+ * along with cod3r.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -31,7 +31,7 @@ if (!('WebSocket' in window &&
 var context = { // The application context - used as a basic dependency-injection mechanism
   // Define events that are used internally in the application (See https://api.jquery.com/category/callbacks-object/).
   events: {
-    // Gnikrap resized event.
+    // cod3r resized event.
     // Params: workAreaHeight, usefullWorkAreaHeight
     resize: $.Callbacks('unique'),
     // Settings (configuration change event. 
@@ -48,12 +48,12 @@ var context = { // The application context - used as a basic dependency-injectio
 };
 
 // Define a settings object
-function GnikrapSettings() {
+function cod3rSettings() {
   'use strict';
 
   var self = this;
   (function () { // Init
-    self.STORAGE_SETTINGS = "gnikrap_settings";
+    self.STORAGE_SETTINGS = "cod3r_settings";
     self.JSON_FIELDS = ['language', 'programmingStyle'];
 
     // Load 
@@ -103,7 +103,7 @@ function GnikrapSettings() {
     }
   };
 }
-context.settings = new GnikrapSettings(context);
+context.settings = new cod3rSettings(context);
 
 // Initialization of the application
 $(document).ready(function () {

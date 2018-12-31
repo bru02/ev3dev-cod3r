@@ -396,10 +396,10 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
                 try:
                     msg = method(data['args'])
                 except Exception as e:
-                    msg = {'err': e.message}
+                    msg = {'err': e}
 
         if(act == "shutdownBrick" or act == "stopCod3r"):
-            self.write_message("Bye")
+            self.write_message('{"txt":"Bye"}')
             self.close()
             tornado.ioloop.IOLoop.instance().stop()
             if(act is "shutdownBrick"):

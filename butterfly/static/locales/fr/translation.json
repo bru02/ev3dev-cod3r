@@ -1,21 +1,21 @@
 {
   "@comment": "Traduction française",
   "navigationBar": {
-    "gnikrap": {
+    "cod3r": {
       "about": "A propos...",
       "fullScreen": "Basculer en mode plein écran",
-      "stopGnikrap": "Arrêter Gnikrap...",
+      "stopcod3r": "Arrêter cod3r...",
       "settings": "Configuration...",
       "importImages": "Importer des images...",
       "documentation": "Documentation...",
       "shell": "Terminal",
       "manager": "File Manager"
     },
-    "confirmStopGnikrap": {
-      "title": "Arrêter Gnikrap",
-      "message": "Voulez vous arreter de Gnikrap (la brique va revenir sur le menu), ou arrêter la brique ?",
+    "confirmStopcod3r": {
+      "title": "Arrêter cod3r",
+      "message": "Voulez vous arreter de cod3r (la brique va revenir sur le menu), ou arrêter la brique ?",
       "cancel": "Non, ne rien faire",
-      "stopGnikrap": "Oui, arrêter Gnikrap",
+      "stopcod3r": "Oui, arrêter cod3r",
       "shutdownBrick": "Oui, arrêter la brique"
     }
   },
@@ -164,7 +164,7 @@
     "ev3ConnectionOk": "La connexion avec la brique EV3 est ok",
     "confirmStopScriptAlreadyRunning": "Un script est déjà en cours d'exécution, faut-il l'arrêter avant de lancer le nouveau script ?",
     "demo": {
-      "no_connection_to_EV3": "Mode démo, certaines fonctionnalités ne vont pas être disponibles car Gnikrap n'a pas été lancé sur une brique EV3",
+      "no_connection_to_EV3": "Mode démo, certaines fonctionnalités ne vont pas être disponibles car cod3r n'a pas été lancé sur une brique EV3",
       "no_run": "Mode démo, impossible de démarrer le programme",
       "no_stop_nor_shutdown": "Mode démo, rien ne va être arrêté"
     },
@@ -209,11 +209,11 @@
     }
   },
   "aboutModal": {
-    "gnikrapShortDescription": "<a href=\"http://jbenech.github.io/gnikrap/\" target=\"_blank\">Gnikrap</a> est un environment de programation à-la Scratch et JavaScript pour <a href=\"http://www.lego.com/mindstorms/\" target=\"_blank\">Lego Mindstrom EV3</a>.",
+    "cod3rShortDescription": "<a href=\"http://jbenech.github.io/cod3r/\" target=\"_blank\">cod3r</a> est un environment de programation à-la Scratch et JavaScript pour <a href=\"http://www.lego.com/mindstorms/\" target=\"_blank\">Lego Mindstrom EV3</a>.",
     "softwareUsed": "Ce logiel n'aurai pas vu le jour sans les logiciel open-source suivant:",
-    "gnikrapLicence": "Licence (Texte complet de la licence <a href=\"licence-lgpl-3.0.txt\" target=\"_blank\">GPL v3</a>):",
+    "cod3rLicence": "Licence (Texte complet de la licence <a href=\"licence-lgpl-3.0.txt\" target=\"_blank\">GPL v3</a>):",
     "gplV3Notice": [
-      "Gnikrap est un environment de programation JavaScript simple à utiliser",
+      "cod3r est un environment de programation JavaScript simple à utiliser",
       "et puissant pour Lego Mindstorm EV3",
       "Copyright (C) 2014-2017 Jean BENECH — Tous droits réservés.",
       "",
@@ -234,7 +234,7 @@
     "close": "Fermer"
   },
   "blocks": {
-    "@comment": "Translation for blockly'blocks defined for Gnikrap",
+    "@comment": "Translation for blockly'blocks defined for cod3r",
     "categories": {
       "logic": "Logique",
       "loops": "Boucles",
@@ -272,27 +272,27 @@
       "TURN_PER_S": "tour(s)/seconde",
       "PERCENT": "% puissance"
     },
-    "gnikrap_ev3_notify": {
-      "tooltip": "Affiche un message dans l'interface de Gnikrap.",
+    "cod3r_ev3_notify": {
+      "tooltip": "Affiche un message dans l'interface de cod3r.",
       "text_notify": "notifier"
     },
-    "gnikrap_ev3_isok": {
+    "cod3r_ev3_isok": {
       "tooltip": "Renvoie vrai si la brique EV3 est ok, faux sinon.",
       "text_ev3_is_ok": "EV3 est ok"
     },
-    "gnikrap_ev3_stop": {
+    "cod3r_ev3_stop": {
       "tooltip": "Arrête le programme.",
       "text_stop_script": "arrêter le programme"
     },
-    "gnikrap_ev3_wait_until": {
+    "cod3r_ev3_wait_until": {
       "tooltip": "Attend jusqu'à ce que la condition soit vrai.",
       "text_wait_until": "attendre jusqu'à ce que"
     },
-    "gnikrap_ev3_sleep": {
+    "cod3r_ev3_sleep": {
       "tooltip": "Le programme va attendre (ne rien faire) pendant le temps indiqué.",
       "text_sleep": "attendre pendant"
     },
-    "gnikrap_ev3_led": {
+    "cod3r_ev3_led": {
       "tooltip": "Met le LED dans l'état sélectionné.",
       "list_change_LED_status": {
         "OFF": "mettre le LED à éteint",
@@ -307,37 +307,37 @@
         "RED_2": "mettre le LED à rouge clignotant rapide"
       }
     },
-    "gnikrap_ev3_sound_setvolume": {
+    "cod3r_ev3_sound_setvolume": {
       "tooltip": "Règle le volume sonore.",
       "text_set_volume": "régler le volume sonore à"
     },
-    "gnikrap_ev3_sound_beep": {
+    "cod3r_ev3_sound_beep": {
       "tooltip": "Joue un bip.",
       "text_beep": "jouer un bip"
     },
-    "gnikrap_ev3_sound_playnote": {
+    "cod3r_ev3_sound_playnote": {
       "tooltip": "Joue la note indiqué pendant le temps indiqué.",
       "text_play_note": "jouer la note",
       "text_for": "pendant"
     },
-    "gnikrap_ev3_touchsensor_pushed": {
+    "cod3r_ev3_touchsensor_pushed": {
       "tooltip": "Renvoie vrai si le capteur est enfoncé, faux sinon.",
       "text_sensor": "le capteur",
       "text_is_pushed": "est enfoncé"
     },
-    "gnikrap_ev3_colorsensor_reflected": {
+    "cod3r_ev3_colorsensor_reflected": {
       "tooltip": "Renvoie la lumière réfléchie (entre 0 et 100) détecté par le capteur.",
       "text_reflected_light": "la lumière réfléchie du capteur"
     },
-    "gnikrap_ev3_colorsensor_ambient": {
+    "cod3r_ev3_colorsensor_ambient": {
       "tooltip": "Renvoie la lumière ambiante (entre 0 et 100) détecté par le capteur.",
       "text_ambiant_light": "la lumière ambiante du capteur"
     },
-    "gnikrap_ev3_colorsensor_getcolor": {
+    "cod3r_ev3_colorsensor_getcolor": {
       "tooltip": "Renvoie la couleur (texte en anglais) détecté par le capteur.",
       "text_color": "la couleur du capteur"
     },
-    "gnikrap_ev3_colorsensor_iscolor": {
+    "cod3r_ev3_colorsensor_iscolor": {
       "tooltip": "Renvoie vrai si la couleur sélectionnée est celle détécté par le capteur, faux sinon.",
       "list_colors_detected": {
         "BLACK": "noir est détecté par le capteur",
@@ -349,16 +349,16 @@
         "NONE": "aucune couleur n'est détecté par le capteur"
       }
     },
-    "gnikrap_ev3_irsensor_setchannel": {
+    "cod3r_ev3_irsensor_setchannel": {
       "tooltip": "Règle le canal à utiliser pour le capteur infrarouge.",
       "text_set_channel": "régler le canal à",
       "text_to_sensor": "pour le capteur infrarouge"
     },
-    "gnikrap_ev3_irsensor_getdistance": {
+    "cod3r_ev3_irsensor_getdistance": {
       "tooltip": "Renvoie la distance (entre 0 et 100) au capteur infrarouge.",
       "text_distance_to_sensor": "distance au capteur infrarouge"
     },
-    "gnikrap_ev3_irsensor_getremotecommand": {
+    "cod3r_ev3_irsensor_getremotecommand": {
       "tooltip": "Renvoie vrai si le bouton sélectionné est préssé sur la télécommande, faux sinon.",
       "list_beacon_buttons_enabled_on_sensor": {
         "TOP_LEFT": "le bouton en haut à gauche est enfoncé sur le capteur infrarouge",
@@ -369,7 +369,7 @@
         "NOTHING": "rien n'est enfoncé sur le capteur infrarouge"
       }
     },
-    "gnikrap_ev3_keyboard_wait": {
+    "cod3r_ev3_keyboard_wait": {
       "tooltip": "Attends que le bouton soit enfoncé (et relanché si sélectionné).",
       "list_keyboard_buttons_wait": {
         "UP": "attendre que le bouton haut",
@@ -384,7 +384,7 @@
         "PRESSED_AND_RELEASED": "soit enfoncé et relaché"
       }
     },
-    "gnikrap_ev3_keyboard_ispressed": {
+    "cod3r_ev3_keyboard_ispressed": {
       "tooltip": "Renvoie vrai si le bouton est enfoncé, faux sinon.",
       "list_keyboard_buttons_is_pressed": {
         "UP": "le bouton haut est enfoncé",
@@ -395,14 +395,14 @@
         "ESCAPE": "le bouton annuler est enfoncé"
       }
     },
-    "gnikrap_ev3_motor_settype": {
+    "cod3r_ev3_motor_settype": {
       "tooltip": "Règle le type de moteur connecté sur le port sélectionné.",
       "list_motor_type_connected_on": {
         "LARGE": "un gros moteur est connecté sur le port",
         "MEDIUM": "un moteur moyen est connecté sur le port"
       }
     },
-    "gnikrap_ev3_motor_move": {
+    "cod3r_ev3_motor_move": {
       "tooltip": "Démarre/Arrête le moteur. L'exécution du programme continue immédiatement après la prise en compte de l'action par le moteur.",
       "list_motor_actions": {
         "FORWARD": "tourner en avant le moteur",
@@ -411,12 +411,12 @@
         "STOP": "arrêter le moteur"
       }
     },
-    "gnikrap_ev3_motor_ismoving": {
+    "cod3r_ev3_motor_ismoving": {
       "tooltip": "Renvoie vrai si le moteur est en train de tourner, faux sinon.",
       "text_motor": "le moteur",
       "text_is_moving": "est en train de tourner"
     },
-    "gnikrap_ev3_motor_rotate": {
+    "cod3r_ev3_motor_rotate": {
       "tooltip": "Fait tourner le moteur du nombre de tour/degré indiqué. Avec 'commence à faire tourner', l'exécution du programme continue immédiatement après la prise en compte de l'action par le moteur. Avec 'faire tourner' le programme attends la fin du mouvement avant de continuer.",
       "list_motor_actions": {
         "ROTATE": "faire tourner le moteur",
@@ -428,32 +428,32 @@
         "TURN": "tour(s)"
       }
     },
-    "gnikrap_ev3_motor_setspeed": {
+    "cod3r_ev3_motor_setspeed": {
       "tooltip": "Règle la vitesse du moteur.",
       "text_set_speed_of_motor": "régler la vitesse du moteur",
       "text_to": "à"
     },
-    "gnikrap_ev3_motor_getspeed": {
+    "cod3r_ev3_motor_getspeed": {
       "tooltip": "Renvoie la vitesse du moteur.",
       "text_speed_of_motor": "la vitesse du moteur",
       "text_in": "en"
     },
-    "gnikrap_ev3_motor_gettacho": {
+    "cod3r_ev3_motor_gettacho": {
       "tooltip": "Renvoie le nombre de pas du moteur depuis la dernière raz du nombre des pas.",
       "text_tacho_count_of_motor": "nombre de pas du moteur"
     },
-    "gnikrap_ev3_motor_resettacho": {
+    "cod3r_ev3_motor_resettacho": {
       "tooltip": "Remet le nombre de pas du moteur à 0.",
       "text_reset_tacho_count_of_motor": "remettre à zéro le nombre de pas du moteur"
     },
-    "gnikrap_ev3_xsensor_workwith": {
+    "cod3r_ev3_xsensor_workwith": {
       "tooltip": "Si le xSensor existe et est démarré execute le bloc d'ordre 'faire'. Sinon le bloc d'ordre optionnel 'sinon' est executé.",
       "text_with_the_xSensor": "avec le xSensor",
       "text_started": "démarré",
       "text_do": "faire",
       "text_else": "sinon"
     },
-    "gnikrap_ev3_xgyro_getvalue": {
+    "cod3r_ev3_xgyro_getvalue": {
       "tooltip": "Retoune l'angle du capteur xGyro pour l'axe sélectionné.",
       "list_axis_angle": {
         "X": "xGyro: angle pour l'axe x",
@@ -461,7 +461,7 @@
         "Z": "xGyro: angle pour l'axe z"
       }
     },
-    "gnikrap_ev3_xgeo_getvalue": {
+    "cod3r_ev3_xgeo_getvalue": {
       "tooltip": "Renvoie la valeur du capteur xGéo pour la mesure sélectionnée.",
       "list_measure": {
         "LATITUDE": "xGéo: latitude",
@@ -472,18 +472,18 @@
         "TIMESTAMP": "xGéo: date et heure"
       }
     },
-    "gnikrap_ev3_xvideo_containsobject": {
+    "cod3r_ev3_xvideo_containsobject": {
       "tooltip": "Renvoie vrai si l'objet indiqué est suivi par le capteur xVideo, faux sinon.",
       "text_xVideo_known_the_object": "xVideo: connait l'objet"
     },
-    "gnikrap_ev3_xvideo_getvalue": {
+    "cod3r_ev3_xvideo_getvalue": {
       "tooltip": "Renvoie pour l'objet indiqué la valeur pour la coordonée sélectionnée.",
       "list_axis_for_object": {
         "X": "xVidéo: coordonnée x pour l'objet",
         "Y": "xVidéo: coordonnée y pour l'objet"
       }
     },
-    "gnikrap_ev3_xtouch_istouchpressed": {
+    "cod3r_ev3_xtouch_istouchpressed": {
       "tooltip": "Retoune vrai si la touche indiquée est pressée, faux sinon.",
       "text_xTouch_touch": "xTouch: la touche",
       "text_is_pressed": "est pressée"
