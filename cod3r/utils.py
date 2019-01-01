@@ -1054,10 +1054,10 @@ class APIWrapper:
     def button_right(self, args):
         return {'res':self.btn.right}
 
-    def button_top(self, args):
+    def button_up(self, args):
         return {'res':self.btn.up}
 
-    def button_bottom(self, args):
+    def button_down(self, args):
         return {'res':self.btn.down} 
 
     def button_enter(self, args):

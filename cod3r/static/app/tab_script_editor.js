@@ -54,14 +54,15 @@ function ScriptEditorTabViewModel(appContext) {
 
   var self = this;
   (function () { // Init
+    let isJs = self.context.settings.lang == 'js';
     self.context = appContext; // The application context
-    self.isJs = ko.observable(self.context.settings.lang == 'js')
+    self.isJs = ko.observable(isJs)
     var mode = ko.observable("Split");
-    self.editor = window.dbl = new DoubleEditor($('#scriptEditorTab'), { lang: "python", editor: mode })
-    self.editor.setCodeLang(self.context.settings.lang == "js" ? "javascript" : "python")
+    self.editor = new DoubleEditor($('#scriptEditorTab'), { lang: isJs ? "javascript" : "python", editor: mode })
+    if (isJs) { self.editor.setMode('Text'); }
     self.split = Split([".blockpy-blocks", ".blockpy-text"], {
       cursor: 'row-resize', onDrag: () => {
-        Blockly.svgResize(self.ScriptEditorTabViewModel.editor.blockly);
+        Blockly.svgResize(self.editor.blockly);
       },
       sizes: [60, 40]
     });
@@ -72,9 +73,10 @@ function ScriptEditorTabViewModel(appContext) {
       if ("lang" == keyChanged) {
         self.onSaveScript();
         self.editor.codeMirror.setValue("");
-        self.isJs(newValue == 'js')
-        if (self.isJs()) { self.editor.setMode('Text'); }
-        self.editor.setCodeLang(newValue == "js" ? "javascript" : "python")
+        let isJs = newValue == 'js';
+        self.isJs(isJs)
+        if (isJs) { self.editor.setMode('Text'); }
+        self.editor.setCodeLang(isJs ? "javascript" : "python")
       }
     });
   })();

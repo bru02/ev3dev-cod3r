@@ -643,7 +643,7 @@ DoubleEditor.prototype.updateTextFromModel = function () {
 
     if (this.silenceModel == 0) {
 
-        let code = "a=1"//this.main.model.program();
+        let code = ""//this.main.model.program();
         this.silenceText = true;
         this.setText(code);
 
@@ -668,7 +668,7 @@ DoubleEditor.prototype.updateBlocksFromModel = function () {
 
         let code = ""; // TODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODO
         this.silenceBlock = true;
-        this.setBlocks(code);
+        if (this.converter == window.pyConv) this.setBlocks(code);
         this.resetBlockSilence();
 
     } else {

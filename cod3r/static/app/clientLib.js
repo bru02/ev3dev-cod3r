@@ -441,8 +441,8 @@ const fns = {
         backspace: {},
         left: {},
         right: {},
-        top: {},
-        bottom: {},
+        up: {},
+        down: {},
         enter: {},
         buttonsPressed: {}
     },
@@ -539,12 +539,12 @@ infraredSensor.distanceCM = function () {
     });
 }
 var cbs = {
-    back: [],
+    backspace: [],
     left: [],
     right: [],
-    top: [],
-    bottom: [],
-    middle: [],
+    up: [],
+    down: [],
+    enter: [],
 };
 var listener = false;
 button.on = function (pos, fn) {
