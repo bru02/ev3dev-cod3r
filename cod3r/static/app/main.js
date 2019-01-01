@@ -158,6 +158,7 @@ $(document).ready(function () {
         });
       }
     });
+    if (context.scriptEditorTabVM.fileName()) context.scriptEditorTabVM.loadScript();
 
 
     // Publish events for settings

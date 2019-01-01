@@ -133,7 +133,7 @@ function ScriptEditorTabViewModel(appContext) {
           self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
           return;
         }
-        self.codeMirror.setValue(e.result)
+        self.editor.codeMirror.setValue(e.result)
         self.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: e.result.error }) || "Loaded file!")
         localStorage['script'] = self.context.fileName()
       });
@@ -142,7 +142,7 @@ function ScriptEditorTabViewModel(appContext) {
   self.onSaveScript = function () {
     if (!!self.context.fileName()) {
       let val = self.editor.codeMirror.getValue();
-      if (!val.startsWith("#!/usr/bin/env python3")) {
+      if (!self.isJs() && !val.startsWith("#!/usr/bin/env python3")) {
         val = "#!/usr/bin/env python3\n\r" + val;
       }
       $.post("/bridge.py", JSON.stringify({
