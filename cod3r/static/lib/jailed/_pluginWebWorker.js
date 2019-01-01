@@ -10,26 +10,26 @@ self.application = {};
 self.connection = {};
 
 
-(function(){
-     
+(function () {
+
     /**
      * Event lisener for the plugin message
      */
-    self.addEventListener('message', function(e){
+    self.addEventListener('message', function (e) {
         var m = e.data.data;
         switch (m.type) {
-        case 'import':
-        case 'importJailed':  // already jailed in the iframe
-            importScript(m.url);
-            break;
-        case 'execute':
-            execute(m.code);
-            break;
-        case 'message':
-            conn._messageHandler(m.data);
-            break;
+            case 'import':
+            case 'importJailed':  // already jailed in the iframe
+                importScript(m.url);
+                break;
+            case 'execute':
+                execute(m.code);
+                break;
+            case 'message':
+                conn._messageHandler(m.data);
+                break;
         }
-     });
+    });
 
 
     /**
@@ -37,7 +37,7 @@ self.connection = {};
      *
      * @param {String} url to load
      */
-    var importScript = function(url) {
+    var importScript = function (url) {
         var error = null;
 
         // importScripts does not throw an exception in old webkits
@@ -51,12 +51,12 @@ self.connection = {};
         }
 
         if (error || typeof returned != 'undefined') {
-            self.postMessage({type: 'importFailure', url: url});
+            self.postMessage({ type: 'importFailure', url: url });
             if (error) {
                 throw error;
             }
         } else {
-           self.postMessage({type: 'importSuccess', url: url});
+            self.postMessage({ type: 'importSuccess', url: url });
         }
 
     }
@@ -69,18 +69,18 @@ self.connection = {};
      * 
      * @param {String} code code to execute
      */
-    var execute = function(code) {
+    var execute = function (code) {
         try {
             eval(code);
         } catch (e) {
-            self.postMessage({type: 'executeFailure'});
+            self.postMessage({ type: 'executeFailure', msg: e.message });
             throw e;
         }
 
-        self.postMessage({type: 'executeSuccess'});
+        self.postMessage({ type: 'executeSuccess' });
     }
 
-     
+
     /**
      * Connection object provided to the JailedSite constructor,
      * plugin site implementation for the web-based environment.
@@ -88,16 +88,16 @@ self.connection = {};
      * Worker, so we put this local connection object into a closure
      */
     var conn = {
-        disconnect: function(){ self.close(); },
-        send: function(data) {
-            self.postMessage({type: 'message', data: data});
+        disconnect: function () { self.close(); },
+        send: function (data) {
+            self.postMessage({ type: 'message', data: data });
         },
-        onMessage: function(h){ conn._messageHandler = h; },
-        _messageHandler: function(){},
-        onDisconnect: function() {}
+        onMessage: function (h) { conn._messageHandler = h; },
+        _messageHandler: function () { },
+        onDisconnect: function () { }
     };
-     
+
     connection = conn;
-     
+
 })();
 

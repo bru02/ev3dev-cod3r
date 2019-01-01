@@ -23,9 +23,12 @@ function SaveAsDialogViewModel(appContext) {
   self.changeFolder = function () {
     PopupCenter("/manage?save=1", "Pick a folder", 600, 600);
     window.addEventListener('message', function (e) {
-      e = JSON.parse(e.data);
-      if (!e['dir'] || e.origin !== location.origin) return;
-      self.folder(e['dir']);
+      if (e.origin == location.origin) {
+        e = JSON.parse(e.data);
+        if ('dir' in e) {
+          self.folder(e['dir']);
+        }
+      }
     })
   }
 
@@ -108,10 +111,13 @@ function ScriptEditorTabViewModel(appContext) {
   self.onLoadScript = function () {
     PopupCenter("/manage?load=1", "Pick a file", 600, 600);
     window.addEventListener('message', function (e) {
-      e = JSON.parse(e.data);
-      if (!e['dir'] || e.origin !== location.origin) return;
-      self.context.fileName(e['dir']);
-      self.loadScript();
+      if (e.origin == location.origin) {
+        e = JSON.parse(e.data);
+        if ('dir' in e) {
+          self.context.fileName(e['dir']);
+          self.loadScript();
+        }
+      }
     })
 
   }

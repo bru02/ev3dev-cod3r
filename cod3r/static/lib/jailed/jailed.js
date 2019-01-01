@@ -70,13 +70,13 @@ if (__is__node__) {
      * all future subscibed listeners will be immideately issued
      * instead of being stored)
      */
-    Whenable.prototype.emit = function () {
+    Whenable.prototype.emit = function (msg) {
         if (!this._emitted) {
             this._emitted = true;
 
             var handler;
             while (handler = this._handlers.pop()) {
-                setTimeout(handler, 0);
+                handler(msg);
             }
         }
     }
@@ -448,7 +448,7 @@ if (__is__node__) {
                     me._executeSCb();
                     break;
                 case 'executeFailure':
-                    me._executeFCb();
+                    me._executeFCb(m.msg);
                     break;
             }
         });
@@ -628,8 +628,8 @@ if (__is__node__) {
             var me = this;
 
             // binded failure callback
-            this._fCb = function () {
-                me._fail.emit();
+            this._fCb = function (msg) {
+                me._fail.emit(msg);
                 me.disconnect();
             }
 
