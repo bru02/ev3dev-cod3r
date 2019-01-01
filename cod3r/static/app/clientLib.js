@@ -547,7 +547,7 @@ var cbs = {
     middle: [],
 };
 var listener = false;
-evalContext.button.on = button.on = function (pos, fn) {
+button.on = function (pos, fn) {
     if (cbs[pos]) {
         cbs[pos].push(fn);
         if (!listener) {
