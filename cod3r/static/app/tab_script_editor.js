@@ -53,8 +53,9 @@ function ScriptEditorTabViewModel(appContext) {
     self.context = appContext; // The application context
     self.isJs = ko.observable(self.context.settings.lang == 'js')
     var mode = ko.observable("Split");
-    self.editor = window.dbl = new DoubleEditor($('#scriptEditorTab'), { lang: "python", editor: mode })
-    window.spl = Split([".blockpy-blocks", ".blockpy-text"], {
+    self.editor = new DoubleEditor($('#scriptEditorTab'), { lang: "python", editor: mode })
+    self.editor.setCodeLang(newValue == "js" ? "javascript" : "python")
+    self.split = Split([".blockpy-blocks", ".blockpy-text"], {
       cursor: 'row-resize', onDrag: () => {
         Blockly.svgResize(dbl.blockly);
       },

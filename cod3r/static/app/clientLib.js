@@ -487,14 +487,14 @@ for (let [key, val] of Object.entries(fns)) {
                             if (!res) return false;
                         });
                     } else {
-                        res = type !== e.type
+                        res = type !== e.type;
                     }
                     if (res) {
                         context.messageLogVM.addError("Argument type mismatch for function " + key + "." + name + " argument " + i + ".");
                     }
                 } else {
                     if ('default' in e) {
-                        args[i] = e.default
+                        args[i] = e.default;
                     } else {
                         context.messageLogVM.addError("Too few arguments supplied to function " + key + "." + name + ".");
 
@@ -521,10 +521,10 @@ for (let [key, val] of Object.entries(fns)) {
                             reject(msg.err);
                             context.messageLogVM.addError(msg.err);
                         } else {
-                            resolve(msg.res)
+                            resolve(msg.res);
                         }
                     }
-                    context.ev3BrickServer.ws.addEventListener('message', cb)
+                    context.ev3BrickServer.ws.addEventListener('message', cb);
                 }
             })
         }
@@ -532,12 +532,12 @@ for (let [key, val] of Object.entries(fns)) {
 }
 
 evalContext.leds.off = leds.off = function () {
-    return leds.setColor('BOTH', [0, 0])
+    return leds.setColor('BOTH', [0, 0]);
 }
 infraredSensor.distanceCM = function () {
     return infraredSensor.proximity.call(this, arguments).then(e => {
-        return e * 0.7
-    })
+        return e * 0.7;
+    });
 }
 var cbs = {
     back: [],
@@ -557,7 +557,7 @@ evalContext.button.on = button.on = function (pos, fn) {
                 try {
                     e = JSON.parse(e.data)
                     if (e.btnPressed && cbs[e.grp]) {
-                        $(cbs[e.grp]).each((i, e) => e())
+                        $(cbs[e.grp]).each((i, e) => e());
                     }
                 } catch (e) { }
             })
