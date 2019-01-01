@@ -147,7 +147,6 @@ $(document).ready(function () {
     ko.applyBindings(context.saveAsVM, $("#saveAsModal")[0]);
 
     // Other initialization
-    context.scriptEditorTabVM.loadScript(localStorage['script'] || false);
     context.ev3BrickServer.initialize(); // WebSsocket connexion with the server
 
     // Register config events to update translation if needed

@@ -5,7 +5,10 @@ function SaveAsDialogViewModel(appContext) {
   (function () { // Init
     self.context = appContext; // The application context
     self.folder = ko.observable("/");
-    self.fileName = ko.observable("/script.py");
+    self.fileName = ko.observable(localStorage['script'] || false);
+    self.fileName.subscribe(() => {
+      localStorage['script'] = self.fileName()
+    })
     self.folderDialog = undefined;
   })();
 
@@ -21,6 +24,7 @@ function SaveAsDialogViewModel(appContext) {
     PopupCenter("/manage?save=1", "Pick a folder", 600, 600);
     window.addEventListener('message', function (e) {
       e = JSON.parse(e.data);
+      if (!e['dir'] || e.origin !== location.origin) return;
       self.folder(e['dir']);
     })
   }
@@ -39,7 +43,7 @@ function SaveAsDialogViewModel(appContext) {
       }
       self.context.messageLogVM.addMessage(e.result.success ? 'success' : 'danger', e.result.error || "Saved file!")
     });
-    self.context.fileName.update(path);
+    self.context.fileName(path);
     self.hide();
   };
 }
@@ -103,6 +107,7 @@ function ScriptEditorTabViewModel(appContext) {
     PopupCenter("/manage?load=1", "Pick a file", 600, 600);
     window.addEventListener('message', function (e) {
       e = JSON.parse(e.data);
+      if (!e['dir'] || e.origin !== location.origin) return;
       self.context.fileName(e['dir']);
       self.loadScript();
     })
@@ -127,7 +132,7 @@ function ScriptEditorTabViewModel(appContext) {
     }
   }
   self.onSaveScript = function () {
-    if (!!self.context.fileName) {
+    if (!!self.context.fileName()) {
       let val = self.editor.codeMirror.getValue();
       if (!val.startsWith("#!/usr/bin/env python3")) {
         val = "#!/usr/bin/env python3\n\r" + val;
@@ -135,7 +140,7 @@ function ScriptEditorTabViewModel(appContext) {
       $.post("/bridge.py", {
         action: "edit",
         content: val,
-        item: self.context.fileName
+        item: self.context.fileName()
       }, function (e) {
         try {
           e = JSON.parse(e);

@@ -483,7 +483,7 @@ for (let [key, val] of Object.entries(fns)) {
                     let res = true;
                     if (Array.isArray(e.type)) {
                         $(e['type']).each((j, e) => {
-                            res = res && type !== e
+                            res = res && type !== e;
                             if (!res) return false;
                         });
                     } else {
