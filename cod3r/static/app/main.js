@@ -147,7 +147,7 @@ $(document).ready(function () {
     ko.applyBindings(context.saveAsVM, $("#saveAsModal")[0]);
 
     // Other initialization
-    context.ev3BrickServer.initialize(); // WebSsocket connexion with the server
+    context.ev3BrickServer.initialize(); // WebSocket connection with the server
 
     // Register config events to update translation if needed
     self.context.events.changeSettings.add(function (keyChanged, newValue) {
@@ -196,7 +196,7 @@ $(document).ready(function () {
     $(".row-offcanvas").toggleClass("active");
 
     $("#content").toggleClass("col-md-12 col-md-8").on('transitionend', function () {
-      Blockly.svgResize(self.ScriptEditorTabViewModel.editor.blockly);
+      Blockly.svgResize(self.scriptEditorTabVM.editor.blockly);
     });
   });
 });

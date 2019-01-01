@@ -465,14 +465,13 @@ const fns = {
         }
     }
 };
-Function.prototype.toJSON = function () { return "FUNK_START" + this.toString().replace(/(\s\s|\n|\r)/g, "") + "FUNK_END"; }
-window.evalContext = {};
+// Function.prototype.toJSON = function () { return "FUNK_START" + this.toString().replace(/(\s\s|\n|\r)/g, "") + "FUNK_END"; }
 for (let [key, val] of Object.entries(fns)) {
     if (key == "global") {
-        t = window = evalContext
+        t = window
     } else {
-        window[key] = evalContext[key] = {};
-        t = window[key] = evalContext[key];
+        window[key] = {};
+        t = window[key]
     }
     for (let [name, props] of Object.entries(val)) {
         t[name] = async function () {
@@ -516,7 +515,7 @@ for (let [key, val] of Object.entries(fns)) {
                             return;
                         }
                         if (msg.id !== id) return;
-                        context.ev3BrickServer.ws.removeEventListener('message', cb)
+                        context.ev3BrickServer.ws.removeEventListener('message', cb);
                         if (msg.err) {
                             reject(msg.err);
                             context.messageLogVM.addError(msg.err);
@@ -531,7 +530,7 @@ for (let [key, val] of Object.entries(fns)) {
     }
 }
 
-evalContext.leds.off = leds.off = function () {
+leds.off = function () {
     return leds.setColor('BOTH', [0, 0]);
 }
 infraredSensor.distanceCM = function () {
@@ -555,22 +554,22 @@ evalContext.button.on = button.on = function (pos, fn) {
             listener = true;
             context.ev3BrickServer.ws.addEventListener('message', function (e) {
                 try {
-                    e = JSON.parse(e.data)
+                    e = JSON.parse(e.data);
                     if (e.btnPressed && cbs[e.grp]) {
                         $(cbs[e.grp]).each((i, e) => e());
                     }
                 } catch (e) { }
-            })
+            });
         }
     }
 }
-evalContext.button.off = button.off = function (pos, fn) {
+button.off = function (pos, fn) {
     if (cbs[pos]) {
         return cbs[pos].filter(function (ele) {
             return ele != fn;
         });
     }
 }
-evalContext.sleep = window.sleep = function sleep(s) {
+window.sleep = function sleep(s) {
     return new Promise(resolve => setTimeout(resolve, s * 500));
 }

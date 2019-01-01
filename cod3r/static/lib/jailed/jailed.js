@@ -22,19 +22,19 @@
 
 var __jailed__path__;
 var __is__node__ = ((typeof process !== 'undefined') &&
-    (!process.browser) &&
-    (process.release.name.search(/node|io.js/) !== -1));
+                    (!process.browser) &&
+                    (process.release.name.search(/node|io.js/) !== -1));
 if (__is__node__) {
     // Node.js
     __jailed__path__ = __dirname + '/';
 } else {
     // web
     var scripts = document.getElementsByTagName('script');
-    __jailed__path__ = scripts[scripts.length - 1].src
+    __jailed__path__ = scripts[scripts.length-1].src
         .split('?')[0]
         .split('/')
         .slice(0, -1)
-        .join('/') + '/';
+        .join('/')+'/';
 }
 
 
@@ -58,7 +58,7 @@ if (__is__node__) {
      * all) during a single plugin lifecycle - connect, disconnect and
      * connection failure
      */
-    var Whenable = function () {
+    var Whenable = function() {
         this._emitted = false;
         this._handlers = [];
     }
@@ -70,13 +70,13 @@ if (__is__node__) {
      * all future subscibed listeners will be immideately issued
      * instead of being stored)
      */
-    Whenable.prototype.emit = function () {
+    Whenable.prototype.emit = function(){
         if (!this._emitted) {
             this._emitted = true;
 
             var handler;
-            while (handler = this._handlers.pop()) {
-                setTimeout(handler, 0);
+            while(handler = this._handlers.pop()) {
+                setTimeout(handler,0);
             }
         }
     }
@@ -90,7 +90,7 @@ if (__is__node__) {
      * 
      * @param {Function} handler to subscribe for the event
      */
-    Whenable.prototype.whenEmitted = function (handler) {
+    Whenable.prototype.whenEmitted = function(handler){
         handler = this._checkHandler(handler);
         if (this._emitted) {
             setTimeout(handler, 0);
@@ -110,7 +110,7 @@ if (__is__node__) {
      * 
      * @returns {Object} the provided object if yes
      */
-    Whenable.prototype._checkHandler = function (handler) {
+    Whenable.prototype._checkHandler = function(handler){
         var type = typeof handler;
         if (type != 'function') {
             var msg =
@@ -129,7 +129,7 @@ if (__is__node__) {
      * Initializes the library site for Node.js environment (loads
      * _JailedSite.js)
      */
-    var initNode = function () {
+    var initNode = function() {
         require('./_JailedSite.js');
     }
 
@@ -139,29 +139,29 @@ if (__is__node__) {
      * _JailedSite.js)
      */
     var platformInit;
-    var initWeb = function () {
+    var initWeb = function() {
         // loads additional script to the application environment
-        var load = function (path, cb) {
+        var load = function(path, cb) {
             var script = document.createElement('script');
             script.src = path;
 
-            var clear = function () {
+            var clear = function() {
                 script.onload = null;
                 script.onerror = null;
                 script.onreadystatechange = null;
                 script.parentNode.removeChild(script);
             }
 
-            var success = function () {
+            var success = function() {
                 clear();
                 cb();
             }
 
             script.onerror = clear;
             script.onload = success;
-            script.onreadystatechange = function () {
+            script.onreadystatechange = function() {
                 var state = script.readyState;
-                if (state === 'loaded' || state === 'complete') {
+                if (state==='loaded' || state==='complete') {
                     success();
                 }
             }
@@ -170,25 +170,25 @@ if (__is__node__) {
         }
 
         platformInit = new Whenable;
-        var origOnload = window.onload || function () { };
+        var origOnload = window.onload || function(){};
 
-        window.onload = function () {
+        window.onload = function(){
             origOnload();
             load(
-                __jailed__path__ + '_JailedSite.js',
-                function () { platformInit.emit(); }
+                __jailed__path__+'_JailedSite.js',
+                function(){ platformInit.emit(); }
             );
         }
     }
 
 
     var BasicConnection;
-
+      
     /**
      * Creates the platform-dependent BasicConnection object in the
      * Node.js environment
      */
-    var basicConnectionNode = function () {
+    var basicConnectionNode = function() {
         var childProcess = require('child_process');
 
         /**
@@ -198,23 +198,23 @@ if (__is__node__) {
          * 
          * For Node.js the plugin is created as a forked process
          */
-        BasicConnection = function () {
+        BasicConnection = function() {
             // in Node.js always has a subprocess
             this.dedicatedThread = true;
             this._disconnected = false;
-            this._messageHandler = function () { };
-            this._disconnectHandler = function () { };
+            this._messageHandler = function(){};
+            this._disconnectHandler = function(){};
 
             this._process = childProcess.fork(
-                __jailed__path__ + '_pluginNode.js'
+                __jailed__path__+'_pluginNode.js'
             );
 
             var me = this;
-            this._process.on('message', function (m) {
+            this._process.on('message', function(m){
                 me._messageHandler(m);
             });
 
-            this._process.on('exit', function (m) {
+            this._process.on('exit', function(m){
                 me._disconnected = true;
                 me._disconnectHandler(m);
             });
@@ -230,7 +230,7 @@ if (__is__node__) {
          * 
          * @param {Function} handler to be called upon connection init
          */
-        BasicConnection.prototype.whenInit = function (handler) {
+        BasicConnection.prototype.whenInit = function(handler) {
             handler();
         }
 
@@ -240,7 +240,7 @@ if (__is__node__) {
          * 
          * @param {Object} data to send
          */
-        BasicConnection.prototype.send = function (data) {
+        BasicConnection.prototype.send = function(data) {
             if (!this._disconnected) {
                 this._process.send(data);
             }
@@ -252,8 +252,8 @@ if (__is__node__) {
          * 
          * @param {Function} handler to call upon a message
          */
-        BasicConnection.prototype.onMessage = function (handler) {
-            this._messageHandler = function (data) {
+        BasicConnection.prototype.onMessage = function(handler) {
+            this._messageHandler = function(data) {
                 // broken stack would break the IPC in Node.js
                 try {
                     handler(data);
@@ -271,7 +271,7 @@ if (__is__node__) {
          * 
          * @param {Function} handler to call upon a disconnect
          */
-        BasicConnection.prototype.onDisconnect = function (handler) {
+        BasicConnection.prototype.onDisconnect = function(handler) {
             this._disconnectHandler = handler;
         }
 
@@ -279,7 +279,7 @@ if (__is__node__) {
         /**
          * Disconnects the plugin (= kills the forked process)
          */
-        BasicConnection.prototype.disconnect = function () {
+        BasicConnection.prototype.disconnect = function() {
             this._process.kill('SIGKILL');
             this._disconnected = true;
         }
@@ -291,10 +291,10 @@ if (__is__node__) {
      * Creates the platform-dependent BasicConnection object in the
      * web-browser environment
      */
-    var basicConnectionWeb = function () {
+    var basicConnectionWeb = function() {
         var perm = ['allow-scripts'];
 
-        if (__jailed__path__.substr(0, 7).toLowerCase() == 'file://') {
+        if (__jailed__path__.substr(0,7).toLowerCase() == 'file://') {
             // local instance requires extra permission
             perm.push('allow-same-origin');
         }
@@ -314,12 +314,12 @@ if (__is__node__) {
          * For the web-browser environment, the plugin is created as a
          * Worker in a sandbaxed frame
          */
-        BasicConnection = function () {
+        BasicConnection = function() {
             this._init = new Whenable;
             this._disconnected = false;
 
             var me = this;
-            platformInit.whenEmitted(function () {
+            platformInit.whenEmitted(function() {
                 if (!me._disconnected) {
                     me._frame = sample.cloneNode(false);
                     document.body.appendChild(me._frame);
@@ -338,8 +338,8 @@ if (__is__node__) {
                 }
             });
         }
-
-
+        
+        
         /**
          * Sets-up the handler to be called upon the BasicConnection
          * initialization is completed.
@@ -351,7 +351,7 @@ if (__is__node__) {
          * 
          * @param {Function} handler to be called upon connection init
          */
-        BasicConnection.prototype.whenInit = function (handler) {
+        BasicConnection.prototype.whenInit = function(handler) {
             this._init.whenEmitted(handler);
         }
 
@@ -361,9 +361,9 @@ if (__is__node__) {
          * 
          * @param {Object} data to send
          */
-        BasicConnection.prototype.send = function (data) {
+        BasicConnection.prototype.send = function(data) {
             this._frame.contentWindow.postMessage(
-                { type: 'message', data: data }, '*'
+                {type: 'message', data: data}, '*'
             );
         }
 
@@ -373,7 +373,7 @@ if (__is__node__) {
          * 
          * @param {Function} handler to call upon a message
          */
-        BasicConnection.prototype.onMessage = function (handler) {
+        BasicConnection.prototype.onMessage = function(handler) {
             this._messageHandler = handler;
         }
 
@@ -384,13 +384,13 @@ if (__is__node__) {
          * 
          * @param {Function} handler to call upon a disconnect
          */
-        BasicConnection.prototype.onDisconnect = function () { };
+        BasicConnection.prototype.onDisconnect = function(){};
 
 
         /**
          * Disconnects the plugin (= kills the frame)
          */
-        BasicConnection.prototype.disconnect = function () {
+        BasicConnection.prototype.disconnect = function() {
             if (!this._disconnected) {
                 this._disconnected = true;
                 if (typeof this._frame != 'undefined') {
@@ -411,7 +411,7 @@ if (__is__node__) {
     }
 
 
-
+      
     /**
      * Application-site Connection object constructon, reuses the
      * platform-dependent BasicConnection declared above in order to
@@ -420,36 +420,36 @@ if (__is__node__) {
      * methods for loading scripts and executing the given code in the
      * plugin
      */
-    var Connection = function () {
+    var Connection = function(){
         this._platformConnection = new BasicConnection;
 
         this._importCallbacks = {};
-        this._executeSCb = function () { };
-        this._executeFCb = function () { };
-        this._messageHandler = function () { };
+        this._executeSCb = function(){};
+        this._executeFCb = function(){};
+        this._messageHandler = function(){};
 
         var me = this;
-        this.whenInit = function (cb) {
+        this.whenInit = function(cb){
             me._platformConnection.whenInit(cb);
         };
 
-        this._platformConnection.onMessage(function (m) {
-            switch (m.type) {
-                case 'message':
-                    me._messageHandler(m.data);
-                    break;
-                case 'importSuccess':
-                    me._handleImportSuccess(m.url);
-                    break;
-                case 'importFailure':
-                    me._handleImportFailure(m.url);
-                    break;
-                case 'executeSuccess':
-                    me._executeSCb();
-                    break;
-                case 'executeFailure':
-                    me._executeFCb();
-                    break;
+        this._platformConnection.onMessage(function(m) {
+            switch(m.type) {
+            case 'message':
+                me._messageHandler(m.data);
+                break;
+            case 'importSuccess':
+                me._handleImportSuccess(m.url);
+                break;
+            case 'importFailure':
+                me._handleImportFailure(m.url);
+                break;
+            case 'executeSuccess':
+                me._executeSCb();
+                break;
+            case 'executeFailure':
+                me._executeFCb();
+                break;
             }
         });
     }
@@ -461,7 +461,7 @@ if (__is__node__) {
      * therefore will not hang up on the infinite loop in the
      * untrusted code
      */
-    Connection.prototype.hasDedicatedThread = function () {
+    Connection.prototype.hasDedicatedThread = function() {
         return this._platformConnection.dedicatedThread;
     }
 
@@ -475,12 +475,12 @@ if (__is__node__) {
      * @param {Function} sCb to call upon success
      * @param {Function} fCb to call upon failure
      */
-    Connection.prototype.importScript = function (path, sCb, fCb) {
-        var f = function () { };
-        this._importCallbacks[path] = { sCb: sCb || f, fCb: fCb || f };
-        this._platformConnection.send({ type: 'import', url: path });
+    Connection.prototype.importScript = function(path, sCb, fCb) {
+        var f = function(){};
+        this._importCallbacks[path] = {sCb: sCb||f, fCb: fCb||f};
+        this._platformConnection.send({type: 'import', url: path});
     }
-
+      
 
     /**
      * Tells the plugin to load a script with the given path, and to
@@ -491,10 +491,10 @@ if (__is__node__) {
      * @param {Function} sCb to call upon success
      * @param {Function} fCb to call upon failure
      */
-    Connection.prototype.importJailedScript = function (path, sCb, fCb) {
-        var f = function () { };
-        this._importCallbacks[path] = { sCb: sCb || f, fCb: fCb || f };
-        this._platformConnection.send({ type: 'importJailed', url: path });
+    Connection.prototype.importJailedScript = function(path, sCb, fCb) {
+        var f = function(){};
+        this._importCallbacks[path] = {sCb: sCb||f, fCb: fCb||f};
+        this._platformConnection.send({type: 'importJailed', url: path});
     }
 
 
@@ -508,10 +508,10 @@ if (__is__node__) {
      * @param {Function} sCb to call upon success
      * @param {Function} fCb to call upon failure
      */
-    Connection.prototype.execute = function (code, sCb, fCb) {
-        this._executeSCb = sCb || function () { };
-        this._executeFCb = fCb || function () { };
-        this._platformConnection.send({ type: 'execute', code: code });
+    Connection.prototype.execute = function(code, sCb, fCb) {
+        this._executeSCb = sCb||function(){};
+        this._executeFCb = fCb||function(){};
+        this._platformConnection.send({type: 'execute', code: code});
     }
 
 
@@ -520,18 +520,18 @@ if (__is__node__) {
      * 
      * @param {Function} handler to call upon a message
      */
-    Connection.prototype.onMessage = function (handler) {
+    Connection.prototype.onMessage = function(handler) {
         this._messageHandler = handler;
     }
-
-
+      
+      
     /**
      * Adds a handler for a disconnect message received from the
      * plugin site
      * 
      * @param {Function} handler to call upon disconnect
      */
-    Connection.prototype.onDisconnect = function (handler) {
+    Connection.prototype.onDisconnect = function(handler) {
         this._platformConnection.onDisconnect(handler);
     }
 
@@ -541,7 +541,7 @@ if (__is__node__) {
      * 
      * @param {Object} data of the message to send
      */
-    Connection.prototype.send = function (data) {
+    Connection.prototype.send = function(data) {
         this._platformConnection.send({
             type: 'message',
             data: data
@@ -554,7 +554,7 @@ if (__is__node__) {
      * 
      * @param {String} url of a script loaded by the plugin
      */
-    Connection.prototype._handleImportSuccess = function (url) {
+    Connection.prototype._handleImportSuccess = function(url) {
         var sCb = this._importCallbacks[url].sCb;
         this._importCallbacks[url] = null;
         delete this._importCallbacks[url];
@@ -567,7 +567,7 @@ if (__is__node__) {
      * 
      * @param {String} url of a script loaded by the plugin
      */
-    Connection.prototype._handleImportFailure = function (url) {
+    Connection.prototype._handleImportFailure = function(url) {
         var fCb = this._importCallbacks[url].fCb;
         this._importCallbacks[url] = null;
         delete this._importCallbacks[url];
@@ -578,17 +578,37 @@ if (__is__node__) {
     /**
      * Disconnects the plugin when it is not needed anymore
      */
-    Connection.prototype.disconnect = function () {
+    Connection.prototype.disconnect = function() {
         this._platformConnection.disconnect();
     }
 
 
 
 
+    /**
+     * Plugin constructor, represents a plugin initialized by a script
+     * with the given path
+     * 
+     * @param {String} url of a plugin source
+     * @param {Object} _interface to provide for the plugin
+     */
+    var Plugin = function(url, _interface) {
+        this._path = url;
+        this._initialInterface = _interface||{};
+        this._connect();
+    };
 
-    var DynamicPlugin = function (code, _interface) {
+
+    /**
+     * DynamicPlugin constructor, represents a plugin initialized by a
+     * string containing the code to be executed
+     * 
+     * @param {String} code of the plugin
+     * @param {Object} _interface to provide to the plugin
+     */
+    var DynamicPlugin = function(code, _interface) {
         this._code = code;
-        this._initialInterface = _interface || {};
+        this._initialInterface = _interface||{};
         this._connect();
     };
 
@@ -597,27 +617,26 @@ if (__is__node__) {
      * Creates the connection to the plugin site
      */
     DynamicPlugin.prototype._connect =
-        function () {
-            this.remote = null;
+           Plugin.prototype._connect = function() {
+        this.remote = null;
 
-            this._connect = new Whenable;
-            this._fail = new Whenable;
-            this._disconnect = new Whenable;
-            this._scs = new Whenable;
-
-            var me = this;
-
-            // binded failure callback
-            this._fCb = function () {
-                me._fail.emit();
-                me.disconnect();
-            }
-
-            this._connection = new Connection;
-            this._connection.whenInit(function () {
-                me._init();
-            });
+        this._connect    = new Whenable;
+        this._fail       = new Whenable;
+        this._disconnect = new Whenable;
+               
+        var me = this;
+               
+        // binded failure callback
+        this._fCb = function(){
+            me._fail.emit();
+            me.disconnect();
         }
+               
+        this._connection = new Connection;
+        this._connection.whenInit(function(){
+            me._init();
+        });
+    }
 
 
     /**
@@ -625,47 +644,48 @@ if (__is__node__) {
      * common routines (_JailedSite.js)
      */
     DynamicPlugin.prototype._init =
-        function () {
-            this._site = new JailedSite(this._connection);
+           Plugin.prototype._init = function() {
+        this._site = new JailedSite(this._connection);
+               
+        var me = this;
+        this._site.onDisconnect(function() {
+            me._disconnect.emit();
+        });
 
-            var me = this;
-            this._site.onDisconnect(function () {
-                me._disconnect.emit();
-            });
-
-            var sCb = function () {
-                me._loadCore();
-            }
-
-            this._connection.importScript(
-                __jailed__path__ + '_JailedSite.js', sCb, this._fCb
-            );
+        var sCb = function() {
+            me._loadCore();
         }
+
+        this._connection.importScript(
+            __jailed__path__+'_JailedSite.js', sCb, this._fCb
+        );
+    }
 
 
     /**
      * Loads the core scirpt into the plugin
      */
     DynamicPlugin.prototype._loadCore =
-        function () {
-            var me = this;
-            var sCb = function () {
-                me._sendInterface();
-            }
-
-            this._connection.importScript(
-                __jailed__path__ + '_pluginCore.js', sCb, this._fCb
-            );
+           Plugin.prototype._loadCore = function() {
+        var me = this;
+        var sCb = function() {
+            me._sendInterface();
         }
 
-
+        this._connection.importScript(
+            __jailed__path__+'_pluginCore.js', sCb, this._fCb
+        );
+    }
+    
+    
     /**
      * Sends to the remote site a signature of the interface provided
      * upon the Plugin creation
      */
-    DynamicPlugin.prototype._sendInterface = function () {
+    DynamicPlugin.prototype._sendInterface =
+           Plugin.prototype._sendInterface = function() {
         var me = this;
-        this._site.onInterfaceSetAsRemote(function () {
+        this._site.onInterfaceSetAsRemote(function() {
             if (!me._connected) {
                 me._loadPlugin();
             }
@@ -673,24 +693,36 @@ if (__is__node__) {
 
         this._site.setInterface(this._initialInterface);
     }
+    
+    
+    /**
+     * Loads the plugin body (loads the plugin url in case of the
+     * Plugin)
+     */
+    Plugin.prototype._loadPlugin = function() {
+        var me = this;
+        var sCb = function() {
+            me._requestRemote();
+        }
 
-
-
+        this._connection.importJailedScript(this._path, sCb, this._fCb);
+    }
+    
+    
     /**
      * Loads the plugin body (executes the code in case of the
      * DynamicPlugin)
      */
-    DynamicPlugin.prototype._loadPlugin = function () {
+    DynamicPlugin.prototype._loadPlugin = function() {
         var me = this;
-        var sCb = function () {
-            me._scs.emit();
+        var sCb = function() {
             me._requestRemote();
         }
 
         this._connection.execute(this._code, sCb, this._fCb);
     }
-
-
+    
+    
     /**
      * Requests the remote interface from the plugin (which was
      * probably set by the plugin during its initialization), emits
@@ -698,16 +730,16 @@ if (__is__node__) {
      * (meaning both the plugin and the application can use the
      * interfaces provided to each other)
      */
-    DynamicPlugin.prototype._requestRemote =
-        function () {
-            var me = this;
-            this._site.onRemoteUpdate(function () {
-                me.remote = me._site.getRemote();
-                me._connect.emit();
-            });
+    DynamicPlugin.prototype._requestRemote = 
+           Plugin.prototype._requestRemote = function() {
+        var me = this;
+        this._site.onRemoteUpdate(function(){
+            me.remote = me._site.getRemote();
+            me._connect.emit();
+        });
 
-            this._site.requestRemote();
-        }
+        this._site.requestRemote();
+    }
 
 
     /**
@@ -716,35 +748,32 @@ if (__is__node__) {
      * will not hang up on the infinite loop in the untrusted code
      */
     DynamicPlugin.prototype.hasDedicatedThread =
-        function () {
-            return this._connection.hasDedicatedThread();
-        }
+           Plugin.prototype.hasDedicatedThread = function() {
+        return this._connection.hasDedicatedThread();
+    }
 
-
+    
     /**
      * Disconnects the plugin immideately
      */
-    DynamicPlugin.prototype.disconnect =
-        function () {
-            this._connection.disconnect();
-            this._disconnect.emit();
-        }
-
-
+    DynamicPlugin.prototype.disconnect = 
+           Plugin.prototype.disconnect = function() {
+        this._connection.disconnect();
+        this._disconnect.emit();
+    }
+   
+    
     /**
      * Saves the provided function as a handler for the connection
      * failure Whenable event
      * 
      * @param {Function} handler to be issued upon disconnect
      */
-    DynamicPlugin.prototype.whenFailed =
-        function (handler) {
-            this._fail.whenEmitted(handler);
-        }
-    DynamicPlugin.prototype.whenDone =
-        function (handler) {
-            this._scs.whenEmitted(handler);
-        }
+    DynamicPlugin.prototype.whenFailed = 
+           Plugin.prototype.whenFailed = function(handler) {
+        this._fail.whenEmitted(handler);
+    }
+
 
     /**
      * Saves the provided function as a handler for the connection
@@ -752,26 +781,27 @@ if (__is__node__) {
      * 
      * @param {Function} handler to be issued upon connection
      */
-    DynamicPlugin.prototype.whenConnected =
-        function (handler) {
-            this._connect.whenEmitted(handler);
-        }
-
-
+    DynamicPlugin.prototype.whenConnected = 
+           Plugin.prototype.whenConnected = function(handler) {
+        this._connect.whenEmitted(handler);
+    }
+    
+    
     /**
      * Saves the provided function as a handler for the connection
      * failure Whenable event
      * 
      * @param {Function} handler to be issued upon connection failure
      */
-    DynamicPlugin.prototype.whenDisconnected =
-        function (handler) {
-            this._disconnect.whenEmitted(handler);
-        }
-
-
-
+    DynamicPlugin.prototype.whenDisconnected = 
+           Plugin.prototype.whenDisconnected = function(handler) {
+        this._disconnect.whenEmitted(handler);
+    }
+    
+    
+    
+    exports.Plugin = Plugin;
     exports.DynamicPlugin = DynamicPlugin;
-
+  
 }));
 
