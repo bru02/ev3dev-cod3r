@@ -194,9 +194,8 @@ $(document).ready(function () {
   $('[data-toggle=offcanvas]').click(function () {
     $("#sidebar").toggleClass("collapsed");
     $(".row-offcanvas").toggleClass("active");
-
-    $("#content").toggleClass("col-md-12 col-md-8").on('transitionend', function () {
-      Blockly.svgResize(self.scriptEditorTabVM.editor.blockly);
+    $("#content").toggleClass("col-md-12 col-md-8").one('transitionend', function () {
+      Blockly.svgResize(context.scriptEditorTabVM.editor.blockly);
     });
   });
 });

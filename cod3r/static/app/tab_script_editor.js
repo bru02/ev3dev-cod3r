@@ -54,12 +54,11 @@ function ScriptEditorTabViewModel(appContext) {
 
   var self = this;
   (function () { // Init
-    let isJs = self.context.settings.lang == 'js';
     self.context = appContext; // The application context
+    let isJs = self.context.settings.lang == 'js';
     self.isJs = ko.observable(isJs)
     var mode = ko.observable("Split");
     self.editor = new DoubleEditor($('#scriptEditorTab'), { lang: isJs ? "javascript" : "python", editor: mode })
-    if (isJs) { self.editor.setMode('Text'); }
     self.split = Split([".blockpy-blocks", ".blockpy-text"], {
       cursor: 'row-resize', onDrag: () => {
         Blockly.svgResize(self.editor.blockly);
@@ -68,7 +67,8 @@ function ScriptEditorTabViewModel(appContext) {
     });
     self.editor.codeMirror.on('change', function () {
       self.context.isSaved(false);
-    })
+    });
+    if (isJs) { self.editor.setMode('Text'); }
     self.context.events.changeSettings.add(function (keyChanged, newValue) {
       if ("lang" == keyChanged) {
         self.onSaveScript();

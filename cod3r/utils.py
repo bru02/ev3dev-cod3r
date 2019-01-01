@@ -509,7 +509,7 @@ class FileManager:
 
             shutil.move(src, dst)
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -531,7 +531,7 @@ class FileManager:
 
                     shutil.copy(src, path)
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -546,7 +546,7 @@ class FileManager:
 
                 shutil.move(src, path)
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -563,7 +563,7 @@ class FileManager:
                 else:
                     os.remove(path)
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -577,7 +577,7 @@ class FileManager:
             with open(path, 'w') as f:
                 f.write(content)
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -590,7 +590,7 @@ class FileManager:
             with open(path, 'r') as f:
                 content = f.read()
         except Exception as e:
-            content = e.message
+            content = str(e)
 
         return {'result': content}
 
@@ -602,7 +602,7 @@ class FileManager:
 
             os.makedirs(path)
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -622,7 +622,7 @@ class FileManager:
                 else:
                     os.chmod(path, permissions)
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -652,7 +652,7 @@ class FileManager:
 
             zip_file.close()
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -667,7 +667,7 @@ class FileManager:
             zip_file.extractall(dst)
             zip_file.close()
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -683,7 +683,7 @@ class FileManager:
                 with open(path, 'wb') as f:
                     f.write(fileinfo['body'])
         except Exception as e:
-            return {'result': {'success': False, 'error': e.message}}
+            return {'result': {'success': False, 'error': str(e)}}
 
         return {'result': {'success': True, 'error': ''}}
 
@@ -723,13 +723,14 @@ class FileManager:
         path = os.path.abspath(self.root + request['item'])
         if not path.startswith(self.root):
             return {'result': {'success': False, 'error': 'Invalid path'}}
-        
         try:
-             with open(path, "x") as fout:
-                fout.write("\n\r")
-                return {'result': {'success': True, 'error': ''}}
-        except FileExistsError:
-            return {'result': {'success': False, 'error': 'File exists'}}
+            from pathlib import Path
+            filename = Path('myfile.txt')
+            filename.touch(exist_ok=True) 
+            return {'result': {'success': True, 'error': ''}}
+        except Exception as e:
+            return {'result': {'success': False, 'error': str(e)}}
+
 
 def get_motor_class(isM):
     if(isM):
