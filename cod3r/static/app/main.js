@@ -197,7 +197,7 @@ $(document).ready(function () {
     $(".row-offcanvas").toggleClass("active");
 
     $("#content").toggleClass("col-md-12 col-md-8").on('transitionend', function () {
-      Blockly.svgResize(dbl.blockly);
+      Blockly.svgResize(self.ScriptEditorTabViewModel.editor.blockly);
     });
   });
 });
