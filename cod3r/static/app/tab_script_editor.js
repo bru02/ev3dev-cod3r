@@ -31,10 +31,10 @@ function SaveAsDialogViewModel(appContext) {
 
   self.onSave = function () {
     let path = self.folder() + self.fileName();
-    $.post("/bridge.py", {
+    $.post("/bridge.py", JSON.stringify({
       action: "createFile",
       item: path
-    }, function (e) {
+    }), function (e) {
       try {
         e = JSON.parse(e);
       } catch (e) {
@@ -117,10 +117,10 @@ function ScriptEditorTabViewModel(appContext) {
   }
   self.loadScript = function () {
     if (self.context.fileName()) {
-      $.post("/bridge.py", {
+      $.post("/bridge.py", JSON.stringify({
         action: "getContent",
         item: self.context.fileName()
-      }, function (e) {
+      }), function (e) {
         try {
           e = JSON.parse(e);
         } catch (e) {
@@ -139,11 +139,11 @@ function ScriptEditorTabViewModel(appContext) {
       if (!val.startsWith("#!/usr/bin/env python3")) {
         val = "#!/usr/bin/env python3\n\r" + val;
       }
-      $.post("/bridge.py", {
+      $.post("/bridge.py", JSON.stringify({
         action: "edit",
         content: val,
         item: self.context.fileName()
-      }, function (e) {
+      }), function (e) {
         try {
           e = JSON.parse(e);
         } catch (e) {

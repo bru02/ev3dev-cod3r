@@ -48,8 +48,8 @@
             );
         angular.module('FileManagerApp').config(['fileManagerConfigProvider', function (config) {
             var defaults = config.$get();
-            let pickFiles = params['load'] !== null;
-            let pickFolders = params['save'] !== null;
+            let pickFiles = 'load' in params;
+            let pickFolders = 'save' in params;
             let allowedActions = angular.extend(defaults.allowedActions, {
                 pickFiles,
                 pickFolders,

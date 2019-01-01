@@ -725,7 +725,7 @@ class FileManager:
             return {'result': {'success': False, 'error': 'Invalid path'}}
         try:
             from pathlib import Path
-            filename = Path('myfile.txt')
+            filename = Path(path)
             filename.touch(exist_ok=True) 
             return {'result': {'success': True, 'error': ''}}
         except Exception as e:
