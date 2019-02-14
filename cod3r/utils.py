@@ -761,71 +761,83 @@ def get_input(p):
     if(port==4):
         return INPUT_4        
 
-
-class APIWrapper:
+class apiWrapper:
     def __init__(self):
-        self.lcd = Display()
-        self.spk = Sound()
-        self.leds = Leds()
-        self.btn = Button()
+        self.ev3 = ev3Wrapper()
+        self.global = globalWrapper()
+        self.screen = screenWrapper()
+        self.led = ledWrapper()
+        self.sound = soundWrapper()
+        self.motor = motorWrapper()
+        self.touchSensor = touchSensorWrapper()
+        self.colorSensor = colorSensorWrapper()
+        self.gyroSensor = gyroSensorWrapper()
+        self.ultraSonicSensor = ultraSonicSensorWrapper()
+        self.button = buttonWrapper()
 
-    def ev3_isOk(self, args):
+class ev3Wrapper:
+    def isOk(self, args):
         return {'res': True}
     
-    def ev3_log(self, args):
+    def log(self, args):
         txt="" 
         for arg in args:
             print(str(arg), file=stderr)
             txt += "\r\n " + str(arg)
 
         return {'txt': txt} 
-    
-    def screen_textPixels(self, args):
-        self.lcd.text_pixels(args[0], clear_screen=args[4], x=args[1], y=args[2], text_color=args[3], font=args[5] or None)
-        
 
-    def global_wrap(self, args):
+class globalWrapper:
+    def wrap(self, args):
         return {'res': wrap(args[0], args[1])}
 
-    def global_print(self, args):
+    def print(self, args):
         for arg in args:
             print(str(arg))
 
-    def screen_line(self, args):
+class screenWrapper:
+    def __init__(self):
+        self.lcd = Display()
+
+    def textPixels(self, args):
+        self.lcd.text_pixels(args[0], clear_screen=args[4], x=args[1], y=args[2], text_color=args[3], font=args[5] or None)
+
+    def line(self, args):
         self.lcd.line(clear_screen=args[6], x1=args[0], y1=args[1], x2=args[2], y2=args[3], line_color=args[5], width=args[4])
         
 
-    def screen_circle(self, args):
+    def circle(self, args):
         self.lcd.circle(clear_screen=args[5], x=args[0], y=args[1], radius=args[2], fill_color=args[3], outline_color=args[4])
 
-    def screen_point(self, args):
+    def point(self, args):
         self.lcd.point(clear_screen=args[3], x=args[0], y=args[1], point_color=args[2])
         
 
-    def screen_rect(self, args):
+    def rect(self, args):
         self.lcd.rectangle(clear_screen=args[5], x=args[0], y=args[1], width=args[2], height=args[3], fill_color=args[4], outline_color=args[5])
         
-
-
-    def screen_imageFromFile(self, args):
+    def imageFromFile(self, args):
         logo = Image.open(args[0])
         self.lcd.image.paste(logo, (args[1],args[2]))
         
 
-    def screen_imageFromString(self, args):
+    def imageFromString(self, args):
         import re
         image_data = re.sub('^data:image/.+;base64,', '', args[0]).decode('base64')
         im = Image.open(BytesIO(image_data))
         self.lcd.image.paste(im, (args[1],args[2]))
         
 
-    def screen_update(self, args):
+    def update(self, args):
         self.lcd.update()
         
 
-    def screen_clear(self, args):
+    def clear(self, args):
         self.lcd.clear()
         
+class ledWrapper:
+    def __init__(self):
+        self.leds = Leds()
 
     def leds_setColor(self, args):
         addr = str(args[0]).upper()
@@ -834,29 +846,32 @@ class APIWrapper:
             self.leds.set_color('RIGHT', args[1])
         else:
             self.leds.set_color(addr, args[1])
-        
-        
+             
+class soundWrapper:
+    def __init__(self):
+        self.spk = Sound()
 
-    def sound_beep(self, args):
+    def beep(self, args):
         self.spk.beep()
         
 
-    def sound_tone(self, args):
+    def tone(self, args):
         if(len(args) == 2):
             self.spk.play_tone(args[0], args[1])
         else:
             self.spk.tone(args[0])
         
 
-    def sound_play(self, args):
+    def play(self, args):
         self.spk.play(args[0])
         
 
-    def sound_speak(self, args):
+    def speak(self, args):
         opts = '-a '+ str(args[1])+' -s '+str(args[2])+' -v'
         self.spk.speak(args[0], espeak_opts=opts+str(args[3]))
 
-    def motor_on(self, args):
+class motorWrapper:
+    def on(self, args):
         if(len(args) == 2):
             m = get_motor_class(args[1])
             m = m()
@@ -868,7 +883,7 @@ class APIWrapper:
                 m = m(get_output(p))
                 m.on(speed=args[1])
 
-    def motor_off(self, args):
+    def off(self, args):
         if(len(args) == 2):
             arr = args[0]
             for p in arr:
@@ -880,7 +895,7 @@ class APIWrapper:
             m = m()
             m.off()
 
-    def motor_turn(self, args):
+    def turn(self, args):
         if(len(args) == 4):
             arr = args[0]
             for p in arr:
@@ -891,7 +906,7 @@ class APIWrapper:
             m = get_motor_class(args[2])
             m.on_for_rotations(args[1], args[0], brake=True, block=True)
 
-    def motor_waitUntilNotMoving(self, args):
+    def waitUntilNotMoving(self, args):
         if(len(args) == 2):
             m = get_motor_class(args[1])
             m = m(args[0])
@@ -901,7 +916,7 @@ class APIWrapper:
             m = m()
             m.wait_until_not_moving()
 
-    def motor_steer(self, args):
+    def steer(self, args):
         if(isinstance(args[0], list)):
             arr = args[0]
         else:
@@ -914,105 +929,108 @@ class APIWrapper:
         else:
             steer_pair.on_for_rotations(steering=args[2], speed=args[1], rotations=args[3])
 
-    def touchSensor_isPressed(self, args):
+class touchSensorWrapper:
+    def isPressed(self, args):
         if(len(args) == 1):
             ts = TouchSensor(get_input(args[0]))
         else:
             ts = TouchSensor()
         return {'res': ts.is_pressed}
 
-    def touchSensor_waitForPress(self, args):
+    def waitForPress(self, args):
         if(len(args) == 1):
             ts = TouchSensor(get_input(args[0]))
         else:
             ts = TouchSensor()
         ts.wait_for_pressed()
 
-    def touchSensor_waitForRelease(self, args):
+    def waitForRelease(self, args):
         if(len(args) == 1):
             ts = TouchSensor(get_input(args[0]))
         else:
             ts = TouchSensor()
         ts.wait_for_released()
 
-    def touchSensor_waitForBump(self, args):
+    def waitForBump(self, args):
         if(len(args) == 1):
             ts = TouchSensor(get_input(args[0]))
         else:
             ts = TouchSensor()
         ts.wait_for_bump()
 
-    def colorSensor_raw(self, args):
+class colorSensorWrapper:
+    def raw(self, args):
         if(len(args) == 1):
             cs = ColorSensor(get_input(args[0]))
         else:
             cs = ColorSensor()
         return {'ret': cs.raw}
 
-    def colorSensor_rgb(self, args):
+    def rgb(self, args):
         if(len(args) == 1):
             cs = ColorSensor(get_input(args[0]))
         else:
             cs = ColorSensor()
         return {'ret': cs.rgb}
 
-    def colorSensor_color(self, args):
+    def color(self, args):
         if(len(args) == 1):
             cs = ColorSensor(get_input(args[0]))
         else:
             cs = ColorSensor()
         return {'ret': cs.color}
 
-    def colorSensor_colorName(self, args):
+    def colorName(self, args):
         if(len(args) == 1):
             cs = ColorSensor(get_input(args[0]))
         else:
             cs = ColorSensor()
         return {'ret': cs.color_name}
 
-    def colorSensor_reflectedLightIntensity(self, args):
+    def reflectedLightIntensity(self, args):
         if(len(args) == 1):
             cs = ColorSensor(get_input(args[0]))
         else:
             cs = ColorSensor()
         return {'ret': cs.reflected_light_intensity}
     
-    def colorSensor_ambientLightIntensity(self, args):
+    def ambientLightIntensity(self, args):
         if(len(args) == 1):
             cs = ColorSensor(get_input(args[0]))
         else:
             cs = ColorSensor()
         return {'ret': cs.ambient_light_intensity}
 
-    def colorSensor_calibrateWhite(self, args):
+    def calibrateWhite(self, args):
         if(len(args) == 1):
             cs = ColorSensor(get_input(args[0]))
         else:
             cs = ColorSensor()
         return {'ret': cs.calibrate_white}
 
-    def gyroSensor_rate(self, args):
+class gyroSensorWrapper:
+    def rate(self, args):
         if(len(args) == 1):
             gs = GyroSensor(get_input(args[0]))
         else:
             gs = GyroSensor()
         return {'ret': gs.rate}
 
-    def gyroSensor_angle(self, args):
+    def angle(self, args):
         if(len(args) == 1):
             gs = GyroSensor(get_input(args[0]))
         else:
             gs = GyroSensor()
         return {'ret': gs.angle}
 
-    def gyroSensor_angleAndRate(self, args):
+    def angleAndRate(self, args):
         if(len(args) == 1):
             gs = GyroSensor(get_input(args[0]))
         else:
             gs = GyroSensor()
         return {'ret': gs.angle_and_rate}
 
-    def gyroSensor_waitUntilAngleIsChangedBy(self, args):
+    def waitUntilAngleIsChangedBy(self, args):
         if(len(args) == 2):
             gs = GyroSensor(get_input(args[0]))
             gs.wait_until_angle_changed_by(args[1])
@@ -1020,52 +1038,57 @@ class APIWrapper:
             gs = GyroSensor()
             gs.wait_until_angle_changed_by(args[0])
 
-    def ultraSonicSensor_distanceCM(self, args):
+class ultraSonicSensorWrapper:
+    def distanceCM(self, args):
         if(len(args) == 2):
             us = UltrasonicSensor(get_input(args[0]))
         else:
             us = UltrasonicSensor()
         return {'ret': us.distance_centimeters}
 
-    def ultraSonicSensor_distanceInch(self, args):
+    def distanceInch(self, args):
         if(len(args) == 2):
             us = UltrasonicSensor(get_input(args[0]))
         else:
             us = UltrasonicSensor()
         return {'ret': us.distance_inches}
 
-    def button_waitForBump(self, args):
+class buttonWrapper:
+    def __init__(self):
+        self.btn = Button()
+
+    def waitForBump(self, args):
         self.btn.wait_for_bump(args[0])
 
-    def button_waitForPress(self, args):
+    def waitForPress(self, args):
         self.btn.wait_for_pressed(args[0])
 
-    def button_waitForRelease(self, args):
+    def waitForRelease(self, args):
         self.btn.wait_for_released(args[0])
 
-    def button_any(self, args):
+    def any(self, args):
         return {'res': self.btn.any()}
 
-    def button_process(self, args):
+    def process(self, args):
         self.btn.process()
 
-    def button_left(self, args):
+    def left(self, args):
         return {'res':self.btn.left}
 
-    def button_right(self, args):
+    def right(self, args):
         return {'res':self.btn.right}
 
-    def button_up(self, args):
+    def up(self, args):
         return {'res':self.btn.up}
 
-    def button_down(self, args):
+    def down(self, args):
         return {'res':self.btn.down} 
 
-    def button_enter(self, args):
+    def enter(self, args):
         return {'res':self.btn.enter} 
 
-    def button_backspace(self, args):
+    def backspace(self, args):
         return {'res':self.btn.backspace}
 
-    def button_buttonsPressed(self, args):
+    def buttonsPressed(self, args):
         return {'res':self.btn.buttons_pressed}

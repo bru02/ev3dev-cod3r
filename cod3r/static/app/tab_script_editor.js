@@ -1,167 +1,167 @@
-function SaveAsDialogViewModel(appContext) {
-  'use strict';
+class SaveAsDialogViewModel {
+  constructor(appContext) {
 
-  var self = this;
-  (function () { // Init
-    self.context = appContext; // The application context
-    self.folder = ko.observable("/");
-    self.fileName = ko.observable(localStorage['script'] || false);
-    self.fileName.subscribe(() => {
-      localStorage['script'] = self.fileName()
-    })
-    self.folderDialog = undefined;
-  })();
-
-  self.display = function () {
+    this.context = appContext; // The application context
+    this.folder = ko.observable("/");
+    this.fileName = ko.observable(localStorage['script'] || false);
+    this.fileName.subscribe(() => {
+      localStorage['script'] = this.fileName();
+    });
+    this.folderDialog = undefined;
+  }
+  display() {
     $('#saveAsModal').modal('show');
-  };
-
-  self.hide = function () {
+  }
+  hide() {
     $('#saveAsModal').modal('hide');
   };
-
-  self.changeFolder = function () {
+  changeFolder() {
     PopupCenter("/manage?save=1", "Pick a folder", 600, 600);
     window.addEventListener('message', function (e) {
       if (e.origin == location.origin) {
         e = JSON.parse(e.data);
         if ('dir' in e) {
-          self.folder(e['dir']);
+          this.folder(e['dir']);
         }
       }
-    })
-  }
-
-  self.onSave = function () {
-    let path = self.folder() + self.fileName();
+    });
+  };
+  onSave() {
+    let path = this.folder() + this.fileName();
     $.post("/bridge.py", JSON.stringify({
       action: "createFile",
       item: path
     }), function (e) {
       try {
         e = JSON.parse(e);
-      } catch (e) {
-        self.context.messageLogVM.addError('Failed to create file!');
+      }
+      catch (e) {
+        this.context.messageLogVM.addError('Failed to create file!');
         return;
       }
-      self.context.messageLogVM.addMessage(e.result.success ? 'success' : 'danger', e.result.error || "Saved file!")
+      this.context.messageLogVM.addMessage(e.result.success ? 'success' : 'danger', e.result.error || "Saved file!");
     });
-    self.context.fileName(path);
-    self.hide();
-  };
+    this.context.fileName(path);
+    this.hide();
+  }
 }
 
 
-function ScriptEditorTabViewModel(appContext) {
-  'use strict';
 
-  var self = this;
-  (function () { // Init
-    self.context = appContext; // The application context
-    let isJs = self.context.settings.lang == 'js';
-    self.isJs = ko.observable(isJs)
+
+class ScriptEditorTabViewModel {
+  constructor(appContext) {
+    this.context = appContext; // The application context
+    let isJs = this.context.settings.lang == 'js';
+    this.isJs = ko.observable(isJs);
     var mode = ko.observable("Split");
-    self.editor = new DoubleEditor($('#scriptEditorTab'), { lang: isJs ? "javascript" : "python", editor: mode })
-    self.split = Split([".blockpy-blocks", ".blockpy-text"], {
+    this.editor = new DoubleEditor($('#scriptEditorTab'), { lang: isJs ? "javascript" : "python", editor: mode });
+    this.split = Split([".blockpy-blocks", ".blockpy-text"], {
       cursor: 'row-resize', onDrag: () => {
-        Blockly.svgResize(self.editor.blockly);
+        Blockly.svgResize(this.editor.blockly);
       },
       sizes: [60, 40]
     });
-    self.editor.codeMirror.on('change', function () {
-      self.context.isSaved(false);
+    this.editor.codeMirror.on('change', function () {
+      this.context.isSaved(false);
     });
-    if (isJs) { self.editor.setMode('Text'); }
-    self.context.events.changeSettings.add(function (keyChanged, newValue) {
+    if (isJs) {
+      this.editor.setMode('Text');
+    }
+    this.context.events.changeSettings.add(function (keyChanged, newValue) {
       if ("lang" == keyChanged) {
-        self.onSaveScript();
-        self.editor.codeMirror.setValue("");
+        this.onSaveScript();
+        this.editor.codeMirror.setValue("");
         let isJs = newValue == 'js';
-        self.isJs(isJs)
-        if (isJs) { self.editor.setMode('Text'); }
-        self.editor.setCodeLang(isJs ? "javascript" : "python")
+        this.isJs(isJs);
+        if (isJs) {
+          this.editor.setMode('Text');
+        }
+        this.editor.setCodeLang(isJs ? "javascript" : "python");
       }
     });
-  })();
-
-  self.setModeToBlocks = function () {
-    if (!self.isJs()) {
-      self.editor.setMode("Blocks");
-    }
   }
-  self.setModeToText = function () {
-    self.editor.setMode("Text");
-  }
-  self.setModeToSplit = function () {
-    if (!self.isJs()) {
-      self.editor.setMode("Split");
-    }
-  }
-  self.onClearScript = function () {
-    if (self.editor) {
-      bootbox.confirm(i18n.t("scriptEditorTab.clearScriptModal.title"), function (result) {
-        if (result) {
-          self.editor.codeMirror.setValue("");
-        }
-      });
-    } else {
-      console.log("Cannot clear script, self.editor is not set");
+  setModeToBlocks() {
+    if (!this.isJs()) {
+      this.editor.setMode("Blocks");
     }
   };
-  self.onLoadScript = function () {
+  setModeToText() {
+    this.editor.setMode("Text");
+  };
+  setModeToSplit() {
+    if (!this.isJs()) {
+      this.editor.setMode("Split");
+    }
+  };
+  onClearScript() {
+    if (this.editor) {
+      bootbox.confirm(i18n.t("scriptEditorTab.clearScriptModal.title"), function (result) {
+        if (result) {
+          this.editor.codeMirror.setValue("");
+        }
+      });
+    }
+    else {
+      console.log("Cannot clear script, this.editor is not set");
+    }
+  };
+  onLoadScript() {
     PopupCenter("/manage?load=1", "Pick a file", 600, 600);
     window.addEventListener('message', function (e) {
       if (e.origin == location.origin) {
         e = JSON.parse(e.data);
         if ('dir' in e) {
-          self.context.fileName(e['dir']);
-          self.loadScript();
+          this.context.fileName(e['dir']);
+          this.loadScript();
         }
       }
-    })
-
-  }
-  self.loadScript = function () {
-    if (self.context.fileName()) {
+    });
+  };
+  loadScript() {
+    if (this.context.fileName()) {
       $.post("/bridge.py", JSON.stringify({
         action: "getContent",
-        item: self.context.fileName()
+        item: this.context.fileName()
       }), function (e) {
         try {
           e = JSON.parse(e);
-        } catch (e) {
-          self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
+        }
+        catch (e) {
+          this.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: this.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
           return;
         }
-        self.editor.codeMirror.setValue(e.result)
-        self.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: self.context.fileName(), causedBy: e.result.error }) || "Loaded file!")
-        localStorage['script'] = self.context.fileName()
+        this.editor.codeMirror.setValue(e.result);
+        this.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: this.context.fileName(), causedBy: e.result.error }) || "Loaded file!");
+        localStorage['script'] = this.context.fileName();
       });
     }
-  }
-  self.onSaveScript = function () {
-    if (!!self.context.fileName()) {
-      let val = self.editor.codeMirror.getValue();
-      if (!self.isJs() && !val.startsWith("#!/usr/bin/env python3")) {
+  };
+  onSaveScript() {
+    if (!!this.context.fileName()) {
+      let val = this.editor.codeMirror.getValue();
+      if (!this.isJs() && !val.startsWith("#!/usr/bin/env python3")) {
         val = "#!/usr/bin/env python3\n\r" + val;
       }
       $.post("/bridge.py", JSON.stringify({
         action: "edit",
         content: val,
-        item: self.context.fileName()
+        item: this.context.fileName()
       }), function (e) {
         try {
           e = JSON.parse(e);
-        } catch (e) {
-          self.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantSaveScriptFile", { filename: self.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
+        }
+        catch (e) {
+          this.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantSaveScriptFile", { filename: this.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
           return;
         }
         let s = e.result.success == false;
-        self.context.messageLogVM.addMessage(s ? 'danger' : 'success', i18n.t(`scriptEditorTab.${s ? "errors.cantSaveScriptFile" : "scriptSuccessfullySaved"}`, { filename: self.context.fileName(), causedBy: e.result.error }))
+        this.context.messageLogVM.addMessage(s ? 'danger' : 'success', i18n.t(`scriptEditorTab.${s ? "errors.cantSaveScriptFile" : "scriptSuccessfullySaved"}`, { filename: this.context.fileName(), causedBy: e.result.error }));
       });
-    } else {
-      self.context.saveAsVM.display();
     }
-    self.context.isSaved(true);
+    else {
+      this.context.saveAsVM.display();
+    }
+    this.context.isSaved(true);
   };
 }

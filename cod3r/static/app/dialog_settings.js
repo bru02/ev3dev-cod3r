@@ -1,32 +1,27 @@
 // Model that manage the "Settings" dialog
-function SettingsViewModel(appContext) {
-  'use strict';
+class SettingsViewModel {
+  constructor(appContext) {
+    this.context = appContext; // The application context
+    this.language = ko.observable("");
+    this.lang = ko.observable("js");
+  }
 
-  var self = this;
-  (function () { // Init
-    self.context = appContext; // The application context
-    self.language = ko.observable("");
-    self.lang = ko.observable("js");
-  })();
-
-  self.display = function () {
+  display() {
     // Initialize the values
-    self.language(self.context.settings.language);
-    self.lang(self.context.settings.lang);
-
+    this.language(this.context.settings.language);
+    this.lang(this.context.settings.lang);
     $('#settingsModal').modal('show');
-  };
+  }
 
-  self.hide = function () {
+  hide() {
     $('#settingsModal').modal('hide');
-  };
+  }
 
-  self.onSave = function () {
-    self.context.settings.update({
-      language: self.language(),
-      lang: self.lang()
+  onSave() {
+    this.context.settings.update({
+      language: this.language(),
+      lang: this.lang()
     });
-
-    self.hide();
-  };
+    this.hide();
+  }
 }

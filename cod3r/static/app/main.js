@@ -48,61 +48,57 @@ var context = { // The application context - used as a basic dependency-injectio
 };
 
 // Define a settings object
-function cod3rSettings() {
-  'use strict';
-
-  var self = this;
-  (function () { // Init
-    self.STORAGE_SETTINGS = "cod3r_settings";
-    self.JSON_FIELDS = ['language', 'lang'];
-
+class cod3rSettings {
+  constructor() {
+    this.STORAGE_SETTINGS = "cod3r_settings";
+    this.JSON_FIELDS = ['language', 'lang'];
     // Load 
-    var loaded = localStorage[self.STORAGE_SETTINGS];
+    var loaded = localStorage[this.STORAGE_SETTINGS];
     console.log("Settings loaded on local storage: " + loaded);
     if (loaded) {
       try {
         var newSettings = JSON.parse(loaded);
         for (var key in newSettings) {
-          if (self.JSON_FIELDS.indexOf(key) != -1) {
-            self[key] = newSettings[key];
+          if (this.JSON_FIELDS.indexOf(key) != -1) {
+            this[key] = newSettings[key];
           }
         }
-      } catch (ex) {
+      }
+      catch (ex) {
         console.log("Error: " + ex + " on settings loaded: " + loaded);
       }
     }
-
     // Language
-    if (!self.language) {
+    if (!this.language) {
       var language_complete = navigator.language.split("-");
-      self.language = (language_complete[0]) == "fr" ? "fr" : "en";
+      this.language = (language_complete[0]) == "fr" ? "fr" : "en";
     }
-
     // ProgrammingStyle
-    if (!self.lang) {
-      self.lang = "js";
+    if (!this.lang) {
+      this.lang = "js";
     }
     // Override with url param if exist
     var param = Utils.getUrlParameter("programmingLanguage");
     if (param && (param == "js" || param == "py")) {
-      self.lang = param;
+      this.lang = param;
     }
-  })();
+  }
 
-  self.update = function (newSettings) {
+  update(newSettings) {
     var needSave = false;
     for (var key in newSettings) {
-      if (self[key] && self[key] != newSettings[key]) {
-        self[key] = newSettings[key];
-        context.events.changeSettings.fire(key, self[key]);
+      if (this[key] && this[key] != newSettings[key]) {
+        this[key] = newSettings[key];
+        context.events.changeSettings.fire(key, this[key]);
         needSave = true;
       }
     }
     if (needSave) {
-      localStorage[self.STORAGE_SETTINGS] = JSON.stringify(self, self.JSON_FIELDS);
+      localStorage[this.STORAGE_SETTINGS] = JSON.stringify(this, this.JSON_FIELDS);
     }
-  };
+  }
 }
+
 context.settings = new cod3rSettings(context);
 
 // Initialization of the application
@@ -150,7 +146,7 @@ $(document).ready(function () {
     context.ev3BrickServer.initialize(); // WebSocket connection with the server
 
     // Register config events to update translation if needed
-    self.context.events.changeSettings.add(function (keyChanged, newValue) {
+    context.events.changeSettings.add(function (keyChanged, newValue) {
       if ("language" == keyChanged) {
         i18n.setLng(context.settings.language, function (t) {
           $(".i18n").i18n();
@@ -158,7 +154,7 @@ $(document).ready(function () {
         });
       }
     });
-    if (context.scriptEditorTabVM.fileName()) context.scriptEditorTabVM.loadScript();
+    if (context.fileName()) context.scriptEditorTabVM.loadScript();
 
 
     // Publish events for settings

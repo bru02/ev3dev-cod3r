@@ -1,55 +1,45 @@
 // Model that manage the "Import Images" dialog
-function ImportImagesViewModel(appContext) {
-  'use strict';
-
-  var self = this;
-  { // Init
-    self.context = appContext; // The application context
-    self.codeToBuildTheImage = ko.observable("");
-    self.useDithering = ko.observable(true);
-    self.keepAspectRatio = ko.observable(true);
-    self.threshold = ko.observable(128);
-
-    self.canvas = document.getElementById("importImagesModalCanvas"); // Canvas for displaying the image
-    self.canvasCtx = self.canvas.getContext('2d');
-
-    self.currentImage = undefined;
-
-    self.MAX_WIDTH = 178;
-    self.MAX_HEIGHT = 128;
-
-    self.useDithering.subscribe(function (newValue) {
-      self.RecomputeImage();
+class ImportImagesViewModel {
+  constructor(appContext) {
+    // Init
+    this.context = appContext; // The application context
+    this.codeToBuildTheImage = ko.observable("");
+    this.useDithering = ko.observable(true);
+    this.keepAspectRatio = ko.observable(true);
+    this.threshold = ko.observable(128);
+    this.canvas = document.getElementById("importImagesModalCanvas"); // Canvas for displaying the image
+    this.canvasCtx = this.canvas.getContext('2d');
+    this.currentImage = undefined;
+    this.MAX_WIDTH = 178;
+    this.MAX_HEIGHT = 128;
+    this.useDithering.subscribe(function (newValue) {
+      this.RecomputeImage();
     });
-    self.keepAspectRatio.subscribe(function (newValue) {
-      self.RecomputeImage();
+    this.keepAspectRatio.subscribe(function (newValue) {
+      this.RecomputeImage();
     });
-    self.threshold.subscribe(function (newValue) {
-      self.RecomputeImage();
+    this.threshold.subscribe(function (newValue) {
+      this.RecomputeImage();
     });
   }
-
-  self.display = function () {
+  display() {
     // Initialize the values
     $('#importImagesModal').modal('show');
     $('#importImages_selectFileForm')[0].reset();
-
-    self.currentImage = undefined;
-    self.codeToBuildTheImage("");
-    self.threshold(128);
-    self.canvasCtx.clearRect(0, 0, self.canvas.width, self.canvas.height);
+    this.currentImage = undefined;
+    this.codeToBuildTheImage("");
+    this.threshold(128);
+    this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   };
-
-  self.uploadImage = function (file) {
+  uploadImage(file) {
     console.log("Filename: " + file.name);
-
     // Only process image files.
     if (file.type.match('image.*')) {
       // Initialize the image object
       var newImg = new Image();
       newImg.onload = function () {
-        self.currentImage = { filename: file.name, rawData: newImg };
-        self.ImageLoaded();
+        this.currentImage = { filename: file.name, rawData: newImg };
+        this.ImageLoaded();
       };
       // Load the selected file
       var reader = new FileReader();
@@ -57,61 +47,53 @@ function ImportImagesViewModel(appContext) {
         newImg.src = event.target.result;
       };
       reader.readAsDataURL(file);
-    } else {
+    }
+    else {
       bootbox.alert(i18n.t("importImagesModal.errors.fileIsNotAnImageSelectAnother", { filename: file.name }));
-      self.currentImage = undefined;
+      this.currentImage = undefined;
       $('#importImages_selectFileForm')[0].reset();
     }
   };
-
-  self.hide = function () {
+  hide() {
     $('#importImagesModal').modal('hide');
   };
-
-  self.RecomputeImage = function () {
-    if (self.currentImage) {
-      self.ImageLoaded();
+  RecomputeImage() {
+    if (this.currentImage) {
+      this.ImageLoaded();
     }
     // else: No image loaded => ignore
   };
-
-  self.ImageLoaded = function () {
-    var newImg = self.currentImage.rawData;
-    var filename = self.currentImage.filename;
-
-    var targetWidth = Math.min(self.MAX_WIDTH, newImg.width);
-    var targetHeight = Math.min(self.MAX_HEIGHT, newImg.height);
-
-    if (self.keepAspectRatio()) {
+  ImageLoaded() {
+    var newImg = this.currentImage.rawData;
+    var filename = this.currentImage.filename;
+    var targetWidth = Math.min(this.MAX_WIDTH, newImg.width);
+    var targetHeight = Math.min(this.MAX_HEIGHT, newImg.height);
+    if (this.keepAspectRatio()) {
       // Default: keep aspect ratio and reduce the image if needed
-      var ratio = Math.min(1, (self.MAX_WIDTH / newImg.width), (self.MAX_HEIGHT / newImg.height));
-      targetWidth = Math.min(self.MAX_WIDTH, Math.ceil(newImg.width * ratio));
-      targetHeight = Math.min(self.MAX_HEIGHT, Math.ceil(newImg.height * ratio));
+      var ratio = Math.min(1, (this.MAX_WIDTH / newImg.width), (this.MAX_HEIGHT / newImg.height));
+      targetWidth = Math.min(this.MAX_WIDTH, Math.ceil(newImg.width * ratio));
+      targetHeight = Math.min(this.MAX_HEIGHT, Math.ceil(newImg.height * ratio));
     }
     console.log("Target width: " + targetWidth + ", target height: " + targetHeight);
-
-    self.canvasCtx.clearRect(0, 0, self.canvas.width, self.canvas.height);
-    self.canvasCtx.drawImage(newImg, 0, 0, targetWidth, targetHeight);
-
-    var imageData = self.canvasCtx.getImageData(0, 0, targetWidth, targetHeight);
+    this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.canvasCtx.drawImage(newImg, 0, 0, targetWidth, targetHeight);
+    var imageData = this.canvasCtx.getImageData(0, 0, targetWidth, targetHeight);
     var pixels = imageData.data;
     var numPixels = imageData.width * imageData.height;
-
     var sPixels = new Uint8Array(numPixels);
-
     // Grayscale on luminosity - See http://en.wikipedia.org/wiki/Luma_%28video%29
     for (var i = 0; i < numPixels; i++) {
       var i4 = 4 * i;
       sPixels[i] = 0.21 * pixels[i4] + 0.72 * pixels[i4 + 1] + 0.07 * pixels[i4 + 2];
     }
-    if (self.useDithering()) {
+    if (this.useDithering()) {
       // Dithering in white and black
-      self.__convertToWhiteAndBlackDither(targetWidth, targetHeight, self.threshold(), sPixels);
-    } else {
-      // Basic conversion
-      self.__convertToWhiteAndBlack(targetWidth, targetHeight, self.threshold(), sPixels);
+      this.__convertToWhiteAndBlackDither(targetWidth, targetHeight, this.threshold(), sPixels);
     }
-
+    else {
+      // Basic conversion
+      this.__convertToWhiteAndBlack(targetWidth, targetHeight, this.threshold(), sPixels);
+    }
     // Copy back pixels to context imageData
     for (var i = 0; i < numPixels; i++) {
       var i4 = 4 * i;
@@ -120,17 +102,15 @@ function ImportImagesViewModel(appContext) {
       pixels[i4 + 2] = sPixels[i];
     }
     // Display the images
-    self.canvasCtx.putImageData(imageData, 0, 0);
-
+    this.canvasCtx.putImageData(imageData, 0, 0);
     // Encode to data URI
-    var imageAsDataURI = self.__getCodeToBuildTheImage(self.__convertToRGFBinaryData(imageData.width, imageData.height, sPixels), filename);
-    self.codeToBuildTheImage(imageAsDataURI);
+    var imageAsDataURI = this.__getCodeToBuildTheImage(this.__convertToRGFBinaryData(imageData.width, imageData.height, sPixels), filename);
+    this.codeToBuildTheImage(imageAsDataURI);
   };
-
   // Floyd�Steinberg dithering algorithm - See http://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering
   // One deviation: Divide by 32 instead of 16 in order to don't report all the error (seems to give better results with only 
   // 2 colours in the target palette)
-  self.__convertToWhiteAndBlackDither = function (width, height, threshold, pixels) {
+  __convertToWhiteAndBlackDither(width, height, threshold, pixels) {
     for (var i = 0; i < height; i++) {
       var lineOffset = i * width;
       for (var j = 0; j < width; j++) {
@@ -156,9 +136,8 @@ function ImportImagesViewModel(appContext) {
       }
     }
   };
-
   // Basic algorithm that make white and black on a given threshold
-  self.__convertToWhiteAndBlack = function (width, height, threshold, pixels) {
+  __convertToWhiteAndBlack(width, height, threshold, pixels) {
     for (var i = 0; i < height; i++) {
       var lineOffset = i * width;
       for (var j = 0; j < width; j++) {
@@ -167,17 +146,13 @@ function ImportImagesViewModel(appContext) {
       }
     }
   };
-
   // Convert the array of pixels (Uint8Array) to an RGB binary representation
-  self.__convertToRGFBinaryData = function (width, height, pixels) {
+  __convertToRGFBinaryData(width, height, pixels) {
     var ev3ImageData = new Uint8Array(2 + Math.floor((width + 7) / 8) * height); // + 7 in order to have a full number of bytes
-
     ev3ImageData[0] = width;
     ev3ImageData[1] = height;
-
     var index = 2; // The index within the raw image data
     var currentByte = 0; // The 8 pixels in progress (1 pixel is 1 bit)
-
     for (var i = 0; i < height; i++) {
       var lineOffset = i * width;
       var idxInLine = 0;
@@ -193,12 +168,10 @@ function ImportImagesViewModel(appContext) {
         ev3ImageData[index++] = currentByte;
       }
     }
-
     return ev3ImageData;
   };
-
   // Return a Data URI representing the given RGF binary data
-  self.__getCodeToBuildTheImage = function (binaryData, filename) {
+  __getCodeToBuildTheImage(binaryData, filename) {
     var imgDataURI = "data:image/rgf;base64," + btoa(String.fromCharCode.apply(null, binaryData));
     // Build the variable name
     var varName;
@@ -213,7 +186,8 @@ function ImportImagesViewModel(appContext) {
         varName = varName.charAt(0).toUpperCase() + varName.slice(1);
       }
       varName = "img" + varName;
-    } catch (e) {
+    }
+    catch (e) {
       console.log(e);
       varName = "img";
       // Just ignore, not standard filename
@@ -226,12 +200,12 @@ function ImportImagesViewModel(appContext) {
       index += nextLineLength;
       if (index < imgDataURI.length) {
         jsCode += " + \n";
-      } else {
+      }
+      else {
         jsCode += ");";
       }
       nextLineLength = 100;
     }
-
     return jsCode;
   };
 }

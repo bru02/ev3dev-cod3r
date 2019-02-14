@@ -155,9 +155,7 @@ function PLUS_MINUS_updateShape(listItemName, startMessage) {
     for (var i = 0; i < this.itemCount_; i++) {
 
       if (!this.getInput(listItemName + i)) {
-
-        let input = this.appendValueInput(listItemName + i);
-
+        this.appendValueInput(listItemName + i);
       }
 
     }

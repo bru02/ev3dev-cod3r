@@ -1,91 +1,88 @@
 // Manage the interaction with the server on the EV3 brick
-function EV3BrickServer(appContext) {
-  'use strict';
-
-  var self = this;
-  { // Init
-    self.context = appContext; // The application context
-    self.ws = undefined; // undefined <=> no connection with the EV3 brick
-    self.xSensorStream = { // Manage the xSensor stream
+class EV3BrickServer {
+  constructor(appContext) {
+    this.context = appContext; // The application context
+    this.ws = undefined; // undefined <=> no connection with the EV3 brick
+    this.xSensorStream = { // Manage the xSensor stream
       sensors: {},
       timeoutID: undefined
     };
-    self.XSENSOR_STREAM_FREQUENCY = 50; // in ms => Maximum of 20 message by second by xSensor
+    this.XSENSOR_STREAM_FREQUENCY = 50; // in ms => Maximum of 20 message by second by xSensor
   }
 
-  self.initialize = function () {
+  initialize() {
     if ("WebSocket" in window) {
       var wsURI = location.protocol.replace('http', 'ws') + "//" + location.host + "/connect";
       try {
-        self.ws = new WebSocket(wsURI);
-        self.ws.onopen = function (evt) { self.__onWSOpen(evt); };
-        self.ws.onclose = function (evt) { self.__onWSClose(evt); };
-        self.ws.onmessage = function (evt) { self.__onWSMessage(evt); };
-        self.ws.onerror = function (evt) { self.__onWSError(evt); };
+        this.ws = new WebSocket(wsURI);
+        this.ws.onopen = function (evt) { this.__onWSOpen(evt); };
+        this.ws.onclose = function (evt) { this.__onWSClose(evt); };
+        this.ws.onmessage = function (evt) { this.__onWSMessage(evt); };
+        this.ws.onerror = function (evt) { this.__onWSError(evt); };
       } catch (ex) {
         console.warn("Fail to create websocket for: '" + wsURI + "'");
-        self.context.messageLogVM.addError(i18n.t("ev3brick.errors.ev3ConnectionFailed", { cansedBy: ex }));
-        self.WSReconnection();
+        this.context.messageLogVM.addError(i18n.t("ev3brick.errors.ev3ConnectionFailed", { cansedBy: ex }));
+        this.WSReconnection();
       }
     }
     else {
-      self.context.messageLogVM.addError(i18n.t("ev3brick.errors.websocketNotSupported"));
+      this.context.messageLogVM.addError(i18n.t("ev3brick.errors.websocketNotSupported"));
     }
   };
 
-  self.__onWSOpen = function (evt) {
-    self.context.messageLogVM.addSuccess(i18n.t("ev3brick.ev3ConnectionOk"));
+  __onWSOpen(evt) {
+    this.context.messageLogVM.addSuccess(i18n.t("ev3brick.ev3ConnectionOk"));
   };
 
-  self.__onWSMessage = function (evt) {
+  __onWSMessage(evt) {
     var received_msg = evt.data;
     var received_data = JSON.parse(received_msg);
     var msgType = received_data.msgTyp;
     console.log("Message received: " + received_msg);
 
     if (msgType == "ScriptException" || msgType == "Exception") {
-      self.context.messageLogVM.addError(i18n.t("server.errors." + received_data.code, received_data.params));
+      this.context.messageLogVM.addError(i18n.t("server.errors." + received_data.code, received_data.params));
     } else if (msgType == "InfoCoded") {
-      self.context.messageLogVM.addInfo(i18n.t("server.messages." + received_data.code, received_data.params));
+      this.context.messageLogVM.addInfo(i18n.t("server.messages." + received_data.code, received_data.params));
     } else if (!('res' in received_data || 'id' in received_data || 'btnPressed' in received_data)) {
       // Default: Assume this is a text message
-      self.context.messageLogVM.addInfo(received_data.txt);
+      this.context.messageLogVM.addInfo(received_data.txt);
     }
   };
 
-  self.__onWSClose = function (evt) {
-    self.context.messageLogVM.addError(i18n.t("ev3brick.errors.ev3ConnectionNok"));
-    self.WSReconnection();
+  __onWSClose(evt) {
+    this.context.messageLogVM.addError(i18n.t("ev3brick.errors.ev3ConnectionNok"));
+    this.WSReconnection();
   };
 
-  self.__onWSError = function (evt) {
+  __onWSError(evt) {
     // Does nothing, onError seems redundant with onClose, see http://www.w3.org/TR/websockets/#feedback-from-the-protocol
   };
 
-  self.WSReconnection = function () {
-    self.WSClose();
-    setTimeout(self.initialize, 15000); // Run once in 15s
+  WSReconnection() {
+    this.WSClose();
+    setTimeout(this.initialize, 15000); // Run once in 15s
   };
 
   // Close the websocket (if initialized)
-  self.WSClose = function () {
-    if (self.ws) {
-      if (self.ws.readyState == 0 || self.ws.readyState == 1) { // CONNECTING or OPEN - See https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants
+  WSClose() {
+    if (this.ws) {
+      if (this.ws.readyState == 0 || this.ws.readyState == 1) { // CONNECTING or OPEN - See https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants
         try {
-          self.ws.close();
+          this.ws.close();
         } catch (ex) {
           console.warn("Fail to close the websocket - " + JSON.stringify(ex));
         }
       } // else: CLOSED or CLOSING => No need to close again
-      self.ws = undefined;
+      this.ws = undefined;
     }
   };
 
   // Send a message to the websocket (if opened)
   // Returns true if sent, false otherwise
-  self.WSSend = function (message) {
+  WSSend(message) {
     let msg = message;
-    if (self.ws && (self.ws.readyState == 1)) { // OPEN
+    if (this.ws && (this.ws.readyState == 1)) { // OPEN
       try {
         if (message['err']) {
           delete message['err']
@@ -93,17 +90,17 @@ function EV3BrickServer(appContext) {
         if (typeof (message) !== "string") {
           message = JSON.stringify(message);
         }
-        self.ws.send(message);
+        this.ws.send(message);
         return true;
       } catch (ex) {
         console.log("Fail to send a message - " + JSON.stringify(ex));
-        self.WSReconnection();
+        this.WSReconnection();
         return false;
       }
     } else {
       console.log("Can't send a message because the ws isn't initialized or isn't opened - " + message);
     }
-    self.context.messageLogVM.addError(i18n.t(`ev3brick.errors.${msg['err'] || 'cantDoSomethingEV3ConnectionNok'}`, {
+    this.context.messageLogVM.addError(i18n.t(`ev3brick.errors.${msg['err'] || 'cantDoSomethingEV3ConnectionNok'}`, {
       action:
         msg['act']
     }));
@@ -111,9 +108,9 @@ function EV3BrickServer(appContext) {
     return false;
   };
 
-  self.runScript = function (scriptCode) {
+  runScript(scriptCode) {
     if (scriptCode) {
-      self.WSSend({
+      this.WSSend({
         act: "runScript",
         sLang: "javascript",
         sText: scriptCode,
@@ -122,22 +119,47 @@ function EV3BrickServer(appContext) {
     }
   };
 
-  self.stopScript = function () {
-    self.WSSend({
+  stopScript() {
+    this.WSSend({
       act: "stopScript",
       err: "cantStopScriptEV3ConnectionNok"
     })
   };
 
-  self.shutdownBrick = function () {
-    self.WSSend({
+  shutdownBrick() {
+    this.WSSend({
       act: "shutdownBrick"
     })
   };
 
-  self.stopcod3r = function () {
-    self.WSSend({
+  stopcod3r() {
+    this.WSSend({
       act: "stopCod3r"
+    })
+  }
+
+  async message(data = {}) {
+    return new Promise((resolve, reject) => {
+      let id = Utils.generateUUID();
+      if (this.WSSend($.fn.extend(data, {
+        id,
+      }))) {
+        this.ws.addEventListener('message', function cb(msg) {
+          try {
+            msg = JSON.parse(msg.data);
+          } catch (e) {
+            return;
+          }
+          if (msg.id !== id) return;
+          this.ws.removeEventListener('message', cb);
+          if (msg.err) {
+            reject(msg.err);
+            this.appContext.messageLogVM.addError(msg.err);
+          } else {
+            resolve(msg.res);
+          }
+        });
+      }
     })
   }
 }

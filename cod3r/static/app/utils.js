@@ -93,8 +93,8 @@ var compatibility = (function () {
   };
 })();
 
-var CanvasUtils = (function () {
-  var roundedRect = function (ctx, x, y, width, height, radius) {
+var CanvasUtils = {
+  roundedRect: function (ctx, x, y, width, height, radius) {
     ctx.beginPath();
     ctx.moveTo(x, y + radius);
     ctx.lineTo(x, y + height - radius);
@@ -108,12 +108,8 @@ var CanvasUtils = (function () {
     ctx.closePath();
     return ctx;
     // ctx.stroke();
-  };
-
-  return {
-    roundedRect: roundedRect
-  };
-})();
+  }
+}
 
 var Utils = (function () {
   // Round by keeping only 2 decimal
@@ -145,9 +141,9 @@ var Utils = (function () {
     }
   };
   return {
-    round2dec: round2dec,
-    generateUUID: generateUUID,
-    getUrlParameter: getUrlParameter
+    round2dec,
+    generateUUID,
+    getUrlParameter,
   };
 })();
 

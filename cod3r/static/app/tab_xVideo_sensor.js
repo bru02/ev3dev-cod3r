@@ -15,76 +15,64 @@
  * You should have received a copy of the GNU General Public License
  * along with cod3r.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 // A computation engine that is able to track points.
 // Current implements is largely inspired from the jsfeast "Lukas Kanade optical flow" sample
-function PointTrackingComputationEngine(appContext) {
-    'use strict';
-
-    var self = this;
-    { // init
-        self.context = appContext; // The application context
-        self.MAX_POINTS = 20;
-
-        self.currentImagePyramid = undefined;
-        self.previousImagePyramid = undefined;
-
-        self.points = {
+class PointTrackingComputationEngine {
+    constructor(appContext) {
+        // init
+        this.context = appContext; // The application context
+        this.MAX_POINTS = 20;
+        this.currentImagePyramid = undefined;
+        this.previousImagePyramid = undefined;
+        this.points = {
             number: 0,
-            idx: 0, // idx is used to generate a unique point name
-            status: new Uint8Array(self.MAX_POINTS),
+            idx: 0,
+            status: new Uint8Array(this.MAX_POINTS),
             name: [],
-            currentXY: new Float32Array(self.MAX_POINTS * 2),
-            previousXY: new Float32Array(self.MAX_POINTS * 2)
+            currentXY: new Float32Array(this.MAX_POINTS * 2),
+            previousXY: new Float32Array(this.MAX_POINTS * 2)
         };
-        self.points.name[self.MAX_POINTS - 1] = undefined;
+        this.points.name[this.MAX_POINTS - 1] = undefined;
     }
-
-    self.reset = function () {
+    reset() {
         // Initialize 2 pyramid with depth 3 => 640x480 -> 320x240 -> 160x120
-        self.currentImagePyramid = new jsfeat.pyramid_t(3);
-        self.currentImagePyramid.allocate(self.width, self.height, jsfeat.U8_t | jsfeat.C1_t); // DataType: single channel unsigned char
-        self.previousImagePyramid = new jsfeat.pyramid_t(3);
-        self.previousImagePyramid.allocate(self.width, self.height, jsfeat.U8_t | jsfeat.C1_t);
+        this.currentImagePyramid = new jsfeat.pyramid_t(3);
+        this.currentImagePyramid.allocate(this.width, this.height, jsfeat.U8_t | jsfeat.C1_t); // DataType: single channel unsigned char
+        this.previousImagePyramid = new jsfeat.pyramid_t(3);
+        this.previousImagePyramid.allocate(this.width, this.height, jsfeat.U8_t | jsfeat.C1_t);
         // Clear the points already defined
-        self.points.number = 0;
-    };
-
-    self.compute = function (imageData, width, height) {
+        this.points.number = 0;
+    }
+    compute(imageData, width, height) {
         // Swap data (recycle old objects to avoid costly instantiation)
-        var recyclingPoints = self.points.previousXY;
-        self.points.previousXY = self.points.currentXY;
-        self.points.currentXY = recyclingPoints;
-        var recyclingPyramid = self.previousImagePyramid;
-        self.previousImagePyramid = self.currentImagePyramid;
-        self.currentImagePyramid = recyclingPyramid;
-
+        var recyclingPoints = this.points.previousXY;
+        this.points.previousXY = this.points.currentXY;
+        this.points.currentXY = recyclingPoints;
+        var recyclingPyramid = this.previousImagePyramid;
+        this.previousImagePyramid = this.currentImagePyramid;
+        this.currentImagePyramid = recyclingPyramid;
         // Perform image processing
-        jsfeat.imgproc.grayscale(imageData.data, width, height, self.currentImagePyramid.data[0]);
-        self.currentImagePyramid.build(self.currentImagePyramid.data[0], true); // Populate the pyramid
-
+        jsfeat.imgproc.grayscale(imageData.data, width, height, this.currentImagePyramid.data[0]);
+        this.currentImagePyramid.build(this.currentImagePyramid.data[0], true); // Populate the pyramid
         // See full documentation: http://inspirit.github.io/jsfeat/#opticalflowlk
-        jsfeat.optical_flow_lk.track(self.previousImagePyramid, self.currentImagePyramid, // previous/current frame 8-bit pyramid_t
-            self.points.previousXY, // Array of 2D coordinates for which the flow needs to be found
-            self.points.currentXY,  // Array of 2D coordinates containing the calculated new positions
-            self.points.number,     // Number of input coordinates
-            25,                     // Size of the search window at each pyramid level
-            30,                     // Stop searching after the specified maximum number of iterations (default: 30)
-            self.points.status,     // Each element is set to 1 if the flow for the corresponding features has been found otherwise 0 (default: null)
-            0.1,                   // Stop searching when the search window moves by less than eps (default: 0.01)
-            0);                 // The algorithm calculates the minimum eigen value of a 2x2 normal matrix of optical flow equations, divided by number of
+        jsfeat.optical_flow_lk.track(this.previousImagePyramid, this.currentImagePyramid, // previous/current frame 8-bit pyramid_t
+            this.points.previousXY, // Array of 2D coordinates for which the flow needs to be found
+            this.points.currentXY, // Array of 2D coordinates containing the calculated new positions
+            this.points.number, // Number of input coordinates
+            25, // Size of the search window at each pyramid level
+            30, // Stop searching after the specified maximum number of iterations (default: 30)
+            this.points.status, // Each element is set to 1 if the flow for the corresponding features has been found otherwise 0 (default: null)
+            0.1, // Stop searching when the search window moves by less than eps (default: 0.01)
+            0); // The algorithm calculates the minimum eigen value of a 2x2 normal matrix of optical flow equations, divided by number of
         // pixels in a window; if this value is less than min_eigen_threshold, then a corresponding feature is filtered out and its flow is not
         // processed, it allows to remove bad points and get a performance boost (default: 0.0001)
-
-        self.__removeLostPoints();
-    };
-
-    self.__removeLostPoints = function () {
-        var n = self.points.number;
-        var name = self.points.name;
-        var status = self.points.status;
-        var curXY = self.points.currentXY;
+        this.__removeLostPoints();
+    }
+    __removeLostPoints() {
+        var n = this.points.number;
+        var name = this.points.name;
+        var status = this.points.status;
+        var curXY = this.points.currentXY;
         var j = 0; // New number of points
         for (var i = 0; i < n; i++) {
             if (status[i] == 1) { // Keep the point
@@ -94,24 +82,22 @@ function PointTrackingComputationEngine(appContext) {
                     name[j] = name[i];
                 }
                 j++;
-            } else {
-                self.context.messageLogVM.addError( i18n.t("videoSensorTab.pointsNoMoreTracked", { "name": name[i] }));
+            }
+            else {
+                this.context.messageLogVM.addError(i18n.t("videoSensorTab.pointsNoMoreTracked", { "name": name[i] }));
             }
         }
-        self.points.number = j;
-    };
-
+        this.points.number = j;
+    }
     // Draw also returns the points structure as JSON
-    self.drawComputationResult = function (ctx) {
+    drawComputationResult(ctx) {
         var result = {};
-        var curXY = self.points.currentXY;
-        var name = self.points.name;
-
-        for (var i = self.points.number - 1; i >= 0; i--) {
+        var curXY = this.points.currentXY;
+        var name = this.points.name;
+        for (var i = this.points.number - 1; i >= 0; i--) {
             var x = Math.round(curXY[i << 1]), y = Math.round(curXY[(i << 1) + 1]);
             var txt = name[i] + ": {x: " + x + ", y: " + y + "}";
             var txtWidthOn2 = ctx.measureText(txt).width / 2;
-
             ctx.beginPath();
             ctx.moveTo(x, y);
             ctx.lineTo(x + 5, y - 14);
@@ -119,174 +105,149 @@ function PointTrackingComputationEngine(appContext) {
             ctx.lineTo(x + 5 + txtWidthOn2, y - 15);
             ctx.stroke();
             ctx.fillText(txt, x + 5 - txtWidthOn2, y - 17);
-
             result[name[i]] = { x: x, y: y };
         }
-
         return result;
     };
-
-    self.onClick = function (x, y) {
-        var n = self.points.number;
+    onClick(x, y) {
+        var n = this.points.number;
         // Check if need to rename a point ?
         var xMin = x - 20, xMax = x + 20;
         var yMin = y - 20, yMax = y + 20;
-
         for (var i = 0; i < n; i++) {
-            var px = self.points.currentXY[i << 1],
-                py = self.points.currentXY[(i << 1) + 1];
+            var px = this.points.currentXY[i << 1], py = this.points.currentXY[(i << 1) + 1];
             if ((xMin < px) && (px < xMax) && (yMin < py) && (py < yMax)) {
-                self.__renamePoint(i);
+                this.__renamePoint(i);
                 return;
             }
         }
-
         // Create a new point if possible
-        if (n < (self.MAX_POINTS - 1)) {
-            self.points.currentXY[n << 1] = x;
-            self.points.currentXY[(n << 1) + 1] = y;
-            self.points.name[n] = i18n.t("videoSensorTab.newPoint") + (++self.points.idx);
-            self.points.number++;
-            self.__renamePoint(n);
-        } else {
-            bootbox.alert(i18n.t("videoSensorTab.errors.maximumTrackedPointsReached", { number: self.MAX_POINT }));
+        if (n < (this.MAX_POINTS - 1)) {
+            this.points.currentXY[n << 1] = x;
+            this.points.currentXY[(n << 1) + 1] = y;
+            this.points.name[n] = i18n.t("videoSensorTab.newPoint") + (++this.points.idx);
+            this.points.number++;
+            this.__renamePoint(n);
         }
-    };
-
-    self.__renamePoint = function (pointIdx) {
+        else {
+            bootbox.alert(i18n.t("videoSensorTab.errors.maximumTrackedPointsReached", { number: this.MAX_POINT }));
+        }
+    }
+    __renamePoint(pointIdx) {
         // Get the point name
         bootbox.prompt({
             title: i18n.t('videoSensorTab.configureTrackedPointNameModal.title'),
-            value: self.points.name[pointIdx],
+            value: this.points.name[pointIdx],
             callback: function (result) {
                 if (result) {
-                    self.points.name[pointIdx] = result;
+                    this.points.name[pointIdx] = result;
                 } // Cancel clicked
             }
         });
     };
 }
 
-
 // Model to manage the Video x-Sensor.
-function VideoSensorTabViewModel(appContext) {
-    'use strict';
-
-    var self = this;
-    { // Init
-        self.context = appContext; // The application context
-        self.sensorName = ko.observable("xVideo");
-        self.isStarted = ko.observable(false);
-
-        self.webcam = document.getElementById("xVideoSensorWebcam"); // Video webcam HTML widget
-        self.canvas = document.getElementById("xVideoSensorCanvas"); // Video canvas HTML widget
-        self.webcamMediaStream = undefined; // The camera
-        self.WIDTH = 640;
-        self.HEIGHT = 480;
-
+class VideoSensorTabViewModel {
+    constructor(appContext) {
+        // Init
+        this.context = appContext; // The application context
+        this.sensorName = ko.observable("xVideo");
+        this.isStarted = ko.observable(false);
+        this.webcam = document.getElementById("xVideoSensorWebcam"); // Video webcam HTML widget
+        this.canvas = document.getElementById("xVideoSensorCanvas"); // Video canvas HTML widget
+        this.webcamMediaStream = undefined; // The camera
+        this.WIDTH = 640;
+        this.HEIGHT = 480;
         // The computation data
-        self.perf = undefined;
-        self.ptce = new PointTrackingComputationEngine(appContext);
-
-        self.perfSummary = ko.observable("");
-        self.perfSummary.extend({ rateLimit: 200 }); // Accept lower refresh rate
-
-        self.canvasCtx = self.canvas.getContext('2d');
-        self.canvasCtx.fillStyle = "rgb(0,255,127)";
-        self.canvasCtx.strokeStyle = "rgb(0,255,127)";
-        self.canvasCtx.textBaseline = "bottom";
-        self.canvasCtx.font = "bold 14px sans-serif";
-        self.canvasCtx.lineWidth = 2;
+        this.perf = undefined;
+        this.ptce = new PointTrackingComputationEngine(appContext);
+        this.perfSummary = ko.observable("");
+        this.perfSummary.extend({ rateLimit: 200 }); // Accept lower refresh rate
+        this.canvasCtx = this.canvas.getContext('2d');
+        this.canvasCtx.fillStyle = "rgb(0,255,127)";
+        this.canvasCtx.strokeStyle = "rgb(0,255,127)";
+        this.canvasCtx.textBaseline = "bottom";
+        this.canvasCtx.font = "bold 14px sans-serif";
+        this.canvasCtx.lineWidth = 2;
     }
-
-    self.onStart = function () {
-        self.isStarted(!self.isStarted());
-
-        if (self.isStarted()) {
-            if (self.context.compatibility.isUserMediaSupported()) {
+    onStart() {
+        this.isStarted(!this.isStarted());
+        if (this.isStarted()) {
+            if (this.context.compatibility.isUserMediaSupported()) {
                 // Request to access to the Webcam
-                self.context.compatibility.getUserMedia({ video: true }, self.handleVideo, self.videoAccessRefused);
+                this.context.compatibility.getUserMedia({ video: true }, this.handleVideo, this.videoAccessRefused);
             }
-        } else {
-            // Stop acquiring video
-            self.webcam.pause();
-            self.webcam.src = null;
-            self.perfSummary("");
-            self.__clearCanvas();
-
-            if (self.webcamMediaStream) { // Defined
-                if (self.webcamMediaStream.stop)
-                    self.webcamMediaStream.stop();
-                else
-                    self.webcamMediaStream.getVideoTracks()[0].stop()
-                self.webcamMediaStream = undefined;
-            }
-
-            // Send an not started value
-            self.SendSensorValue({ isStarted: self.isStarted() });
         }
-    };
-
-    self.SendSensorValue = function (value) {
-        self.context.ev3BrickServer.streamXSensorValue(self.sensorName(), "Vid1", value);
-    };
-
+        else {
+            // Stop acquiring video
+            this.webcam.pause();
+            this.webcam.src = null;
+            this.perfSummary("");
+            this.__clearCanvas();
+            if (this.webcamMediaStream) { // Defined
+                if (this.webcamMediaStream.stop)
+                    this.webcamMediaStream.stop();
+                else
+                    this.webcamMediaStream.getVideoTracks()[0].stop();
+                this.webcamMediaStream = undefined;
+            }
+            // Send an not started value
+            this.SendSensorValue({ isStarted: this.isStarted() });
+        }
+    }
+    SendSensorValue(value) {
+        this.context.ev3BrickServer.streamXSensorValue(this.sensorName(), "Vid1", value);
+    }
     // Start acquisition: Ensure that all the stuff is correctly initialized
-    self.handleVideo = function (webcamMediaStream) {
+    handleVideo(webcamMediaStream) {
         // Init webcam
-        self.webcam.src = self.context.compatibility.URL.createObjectURL(webcamMediaStream);
-        self.webcamMediaStream = webcamMediaStream;
+        this.webcam.src = this.context.compatibility.URL.createObjectURL(webcamMediaStream);
+        this.webcamMediaStream = webcamMediaStream;
         // Init computation stuff
-        self.ptce.reset();
-        self.prof = new profiler();
+        this.ptce.reset();
+        this.prof = new profiler();
         // Launch the show
-        setTimeout(function () { // Not sure if it's useful to delay this call ?!
-            self.webcam.play();
-            self.context.compatibility.requestAnimationFrame(self.onAnimationFrame);
+        setTimeout(function () {
+            this.webcam.play();
+            this.context.compatibility.requestAnimationFrame(this.onAnimationFrame);
         }, 500);
-    };
-
-    self.videoAccessRefused = function (err) {
+    }
+    videoAccessRefused(err) {
         console.log("Error: " + JSON.stringify(err));
         alert(i18n.t("videoSensorTab.errors.videoAccessRefused"));
-    };
-
-    self.onAnimationFrame = function () {
+    }
+    onAnimationFrame() {
         //console.log("onAnimmationFrame");
-        if (self.isStarted()) {
-            self.prof.new_frame();
-            if (self.webcam.readyState === self.webcam.HAVE_ENOUGH_DATA) { // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
+        if (this.isStarted()) {
+            this.prof.new_frame();
+            if (this.webcam.readyState === this.webcam.HAVE_ENOUGH_DATA) { // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
                 // Get image and compute
-                self.canvasCtx.drawImage(self.webcam, 0, 0, self.WIDTH, self.HEIGHT);
-                var imageData = self.canvasCtx.getImageData(0, 0, self.WIDTH, self.HEIGHT);
-                self.ptce.compute(imageData, self.WIDTH, self.HEIGHT);
-
+                this.canvasCtx.drawImage(this.webcam, 0, 0, this.WIDTH, this.HEIGHT);
+                var imageData = this.canvasCtx.getImageData(0, 0, this.WIDTH, this.HEIGHT);
+                this.ptce.compute(imageData, this.WIDTH, this.HEIGHT);
                 // Update display
-                var ceJson = self.ptce.drawComputationResult(self.canvasCtx);
-                self.perfSummary("FPS: " + Math.round(self.prof.fps));
-
+                var ceJson = this.ptce.drawComputationResult(this.canvasCtx);
+                this.perfSummary("FPS: " + Math.round(this.prof.fps));
                 // Send JSON event
-                self.SendSensorValue({ isStarted: self.isStarted(), objects: ceJson });
+                this.SendSensorValue({ isStarted: this.isStarted(), objects: ceJson });
             }
-
-            self.context.compatibility.requestAnimationFrame(self.onAnimationFrame); // Call for each frame - See note on: https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame
-        } else {
-            self.__clearCanvas();
+            this.context.compatibility.requestAnimationFrame(this.onAnimationFrame); // Call for each frame - See note on: https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame
         }
-    };
-
-    self.__clearCanvas = function () {
-        self.canvasCtx.clearRect(0, 0, self.WIDTH, self.HEIGHT);
-    };
-
-    self.onCanvasClick = function (data, event) {
-        if (self.isStarted()) {
-            var rect = self.canvas.getBoundingClientRect();
+        else {
+            this.__clearCanvas();
+        }
+    }
+    __clearCanvas() {
+        this.canvasCtx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
+    }
+    onCanvasClick(data, event) {
+        if (this.isStarted()) {
+            var rect = this.canvas.getBoundingClientRect();
             var x = event.clientX - rect.left;
             var y = event.clientY - rect.top;
-
-            if ((x > 0) && (y > 0) && (x < self.WIDTH) && (y < self.HEIGHT)) { // Add a new point
-                self.ptce.onClick(x, y);
+            if ((x > 0) && (y > 0) && (x < this.WIDTH) && (y < this.HEIGHT)) { // Add a new point
+                this.ptce.onClick(x, y);
             }
         }
     };

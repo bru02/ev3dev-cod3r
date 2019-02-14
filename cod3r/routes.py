@@ -143,7 +143,6 @@ class KeptAliveWebSocketHandler(tornado.websocket.WebSocketHandler):
         if self.keepalive_timer is not None:
             self.keepalive_timer.stop()
 
-
 @url(r'/ctl/session/(?P<session>[^/]+)')
 class TermCtlWebSocket(Route, KeptAliveWebSocketHandler):
     sessions = defaultdict(list)
@@ -375,9 +374,13 @@ class ThemesList(Route):
 class WSHandler(Route, KeptAliveWebSocketHandler):
     def open(self):
         super(WSHandler, self).open()
-        self.wrapper = utils.APIWrapper()
+        self.wrapper = utils.apiWrapper()
         def change(changed_buttons): 
             print('These buttons changed state: ' + str(changed_buttons))
+            for btn, state in changed_buttons.__dict__.items():
+                if(state == True):
+                    self.write_message("{\"pos\":\"%s\"}" % btn)
+
         self.wrapper.btn.on_change = change
         print('new connection')
 
@@ -391,12 +394,14 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
         act = data['act']
         msg = {}
         if(act == "ufn"):
-            if 'fn' in data and hasattr(self.wrapper, data['fn']):
-                method = getattr(self.wrapper, data['fn'])
-                try:
-                    msg = method(data['args']) or {}
-                except Exception as e:
-                    msg = {'err': str(e)}
+            if 'ns' in data and hasattr(self.wrapper, data['ns']):
+                wrapper = getattr(self.wrapper, data['ns'])
+                if 'fn' in data and hasattr(wrapper, data['fn']):
+                    method = getattr(wrapper, data['fn'])
+                    try:
+                        msg = method(data['args']) or {}
+                    except Exception as e:
+                        msg = {'err': str(e)}
 
         if(act == "shutdownBrick" or act == "stopCod3r"):
             self.write_message('{"txt":"Bye"}')
@@ -407,7 +412,6 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
                 os.system('sudo shutdown')
             exit()
 
-        # Reverse Message and send it back
         if('id' in data):
             msg['id'] = data['id']
         msg = json.dumps(msg)

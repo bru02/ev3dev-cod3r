@@ -15,74 +15,64 @@
  * You should have received a copy of the GNU General Public License
  * along with cod3r.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 // Model that manage the message log view
-function MessageLogViewModel(appContext) { // appContext not used for MessageLog
-  'use strict';
-
-  var self = this;
-  { // Init
-    self.context = appContext; // The application context
-    self.messages = ko.observableArray();
-    self.messages.extend({ rateLimit: 200 }); // Accept lower refresh rate
-    self.keepOnlyLastMessages = ko.observable(true);
-    self.MESSAGES_TO_KEEP = 15;
-
+class MessageLogViewModel {
+  constructor(appContext) {
+    // Init
+    this.context = appContext; // The application context
+    this.messages = ko.observableArray();
+    this.messages.extend({ rateLimit: 200 }); // Accept lower refresh rate
+    this.keepOnlyLastMessages = ko.observable(true);
+    this.MESSAGES_TO_KEEP = 15;
     // Register events
-    self.context.events.resize.add(function (workAreaHeight, usefullWorkAreaHeight) {
-      self.doResize(workAreaHeight, usefullWorkAreaHeight);
+    this.context.events.resize.add(function (workAreaHeight, usefullWorkAreaHeight) {
+      this.doResize(workAreaHeight, usefullWorkAreaHeight);
     });
   }
-
-  self.addMessage = function (type, message) {
+  addMessage(type, message) {
     function doAddMessage(type, message, count) {
-      self.messages.unshift({
+      this.messages.unshift({
         "time": new Date().toLocaleTimeString(),
         "cssClass": "list-group-item-" + type,
         type,
         "text": message,
         "count": count
       });
-      self.KeepOnlyLastMessages();
+      this.KeepOnlyLastMessages();
     }
-
     // Manage the message count
-    var m0 = (self.messages().length > 0 ? self.messages()[0] : undefined);
+    var m0 = (this.messages().length > 0 ? this.messages()[0] : undefined);
     if (m0 && (m0.type == type) && (m0.text == message)) {
-      self.messages.shift();
+      this.messages.shift();
       doAddMessage(type, message, m0.count + 1);
-    } else {
+    }
+    else {
       doAddMessage(type, message, 1);
     }
-  };
-  self.addError = function (msg) {
-    self.addMessage('danger', msg)
   }
-  self.addInfo = function (msg) {
-    self.addMessage('info', msg)
+  addError(msg) {
+    this.addMessage('danger', msg);
   }
-  self.addSuccess = function (msg) {
-    self.addMessage('success', msg)
+  addInfo(msg) {
+    this.addMessage('info', msg);
   }
-
-  self.onResetMessages = function () {
-    self.messages.removeAll();
-  };
-
-  self.onKeepOnlyLastMessages = function () {
-    self.keepOnlyLastMessages(!self.keepOnlyLastMessages());
-    self.KeepOnlyLastMessages();
-  };
-
-  self.KeepOnlyLastMessages = function () {
-    if (self.keepOnlyLastMessages()) {
-      self.messages.splice(self.MESSAGES_TO_KEEP); // Keep the first n messages
+  addSuccess(msg) {
+    this.addMessage('success', msg);
+  }
+  onResetMessages() {
+    this.messages.removeAll();
+  }
+  onKeepOnlyLastMessages() {
+    this.keepOnlyLastMessages(!this.keepOnlyLastMessages());
+    this.KeepOnlyLastMessages();
+  }
+  KeepOnlyLastMessages() {
+    if (this.keepOnlyLastMessages()) {
+      this.messages.splice(this.MESSAGES_TO_KEEP); // Keep the first n messages
     }
-  };
-
-  self.doResize = function (workAreaHeight, usefullWorkAreaHeight) {
-    self.MESSAGES_TO_KEEP = Math.max(15, Math.round(usefullWorkAreaHeight / 40)); // 40 is a bit more than the height of a single line message
-    self.KeepOnlyLastMessages();
-  };
+  }
+  doResize(workAreaHeight, usefullWorkAreaHeight) {
+    this.MESSAGES_TO_KEEP = Math.max(15, Math.round(usefullWorkAreaHeight / 40)); // 40 is a bit more than the height of a single line message
+    this.KeepOnlyLastMessages();
+  }
 }

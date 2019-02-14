@@ -15,99 +15,84 @@
  * You should have received a copy of the GNU General Public License
  * along with cod3r.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 // Model to manage the Gyroscope x-Sensor
-function GyroscopeSensorTabViewModel(appContext) {
-  'use strict';
-
-  var self = this;
-  { // Init
-    self.context = appContext; // The application context
-    self.sensorName = ko.observable("xGyro");
-    self.isStarted = ko.observable(false);
-    self.axisOrientation = 0;
-
-    self.xAxisValue = ko.observable("");
-    self.yAxisValue = ko.observable("");
-    self.zAxisValue = ko.observable("");
-    self.xAxisValue.extend({ rateLimit: 100 }); // Accept lower refresh rate
-    self.yAxisValue.extend({ rateLimit: 100 }); // Accept lower refresh rate
-    self.zAxisValue.extend({ rateLimit: 100 }); // Accept lower refresh rate
-
+class GyroscopeSensorTabViewModel {
+  constructor(appContext) {
+    // Init
+    this.context = appContext; // The application context
+    this.sensorName = ko.observable("xGyro");
+    this.isStarted = ko.observable(false);
+    this.axisOrientation = 0;
+    this.xAxisValue = ko.observable("");
+    this.yAxisValue = ko.observable("");
+    this.zAxisValue = ko.observable("");
+    this.xAxisValue.extend({ rateLimit: 100 }); // Accept lower refresh rate
+    this.yAxisValue.extend({ rateLimit: 100 }); // Accept lower refresh rate
+    this.zAxisValue.extend({ rateLimit: 100 }); // Accept lower refresh rate
     // Is device orientation supported
-    if(!window.DeviceOrientationEvent) {
+    if (!window.DeviceOrientationEvent) {
       // Should not be possible to be here if not allowed (should have already been checked while adding tabs)
       console.log("Device orientation not supported !");
     }
   }
-
-  self.__resetXValue = function() {
+  __resetXValue() {
     // EV3 sensor values: angle degree and rate in degree/s
-    self.xValue = {
-      isStarted: undefined, // will be defined just before sending
-      x: { angle: 0 }, //, rate: 0.0},
-      y: { angle: 0 }, //, rate: 0.0},
+    this.xValue = {
+      isStarted: undefined,
+      x: { angle: 0 },
+      y: { angle: 0 },
       z: { angle: 0 } //, rate: 0.0}
     };
-  };
-
-  self.deviceOrientationHandler = function(eventData) {
-    var xv = self.xValue;
+  }
+  deviceOrientationHandler(eventData) {
+    var xv = this.xValue;
     xv.x.angle = Math.round(eventData.beta);
     xv.y.angle = Math.round(eventData.gamma);
     xv.z.angle = Math.round(eventData.alpha);
-    
-    if ((self.axisOrientation == 90) || (self.axisOrientation == -90)) { // Invert X and Y
+    if ((this.axisOrientation == 90) || (this.axisOrientation == -90)) { // Invert X and Y
       var t = xv.y.angle;
       xv.y.angle = xv.x.angle;
       xv.x.angle = t;
     }
-    
-    if ((self.axisOrientation == 180) || (self.axisOrientation == -90)) {
+    if ((this.axisOrientation == 180) || (this.axisOrientation == -90)) {
       xv.y.angle *= -1;
     }
-    if((self.axisOrientation == 180) || (self.axisOrientation == 90)) {
+    if ((this.axisOrientation == 180) || (this.axisOrientation == 90)) {
       xv.x.angle *= -1;
-    }    
-
-    self.__sendXValue();
+    }
+    this.__sendXValue();
   };
-
   /*
   function deviceMotionHandler(eventData) {
     var acceleration = eventData.acceleration || // can acceleration be undefined on some hardware
                         eventData.accelerationIncludingGravity;
     if(acceleration != undefined) {
-      if (Math.abs(self.axisOrientation) == 90) {
+      if (Math.abs(this.axisOrientation) == 90) {
         // Invert X and Y
-        self.xValue.y.rate = round2dec(acceleration.x);
-        self.xValue.x.rate = round2dec(acceleration.y);
+        this.xValue.y.rate = round2dec(acceleration.x);
+        this.xValue.x.rate = round2dec(acceleration.y);
       } else {
         // Use device default
-        self.xValue.x.rate = round2dec(acceleration.x);
-        self.xValue.y.rate = round2dec(acceleration.y);
+        this.xValue.x.rate = round2dec(acceleration.x);
+        this.xValue.y.rate = round2dec(acceleration.y);
       }
       // TODO: Does we need to change the sign for acceleration ?
-      self.xValue.z.rate = round2dec(acceleration.z);
-      self.__sendXValue();
+      this.xValue.z.rate = round2dec(acceleration.z);
+      this.__sendXValue();
     }
   }*/
-
-  self.__sendXValue = function() {
-    self.xValue.isStarted = self.isStarted();
-    self.context.ev3BrickServer.streamXSensorValue(self.sensorName(), "Gyr1", self.xValue);
+  __sendXValue() {
+    this.xValue.isStarted = this.isStarted();
+    this.context.ev3BrickServer.streamXSensorValue(this.sensorName(), "Gyr1", this.xValue);
     // Also display value to GUI
-    self.xAxisValue("x: " + JSON.stringify(self.xValue.x));
-    self.yAxisValue("y: " + JSON.stringify(self.xValue.y));
-    self.zAxisValue("z: " + JSON.stringify(self.xValue.z));
+    this.xAxisValue("x: " + JSON.stringify(this.xValue.x));
+    this.yAxisValue("y: " + JSON.stringify(this.xValue.y));
+    this.zAxisValue("z: " + JSON.stringify(this.xValue.z));
   };
-
-  self.__setAxisOrientation = function(orientation) {
-    self.axisOrientation = orientation;
-  };
-  
-  self.__askAxisOrientationFull = function() {
+  __setAxisOrientation(orientation) {
+    this.axisOrientation = orientation;
+  }
+  __askAxisOrientationFull() {
     bootbox.dialog({
       title: i18n.t("gyroSensorTab.setAxisDialogFull.title"),
       message: i18n.t("gyroSensorTab.setAxisDialogFull.message"),
@@ -115,98 +100,95 @@ function GyroscopeSensorTabViewModel(appContext) {
         cancel: {
           label: i18n.t("gyroSensorTab.setAxisDialogFull.cancel"),
           className: "btn-default",
-          callback: function() { /* Cancel */ }
+          callback: function () { }
         },
         landscapeLeft: {
           label: i18n.t("gyroSensorTab.setAxisDialogFull.landscapeLeft"),
           className: "btn-primary",
-          callback: function() {
-            self.__setAxisOrientation(90);
+          callback: function () {
+            this.__setAxisOrientation(90);
           }
         },
         landscapeRight: {
           label: i18n.t("gyroSensorTab.setAxisDialogFull.landscapeRight"),
           className: "btn-primary",
-          callback: function() {
-            self.__setAxisOrientation(-90);
+          callback: function () {
+            this.__setAxisOrientation(-90);
           }
         },
         portrait: {
           label: i18n.t("gyroSensorTab.setAxisDialogFull.portrait"),
           className: "btn-primary",
-          callback: function() {
-            self.__setAxisOrientation(0);
+          callback: function () {
+            this.__setAxisOrientation(0);
           }
         },
         reversePortrait: {
           label: i18n.t("gyroSensorTab.setAxisDialogFull.reversePortrait"),
           className: "btn-primary",
-          callback: function() {
-            self.__setAxisOrientation(180);
+          callback: function () {
+            this.__setAxisOrientation(180);
           }
         }
       }
     });
-  };
-  
-  self.onSetAxis = function() {
+  }
+  onSetAxis() {
     var wo = window.orientation;
-    
-    if(wo == undefined) { // Browser don't support orientation
-      self.__askAxisOrientationFull();
-    } else {
-      if(wo == -180) {
+    if (wo == undefined) { // Browser don't support orientation
+      this.__askAxisOrientationFull();
+    }
+    else {
+      if (wo == -180) {
         wo = 180;
       }
-      
       var woLabel = i18n.t("gyroSensorTab.axisOrientation.o" + wo);
-      
       bootbox.dialog({
         title: i18n.t("gyroSensorTab.setAxisDialogLight.title"),
-        message: i18n.t("gyroSensorTab.setAxisDialogLight.message", {"axisOrientation": woLabel }),
+        message: i18n.t("gyroSensorTab.setAxisDialogLight.message", { "axisOrientation": woLabel }),
         buttons: {
           cancel: {
             label: i18n.t("gyroSensorTab.setAxisDialogLight.cancel"),
             className: "btn-default",
-            callback: function() { /* Cancel */ }
+            callback: function () { }
           },
           ok: {
             label: i18n.t("gyroSensorTab.setAxisDialogLight.ok"),
             className: "btn-primary",
-            callback: function() {
-              self.__setAxisOrientation(wo);
+            callback: function () {
+              this.__setAxisOrientation(wo);
             }
           },
           fullChoice: {
             label: i18n.t("gyroSensorTab.setAxisDialogLight.fullChoice"),
             className: "btn-primary",
-            callback: function() {
-              self.__askAxisOrientationFull();
+            callback: function () {
+              this.__askAxisOrientationFull();
             }
           }
         }
       });
     }
-  };
-  
-  self.onStart = function() {
-    self.isStarted(!self.isStarted());
-    if(self.isStarted()) {
+  }
+  onStart() {
+    this.isStarted(!this.isStarted());
+    if (this.isStarted()) {
       if (window.DeviceOrientationEvent) {
         console.log("Register DeviceOrientationEvent...");
-        self.__resetXValue();
-        window.addEventListener('deviceorientation', self.deviceOrientationHandler, false);
-        //window.addEventListener('devicemotion', self.deviceMotionHandler, false);
-        self.__sendXValue();
+        this.__resetXValue();
+        window.addEventListener('deviceorientation', this.deviceOrientationHandler, false);
+        //window.addEventListener('devicemotion', this.deviceMotionHandler, false);
+        this.__sendXValue();
       }
-    } else {
+    }
+    else {
       if (window.DeviceOrientationEvent) {
         console.log("Remove DeviceOrientationEvent...");
-        window.removeEventListener('deviceorientation', self.deviceOrientationHandler, false);
-        //window.removeEventListener('devicemotion', self.deviceMotionHandler, false);
+        window.removeEventListener('deviceorientation', this.deviceOrientationHandler, false);
+        //window.removeEventListener('devicemotion', this.deviceMotionHandler, false);
       }
-      self.__resetXValue();
-      self.__sendXValue();
+      this.__resetXValue();
+      this.__sendXValue();
     }
-  };
+  }
 }

@@ -1,3 +1,4 @@
+
 /*
  * cod3r is a simple scripting environment for the Lego Mindstrom EV3
  * Copyright (C) 2015 Jean BENECH
@@ -15,74 +16,62 @@
  * You should have received a copy of the GNU General Public License
  * along with cod3r.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 // Model to manage the GPS/Geo x-Sensor
-function GeoSensorTabViewModel(appContext) {
-    'use strict';
-
-    var self = this;
-    { // Init
-        self.context = appContext; // The application context
-        self.sensorName = ko.observable("xGeo");
-        self.isStarted = ko.observable(false);
-
-        self.timestamp = ko.observable("");
-        self.latitude = ko.observable("");
-        self.longitude = ko.observable("");
-        self.accuracy = ko.observable("");
-        self.altitude = ko.observable("");
-        self.altitudeAccuracy = ko.observable("");
-
+class GeoSensorTabViewModel {
+    constructor(appContext) {
+        // Init
+        this.context = appContext; // The application context
+        this.sensorName = ko.observable("xGeo");
+        this.isStarted = ko.observable(false);
+        this.timestamp = ko.observable("");
+        this.latitude = ko.observable("");
+        this.longitude = ko.observable("");
+        this.accuracy = ko.observable("");
+        this.altitude = ko.observable("");
+        this.altitudeAccuracy = ko.observable("");
         // Is device orientation supported
         if (!navigator.geolocation) {
             // Should not be possible to be here if not allowed (should have already been checked while adding tabs)
             console.log("Geolocation not supported !");
         }
     }
-
-    self.__resetXValue = function () {
-        self.xValue = {
-            isStarted: undefined, // will be defined just before sending
+    __resetXValue() {
+        this.xValue = {
+            isStarted: undefined,
             timestamp: 0,
             latitude: 0,
             longitude: 0,
             accuracy: 0,
-
             // Optional field (depends on the hardware/device capabilities)
             altitude: 0,
             altitudeAccuracy: 0
         };
-    };
-
-    self.__sendXValue = function () {
-        self.xValue.isStarted = self.isStarted();
-        self.context.ev3BrickServer.streamXSensorValue(self.sensorName(), "Geo1", self.xValue);
+    }
+    __sendXValue() {
+        this.xValue.isStarted = this.isStarted();
+        this.context.ev3BrickServer.streamXSensorValue(this.sensorName(), "Geo1", this.xValue);
         // Also display value to GUI
-        self.timestamp(self.xValue.timestamp + (self.xValue.timestamp != 0 ? " - " + new Date(self.xValue.timestamp).toLocaleString() : ""));
-        self.latitude(self.xValue.latitude);
-        self.longitude(self.xValue.longitude);
-        self.accuracy(self.xValue.accuracy);
-        self.altitude(self.xValue.altitude);
-        self.altitudeAccuracy(self.xValue.altitudeAccuracy);
-    };
-
-    self.watchPositionHandler = function (position) {
-        if (self.isStarted()) { // Workaround: In some version of Firefox, the geolocation.clearWatch don't unregister the callback <=> avoid flooding the EV3 brick
-            self.xValue.timestamp = position.timestamp;
-            self.xValue.latitude = position.coords.latitude;
-            self.xValue.longitude = position.coords.longitude;
-            self.xValue.accuracy = position.coords.accuracy;
-            self.xValue.altitude = position.coords.altitude;
-            self.xValue.altitudeAccuracy = position.coords.altitudeAccuracy;
-            //self.xValue.heading = position.coords.heading; // Heading can be computed (or use the gyro compass)
-            //self.xValue.speed = position.coords.speed; // Speed can be computed
-
-            self.__sendXValue();
+        this.timestamp(this.xValue.timestamp + (this.xValue.timestamp != 0 ? " - " + new Date(this.xValue.timestamp).toLocaleString() : ""));
+        this.latitude(this.xValue.latitude);
+        this.longitude(this.xValue.longitude);
+        this.accuracy(this.xValue.accuracy);
+        this.altitude(this.xValue.altitude);
+        this.altitudeAccuracy(this.xValue.altitudeAccuracy);
+    }
+    watchPositionHandler(position) {
+        if (this.isStarted()) { // Workaround: In some version of Firefox, the geolocation.clearWatch don't unregister the callback <=> avoid flooding the EV3 brick
+            this.xValue.timestamp = position.timestamp;
+            this.xValue.latitude = position.coords.latitude;
+            this.xValue.longitude = position.coords.longitude;
+            this.xValue.accuracy = position.coords.accuracy;
+            this.xValue.altitude = position.coords.altitude;
+            this.xValue.altitudeAccuracy = position.coords.altitudeAccuracy;
+            //this.xValue.heading = position.coords.heading; // Heading can be computed (or use the gyro compass)
+            //this.xValue.speed = position.coords.speed; // Speed can be computed
+            this.__sendXValue();
         }
-    };
-
-    self.watchPositionErrorHandler = function (error) {
+    }
+    watchPositionErrorHandler(error) {
         var errorMsg;
         switch (error.code) {
             case error.TIMEOUT:
@@ -99,34 +88,34 @@ function GeoSensorTabViewModel(appContext) {
                 errorMsg = i18n.t("geoSensorTab.errors.unknownError", { "detail": error.message });
                 break;
         }
-        self.context.messageLogVM.addError( errorMsg);
+        this.context.messageLogVM.addError(errorMsg);
     };
-
-    self.onStart = function () {
-        self.isStarted(!self.isStarted());
-        if (self.isStarted()) {
+    onStart() {
+        this.isStarted(!this.isStarted());
+        if (this.isStarted()) {
             if (navigator.geolocation) {
                 console.log("Register geolocation callback...");
-                self.__resetXValue();
-                var geo_options = { // TODO tune parameters ?
+                this.__resetXValue();
+                var geo_options = {
                     enableHighAccuracy: true,
                     maximumAge: 30000,
                     timeout: 27000
                 };
-                self.watchID = navigator.geolocation.watchPosition(self.watchPositionHandler, self.watchPositionErrorHandler, geo_options);
-                console.log("  ... id of callback is: " + self.watchID);
-                self.__sendXValue();
+                this.watchID = navigator.geolocation.watchPosition(this.watchPositionHandler, this.watchPositionErrorHandler, geo_options);
+                console.log("  ... id of callback is: " + this.watchID);
+                this.__sendXValue();
             }
-        } else {
+        }
+        else {
             if (navigator.geolocation) {
-                console.log("Unregister geolocation for callback: " + self.watchID);
-                if (self.watchID) {
-                    navigator.geolocation.clearWatch(self.watchID);
-                    self.watchID = undefined;
+                console.log("Unregister geolocation for callback: " + this.watchID);
+                if (this.watchID) {
+                    navigator.geolocation.clearWatch(this.watchID);
+                    this.watchID = undefined;
                 }
             }
-            self.__resetXValue();
-            self.__sendXValue();
+            this.__resetXValue();
+            this.__sendXValue();
         }
     };
 }
