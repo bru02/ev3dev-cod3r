@@ -1,0 +1,10 @@
+<script>
+    const worker = new Worker('worker.js');
+    worker.onmessage = function (e) {
+        parent.postMessage(e)
+    }
+    window.addEventListener('message', function (e) {
+        if (e.data.act == 'kill') worker.terminate();
+        else worker.postMessage(e.data);
+    });
+</script>

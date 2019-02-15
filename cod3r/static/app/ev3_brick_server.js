@@ -25,7 +25,7 @@ class EV3BrickServer {
             self.ws.removeEventListener('message', cb);
             if (msg.err) {
               reject(msg.err);
-              self.appContext.messageLogVM.addError(msg.err);
+              self.context.messageLogVM.addError(msg.err);
             } else {
               resolve(msg.res);
             }

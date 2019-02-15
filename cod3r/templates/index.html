@@ -24,7 +24,7 @@
   <script src="{{ static_url('python.js') }}"></script>
   <script src="{{ static_url('matchbrackets.js') }}"></script>
   <script src="{{ static_url('closebrackets.js') }}"></script>
-  <script src="{{ static_url('lib/artyom.js') }}"></script>
+  <!-- <script src="{{ static_url('lib/artyom.js') }}"></script> -->
 
   <!-- /!\ To be defined after the css import in order to overwrite it (see http://getbootstrap.com/components/#navbar-fixed-bottom) -->
   <style type="text/css" media="screen">
@@ -213,6 +213,7 @@
   <!-- cod3r libs -->
   <script src="{{ static_url('app/ev3_brick_server.js') }}" type="text/javascript"></script>
   <script src="{{ static_url('app/message_log.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('app/runner.js') }}" type="text/javascript"></script>
   <script src="{{ static_url('app/navigation_bar.js') }}" type="text/javascript"></script>
   <script src="{{ static_url('app/tab_xGeo_sensor.js') }}" type="text/javascript"></script>
   <script src="{{ static_url('app/tab_xVideo_sensor.js') }}" type="text/javascript"></script>
@@ -228,9 +229,8 @@
   <script src="{{ static_url('app/python_to_blockly.js') }}" type="text/javascript"></script>
   <script src="{{ static_url('app/editor.js') }}" type="text/javascript"></script>
   <script src="{{ static_url('app/tab_script_editor.js') }}" type="text/javascript"></script>
-  <!-- Depends on cod3r_blocks -->
-  <script src="{{ static_url('app/main.js') }}" type="text/javascript"></script>
   <script src="{{ static_url('app/clientLib.js') }}" type="text/javascript"></script>
+  <script src="{{ static_url('app/main.js') }}" type="text/javascript"></script>
 
   <!-- Depend on all the scripts before -->
 </head>
@@ -244,7 +244,8 @@
       <div class="container-fluid">
         <!-- Core buttons (Start / Stop) and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" id="collapser" data-toggle="collapse" data-target="#bs-navbar-collapse-1">
+          <button type="button" class="navbar-toggle collapsed" id="collapser" data-toggle="collapse"
+            data-target="#bs-navbar-collapse-1">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -258,7 +259,8 @@
         <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
           <span style="margin-left: 10px"></span>
           <!-- ko foreach: workAreaItems -->
-          <button class="btn btn-primary navbar-btn" data-bind="css: { active: active }, click: $parent.onShowWorkAreaItem">
+          <button class="btn btn-primary navbar-btn"
+            data-bind="css: { active: active }, click: $parent.onShowWorkAreaItem">
             <span data-bind="text: name, i18n: data_i18n">Loading..</span></button>
           <!-- /ko -->
 
@@ -267,16 +269,24 @@
               <button class="btn navbar-btn" data-toggle="dropdown"><strong>Cod3r</strong> <img height="20" alt="Logo"
                   src="{{ static_url('logo.png') }}" /> <span class="caret"></span></button>
               <ul class="dropdown-menu" role="menu">
-                <li><a data-bind="click: onFullScreen"><span class="i18n" data-i18n="navigationBar.cod3r.fullScreen">FULL_SCREEN</span></a></li>
-                <li><a data-bind="click: onDisplayImportImages"><span class="i18n" data-i18n="navigationBar.cod3r.importImages">IMPORT_IMAGES</span></a></li>
-                <li><a data-bind="click: onStopcod3r"><span class="i18n" data-i18n="navigationBar.cod3r.stopcod3r">STOP_cod3r</span></a></li>
+                <li><a data-bind="click: onFullScreen"><span class="i18n"
+                      data-i18n="navigationBar.cod3r.fullScreen">FULL_SCREEN</span></a></li>
+                <li><a data-bind="click: onDisplayImportImages"><span class="i18n"
+                      data-i18n="navigationBar.cod3r.importImages">IMPORT_IMAGES</span></a></li>
+                <li><a data-bind="click: onStopcod3r"><span class="i18n"
+                      data-i18n="navigationBar.cod3r.stopcod3r">STOP_cod3r</span></a></li>
                 <li class="divider"></li>
-                <li><a data-bind="click: onDisplaySettings"><span class="i18n" data-i18n="navigationBar.cod3r.settings">SETTINGS</span></a></li>
+                <li><a data-bind="click: onDisplaySettings"><span class="i18n"
+                      data-i18n="navigationBar.cod3r.settings">SETTINGS</span></a></li>
                 <li class="divider"></li>
-                <li><a href="/manage" target="_blank"><span class="i18n" data-i18n="navigationBar.cod3r.manager">FILE_MANAGER</span></a></li>
-                <li><a href="/shell" target="_blank"><span class="i18n" data-i18n="navigationBar.cod3r.shell">SHELL</span></a></li>
-                <li><a href="cod3r-doc/index.html" target="_blank"><span class="i18n" data-i18n="navigationBar.cod3r.documentation">DOCUMENTATION</span></a></li>
-                <li><a data-bind="click: onDisplayAbout"><span class="i18n" data-i18n="navigationBar.cod3r.about">ABOUT</span></a></li>
+                <li><a href="/manage" target="_blank"><span class="i18n"
+                      data-i18n="navigationBar.cod3r.manager">FILE_MANAGER</span></a></li>
+                <li><a href="/shell" target="_blank"><span class="i18n"
+                      data-i18n="navigationBar.cod3r.shell">SHELL</span></a></li>
+                <li><a href="cod3r-doc/index.html" target="_blank"><span class="i18n"
+                      data-i18n="navigationBar.cod3r.documentation">DOCUMENTATION</span></a></li>
+                <li><a data-bind="click: onDisplayAbout"><span class="i18n"
+                      data-i18n="navigationBar.cod3r.about">ABOUT</span></a></li>
               </ul>
             </div>
           </div>
@@ -289,7 +299,8 @@
       <!-- Work area 'tabs' part -->
       <div class="col-md-8" id="content">
         <p class="pull-right">
-          <a type="button" class="btn btn-collapse btn-sm" data-toggle="offcanvas"><i class="glyphicon glyphicon-chevron-down"></i>
+          <a type="button" class="btn btn-collapse btn-sm" data-toggle="offcanvas"><i
+              class="glyphicon glyphicon-chevron-down"></i>
             Messages</a>
         </p>
         <div class="tab-content">
@@ -298,13 +309,18 @@
             <nav class="nav" style="margin-bottom: 5px">
               <!-- Button bar -->
               <button class="btn btn-default btn-sm" data-bind="click: onClearScript">
-                <span class="glyphicon glyphicon-file"></span> <span class="i18n" data-i18n="scriptEditorTab.clear">CLEAR</span></button>
+                <span class="glyphicon glyphicon-file"></span> <span class="i18n"
+                  data-i18n="scriptEditorTab.clear">CLEAR</span></button>
               <button class="btn btn-default btn-sm" data-bind="click: onLoadScript">
-                <span class="glyphicon glyphicon-open"></span> <span class="i18n" data-i18n="scriptEditorTab.load">LOAD</span></button>
+                <span class="glyphicon glyphicon-open"></span> <span class="i18n"
+                  data-i18n="scriptEditorTab.load">LOAD</span></button>
               <button class="btn btn-default btn-sm" data-bind="disabled: context.isStarted, click: onSaveScript">
-                <span class="glyphicon glyphicon-save"></span> <span class="i18n" data-i18n="scriptEditorTab.save">SAVE</span></button>
-              <button class="btn btn-default btn-sm" data-bind="disabled: context.isStarted, click: context.saveAsVM.display">
-                <span class="glyphicon glyphicon-save"></span> <span class="i18n" data-i18n="scriptEditorTab.saveAs">Save
+                <span class="glyphicon glyphicon-save"></span> <span class="i18n"
+                  data-i18n="scriptEditorTab.save">SAVE</span></button>
+              <button class="btn btn-default btn-sm"
+                data-bind="disabled: context.isStarted, click: context.saveAsVM.display">
+                <span class="glyphicon glyphicon-save"></span> <span class="i18n"
+                  data-i18n="scriptEditorTab.saveAs">Save
                   As</span></button>
               <div class="btn-group" data-toggle="buttons">
                 <label class="btn btn-default blockpy-mode-set" data-bind="click: setModeToBlocks, disabled: isJs">
@@ -351,27 +367,33 @@
             <nav class="nav navOnOneLine" style="margin-bottom: 5px;">
               <!-- Button bar -->
               <!-- navbar-form navbar-input-group -->
-              <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form" onsubmit="return false;">
+              <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form"
+                onsubmit="return false;">
                 <div class="input-group input-group-sm">
                   <div class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></div>
-                  <input class="form-control" type="text" placeholder="Sensor identifier" data-bind="value: sensorName, valueUpdate: 'input'">
+                  <input class="form-control" type="text" placeholder="Sensor identifier"
+                    data-bind="value: sensorName, valueUpdate: 'input'">
                 </div>
               </form>
               <button class="btn btn-default btn-sm" data-bind="css: {active: isStarted}, click: onStart">
                 <span class="i18n" data-i18n="keyboardSensorTab.start">START</span></button>
               <span class="visible-xs-block">&nbsp;</span>
               <button class="btn btn-default btn-sm" data-bind="disabled: isStarted, click: onResetKeyboard">
-                <span class="glyphicon glyphicon-file"></span> <span class="i18n" data-i18n="keyboardSensorTab.clear">CLEAR</span></button>
+                <span class="glyphicon glyphicon-file"></span> <span class="i18n"
+                  data-i18n="keyboardSensorTab.clear">CLEAR</span></button>
               <span class="visible-xs-block">&nbsp;</span>
               <button class="btn btn-default btn-sm" data-bind="disabled: isStarted, click: onLoadKeyboard">
-                <span class="glyphicon glyphicon-open"></span> <span class="i18n" data-i18n="keyboardSensorTab.loadAndManage">LOAD_MANAGE</span></button>
+                <span class="glyphicon glyphicon-open"></span> <span class="i18n"
+                  data-i18n="keyboardSensorTab.loadAndManage">LOAD_MANAGE</span></button>
               <button class="btn btn-default btn-sm" data-bind="disabled: isStarted, click: onSaveKeyboard">
-                <span class="glyphicon glyphicon-save"></span> <span class="i18n" data-i18n="keyboardSensorTab.save">SAVE</span></button>
+                <span class="glyphicon glyphicon-save"></span> <span class="i18n"
+                  data-i18n="keyboardSensorTab.save">SAVE</span></button>
             </nav>
             <!-- Nest a bootstrap grid inside <=> 12 columns available -->
             <div id="xTouchButtons" data-bind="foreach: buttons">
               <div class="row" data-bind="foreach: $data">
-                <button class="col-xs-2 col-sm-2 btn btn-default btn-lg xkeyboard-touch" role="button" data-bind="disabled: isDisabled, text: name">BUTTON</button>
+                <button class="col-xs-2 col-sm-2 btn btn-default btn-lg xkeyboard-touch" role="button"
+                  data-bind="disabled: isDisabled, text: name">BUTTON</button>
               </div>
             </div>
           </div>
@@ -380,24 +402,28 @@
           <div role="tabpanel" id="gyroSensorTab" class="tab-pane">
             <nav class="nav navOnOneLine" style="margin-bottom: 5px">
               <!-- Button bar -->
-              <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form" onsubmit="return false;">
+              <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form"
+                onsubmit="return false;">
                 <div class="input-group input-group-sm">
                   <div class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></div>
-                  <input class="form-control" type="text" placeholder="Sensor identifier" data-bind="value: sensorName, valueUpdate: 'input'">
+                  <input class="form-control" type="text" placeholder="Sensor identifier"
+                    data-bind="value: sensorName, valueUpdate: 'input'">
                 </div>
               </form>
               <button class="btn btn-default btn-sm" data-bind="css: {active: isStarted}, click: onStart">
                 <span class="i18n" data-i18n="gyroSensorTab.start">START</span></button>
               <span class="visible-xs-block">&nbsp;</span>
               <button class="btn btn-default btn-sm" data-bind="click: onSetAxis">
-                <span class="glyphicon glyphicon-refresh"></span> <span class="i18n" data-i18n="gyroSensorTab.setAxis">SET_AXIS</span></button>
+                <span class="glyphicon glyphicon-refresh"></span> <span class="i18n"
+                  data-i18n="gyroSensorTab.setAxis">SET_AXIS</span></button>
             </nav>
 
             <div>
               <!-- Nest a bootstrap grid inside <=> 12 columns available -->
               <div class="row">
                 <div class="col-sm-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170"
+                    height="110">
                     <polyline points="70,50 140,50 120,65 50,65" style="fill: #aaaaaa;"></polyline>
                     <polyline points="60,40 130,40 110,90 40,90" style="fill: #103BE7; fill-opacity: 0.9;"></polyline>
                     <polyline points="50,65 120,65 100,80 30,80" style="fill: #aaaaaa; fill-opacity: 0.6;"></polyline>
@@ -412,7 +438,8 @@
               </div>
               <div class="row">
                 <div class="col-sm-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170"
+                    height="110">
                     <polyline points="110,50 145,60 95,90 60,80" style="fill: #aaaaaa;"></polyline>
                     <polyline points="70,50 150,50 100,80 20,80" style="fill: #103BE7; fill-opacity: 0.9;"></polyline>
                     <polyline points="75,40 110,50 60,80 25,70" style="fill: #aaaaaa; fill-opacity: 0.6;"></polyline>
@@ -427,11 +454,13 @@
               </div>
               <div class="row">
                 <div class="col-sm-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170"
+                    height="110">
                     <polyline points="70,50 150,50 100,80 20,80" style="fill: #103BE7; fill-opacity: 0.9;"></polyline>
                     <polyline points="85,45 155,55 80,85 15,75" style="fill: #aaaaaa; fill-opacity: 0.6;"></polyline>
                     <line x1="87.5" y1="29" x2="87.5" y2="98" style="stroke:#FF0000; stroke-width: 4;"></line>
-                    <text x="87.5" y="25" font-size="24" fill="#FF0000" stroke="#FF0000" style="text-anchor: middle">Z</text>
+                    <text x="87.5" y="25" font-size="24" fill="#FF0000" stroke="#FF0000"
+                      style="text-anchor: middle">Z</text>
                   </svg>
                 </div>
                 <div class="col-sm-9">
@@ -439,7 +468,8 @@
                     <span class="i18n text-info" data-i18n="gyroSensorTab.zAxis">Z</span><br />
                     <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: zAxisValue">{}</span></strong>
                   </p>
-                  <p><small><em><span class="i18n text-small text-muted" data-i18n="gyroSensorTab.zAxisNote">NOT_ALL_DEVICES_SUPPORT_Z</span></em></small></p>
+                  <p><small><em><span class="i18n text-small text-muted"
+                          data-i18n="gyroSensorTab.zAxisNote">NOT_ALL_DEVICES_SUPPORT_Z</span></em></small></p>
                 </div>
               </div>
             </div>
@@ -449,17 +479,21 @@
           <div role="tabpanel" id="videoSensorTab" class="tab-pane">
             <div class="nav navOnOneLine" style="margin-bottom: 5px">
               <!-- Button bar -->
-              <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form" onsubmit="return false;">
+              <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form"
+                onsubmit="return false;">
                 <div class="input-group input-group-sm">
                   <div class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></div>
-                  <input class="form-control" type="text" placeholder="Sensor identifier" data-bind="value: sensorName, valueUpdate: 'input'">
+                  <input class="form-control" type="text" placeholder="Sensor identifier"
+                    data-bind="value: sensorName, valueUpdate: 'input'">
                 </div>
               </form>
               <button class="btn btn-default btn-sm" data-bind="css: {active: isStarted}, click: onStart">
                 <span class="i18n" data-i18n="videoSensorTab.start">START</span></button>
               <div class="pull-right">
-                <p class="navbar-text" data-bind="visible: isStarted"><span class="i18n text-info" data-i18n="videoSensorTab.addPoints">CLICK_VIDEO_TO_ADD_POINTS</span></p>
-                <p id="xVideoSensorPerf" class="navbar-text text-info" data-bind="visible: isStarted, text: perfSummary"></p>
+                <p class="navbar-text" data-bind="visible: isStarted"><span class="i18n text-info"
+                    data-i18n="videoSensorTab.addPoints">CLICK_VIDEO_TO_ADD_POINTS</span></p>
+                <p id="xVideoSensorPerf" class="navbar-text text-info"
+                  data-bind="visible: isStarted, text: perfSummary"></p>
               </div>
             </div>
 
@@ -474,10 +508,12 @@
           <div role="tabpanel" id="geoSensorTab" class="tab-pane">
             <div class="nav navOnOneLine" style="margin-bottom: 5px">
               <!-- Button bar -->
-              <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form" onsubmit="return false;">
+              <form class="navbar-left" style="margin-right: 5px; max-width: 200px;" role="form"
+                onsubmit="return false;">
                 <div class="input-group input-group-sm">
                   <div class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></div>
-                  <input class="form-control" type="text" placeholder="Sensor identifier" data-bind="value: sensorName, valueUpdate: 'input'">
+                  <input class="form-control" type="text" placeholder="Sensor identifier"
+                    data-bind="value: sensorName, valueUpdate: 'input'">
                 </div>
               </form>
               <button class="btn btn-default btn-sm" data-bind="css: {active: isStarted}, click: onStart">
@@ -488,7 +524,8 @@
               <!-- Nest a bootstrap grid inside <=> 12 columns available -->
               <div class="row">
                 <div class="col-sm-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170"
+                    height="110">
                     <circle cx="85" cy="55" r="40" style="fill:#103BE7" />
                     <path d="M45,55 A50,30 0 0,0 125,55" style="stroke:#FF0000; stroke-width: 3; fill:none;"></path>
                   </svg>
@@ -500,7 +537,8 @@
               </div>
               <div class="row">
                 <div class="col-sm-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170"
+                    height="110">
                     <circle cx="85" cy="55" r="40" style="fill:#103BE7" />
                     <path d="M85,15 A30,50 0 0,1 85,95" style="stroke:#FF0000; stroke-width: 3; fill:none;"></path>
                   </svg>
@@ -512,13 +550,15 @@
                   </p>
                   <p><small><em>
                         <span class="i18n text-info" data-i18n="geoSensorTab.accuracy">ACCURACY</span><br />
-                        <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: accuracy">{}</span></strong>
+                        <span>&nbsp;</span><strong><span
+                            data-bind="visible: isStarted, text: accuracy">{}</span></strong>
                       </em></small></p>
                 </div>
               </div>
               <div class="row">
                 <div class="col-sm-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170"
+                    height="110">
                     <polygon points="40,90  70,40  100,90" style="fill:#aaaaaa;"></polygon>
                     <polygon points="60,90  100,10  140,90" style="fill:#103BE7;"></polygon>
                     <line x1="50" y1="30" x2="150" y2="30" style="stroke:#FF0000; stroke-width: 3;"></line>
@@ -530,14 +570,17 @@
                     <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: altitude">{}</span></strong>
                   </p>
                   <p><small><em>
-                        <span class="i18n text-info" data-i18n="geoSensorTab.altitudeAccuracy">ALTITUDE_ACCURACY</span><br />
-                        <span>&nbsp;</span><strong><span data-bind="visible: isStarted, text: altitudeAccuracy">{}</span></strong>
+                        <span class="i18n text-info"
+                          data-i18n="geoSensorTab.altitudeAccuracy">ALTITUDE_ACCURACY</span><br />
+                        <span>&nbsp;</span><strong><span
+                            data-bind="visible: isStarted, text: altitudeAccuracy">{}</span></strong>
                       </em></small></p>
                 </div>
               </div>
               <div class="row">
                 <div class="col-sm-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170" height="110">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="170"
+                    height="110">
                     <circle cx="85" cy="55" r="40" style="stroke:#103BE7; stroke-width: 3; fill-opacity:0" />
                     <line x1="85" y1="55" x2="85" y2="20" style="stroke:#FF0000; stroke-width: 3;"></line>
                     <line x1="85" y1="55" x2="105" y2="65" style="stroke:#FF0000; stroke-width: 3;"></line>
@@ -558,14 +601,16 @@
         <nav class="nav" style="margin-bottom: 5px">
           <!-- Button bar -->
           <button class="btn btn-default btn-sm" data-bind="click: onResetMessages">
-            <span class="glyphicon glyphicon-file"></span> <span class="i18n" data-i18n="messageLog.clear">CLEAR</span></button>
-          <button class="btn btn-default btn-sm" data-bind="css: {active: keepOnlyLastMessages}, click: onKeepOnlyLastMessages">
+            <span class="glyphicon glyphicon-file"></span> <span class="i18n"
+              data-i18n="messageLog.clear">CLEAR</span></button>
+          <button class="btn btn-default btn-sm"
+            data-bind="css: {active: keepOnlyLastMessages}, click: onKeepOnlyLastMessages">
             <span class="i18n" data-i18n="messageLog.keepLast">KEEP_LAST</span></button>
         </nav>
         <ul class="list-group" data-bind="foreach: messages" style="font-size:11px">
           <li class="list-group-item" data-bind="css: cssClass">
-            <small data-bind="text: time">00:00:00</small> - <span data-bind="text: text">Message</span><span class="badge"
-              data-bind="visible: count > 1, text: count">0</span>
+            <small data-bind="text: time">00:00:00</small> - <span data-bind="text: text">Message</span><span
+              class="badge" data-bind="visible: count > 1, text: count">0</span>
           </li>
         </ul>
 
@@ -581,7 +626,8 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">CrossCloseButton</span></button>
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+              class="sr-only">CrossCloseButton</span></button>
           <h4 class="modal-title"><span class="i18n" data-i18n="saveAsModal.title">Save As</span></h4>
         </div>
         <div class="modal-body">
@@ -606,7 +652,8 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">CrossCloseButton</span></button>
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+              class="sr-only">CrossCloseButton</span></button>
           <h4 class="modal-title"><span class="i18n" data-i18n="settingsModal.title">SETTINGS</span></h4>
         </div>
         <div class="modal-body">
@@ -655,33 +702,38 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">CrossCloseButton</span></button>
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+              class="sr-only">CrossCloseButton</span></button>
           <h4 class="modal-title"><span class="i18n" data-i18n="importImagesModal.title">IMPORT_IMAGES</span></h4>
         </div>
         <div class="modal-body">
           <form id="importImages_selectFileForm">
             <div class="form-group">
               <label for="selectImageFile" class="i18n" data-i18n="importImagesModal.selectImage">SELECT_IMAGE</label>
-              <input type="file" id="selectImageFile" data-bind="event: { change: function() { uploadImage($element.files[0]) } }" />
+              <input type="file" id="selectImageFile"
+                data-bind="event: { change: function() { uploadImage($element.files[0]) } }" />
             </div>
           </form>
           <form class="form-horizontal" disabled>
             <div class="form-group">
               <div class="col-sm-offset-1 checkbox">
                 <label>
-                  <input type="checkbox" data-bind="checked: keepAspectRatio" /> <span class="i18n" data-i18n="importImagesModal.keepAspectRatio">KEEP_ASPECT_RATIO</span>
+                  <input type="checkbox" data-bind="checked: keepAspectRatio" /> <span class="i18n"
+                    data-i18n="importImagesModal.keepAspectRatio">KEEP_ASPECT_RATIO</span>
                 </label>
               </div>
             </div>
             <div class="form-group">
               <div class="col-sm-offset-1 checkbox">
                 <label>
-                  <input type="checkbox" data-bind="checked: useDithering" /> <span class="i18n" data-i18n="importImagesModal.useDithering">USE_DITHERING</span>
+                  <input type="checkbox" data-bind="checked: useDithering" /> <span class="i18n"
+                    data-i18n="importImagesModal.useDithering">USE_DITHERING</span>
                 </label>
               </div>
             </div>
             <div class="form-group">
-              <span class="col-sm-offset-1 col-sm-4 i18n" data-i18n="importImagesModal.whiteBlackthreshold">WHITE_BLACK_THRESHOLD</span>
+              <span class="col-sm-offset-1 col-sm-4 i18n"
+                data-i18n="importImagesModal.whiteBlackthreshold">WHITE_BLACK_THRESHOLD</span>
               <div class="col-sm-7">
                 <input type="range" data-bind="value: threshold" min="1" max="255">
               </div>
@@ -696,8 +748,10 @@
             </div>
           </div>
 
-          <label for="importImages_jsCodeToCopy" class="i18n" data-i18n="importImagesModal.selectCodeAndCopy">SELECT_AND_COPY</label>
-          <textarea class="form-control" id="importImages_jsCodeToCopy" rows="5" data-bind="value: codeToBuildTheImage"></textarea>
+          <label for="importImages_jsCodeToCopy" class="i18n"
+            data-i18n="importImagesModal.selectCodeAndCopy">SELECT_AND_COPY</label>
+          <textarea class="form-control" id="importImages_jsCodeToCopy" rows="5"
+            data-bind="value: codeToBuildTheImage"></textarea>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">
@@ -719,24 +773,38 @@
           <p></p>
           <span class="i18n" data-i18n="aboutModal.softwareUsed">SOFTWARE_USED</span>
           <ul class="list-inline">
-            <li><a href="http://codemirror.net" target="_blank" title="In-browser code editor - MIT license">Codemirror</a></li>
-            <li><a href="https://developers.google.com/blockly/" target="_blank" title="Blockly is a library for building visual programming editors - Apache 2.0">Blockly</a></li>
-            <li><a href="http://bootboxjs.com/" target="_blank" title="A small JavaScript library which allows you to create programmatic dialog boxes using Bootstrap modals - MIT License">Bootboxjs</a></li>
-            <li><a href="http://getbootstrap.com/" target="_blank" title="A sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development - MIT License">Bootstrap</a></li>
-            <li><a href="http://i18next.com/" target="_blank" title="A full-featured i18n javascript library for translating your webapplication - MIT license">i18next</a></li>
-            <li><a href="http://jquery.com/" target="_blank" title="A fast, small, and feature-rich JavaScript library - MIT license">jQuery</a></li>
-            <li><a href="https://github.com/inspirit/jsfeat" target="_blank" title="A JavaScript Computer Vision library - MIT license">jsfeat</a></li>
-            <li><a href="http://knockoutjs.com/" target="_blank" title="Simplify dynamic JavaScript UIs with the Model-View-View-Model (MVVM) pattern - MIT license">Knockout.</a></li>
+            <li><a href="http://codemirror.net" target="_blank"
+                title="In-browser code editor - MIT license">Codemirror</a></li>
+            <li><a href="https://developers.google.com/blockly/" target="_blank"
+                title="Blockly is a library for building visual programming editors - Apache 2.0">Blockly</a></li>
+            <li><a href="http://bootboxjs.com/" target="_blank"
+                title="A small JavaScript library which allows you to create programmatic dialog boxes using Bootstrap modals - MIT License">Bootboxjs</a>
+            </li>
+            <li><a href="http://getbootstrap.com/" target="_blank"
+                title="A sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development - MIT License">Bootstrap</a>
+            </li>
+            <li><a href="http://i18next.com/" target="_blank"
+                title="A full-featured i18n javascript library for translating your webapplication - MIT license">i18next</a>
+            </li>
+            <li><a href="http://jquery.com/" target="_blank"
+                title="A fast, small, and feature-rich JavaScript library - MIT license">jQuery</a></li>
+            <li><a href="https://github.com/inspirit/jsfeat" target="_blank"
+                title="A JavaScript Computer Vision library - MIT license">jsfeat</a></li>
+            <li><a href="http://knockoutjs.com/" target="_blank"
+                title="Simplify dynamic JavaScript UIs with the Model-View-View-Model (MVVM) pattern - MIT license">Knockout.</a>
+            </li>
             <li><a href="http://www.ev3dev.org/" target="_blank" title="Debian for the ev3 - GNU v2">Ev3dev</a></li>
-            <li><a href="https://github.com/paradoxxxzero/butterfly" target="_blank" title="A sleek web based terminal emulator - GNU v3">Butterfly</a></li>
-            <li><a href="https://github.com/joni2back/angular-filemanager" target="_blank" title="Filemanager - MIT">angular-filemanager</a></li>
+            <li><a href="https://github.com/paradoxxxzero/butterfly" target="_blank"
+                title="A sleek web based terminal emulator - GNU v3">Butterfly</a></li>
+            <li><a href="https://github.com/joni2back/angular-filemanager" target="_blank"
+                title="Filemanager - MIT">angular-filemanager</a></li>
             <li>
               <a href="https://github.com/RealTimeWeb/blockpy" target="_blank" title="Blockly that's more Python than JavaScript, powered with Skulpt
-              - Apache License 2.0"
-                s>Blockpy</a>
+              - Apache License 2.0" s>Blockpy</a>
             </li>
             <li>
-              <a href="https://github.com/jbenech/gnikrap" target="_blank" title="A JavaScript and Scratch-like development environment for the Lego Mindstrom EV3 - GPL v3"
+              <a href="https://github.com/jbenech/gnikrap" target="_blank"
+                title="A JavaScript and Scratch-like development environment for the Lego Mindstrom EV3 - GPL v3"
                 s>Gnikrap</a>
             </li>
           </ul>
