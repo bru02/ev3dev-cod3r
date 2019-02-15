@@ -8,6 +8,31 @@ class EV3BrickServer {
       timeoutID: undefined
     };
     this.XSENSOR_STREAM_FREQUENCY = 50; // in ms => Maximum of 20 message by second by xSensor
+    this.message = async (data = {}) => {
+      let self = this;
+      return new Promise((resolve, reject) => {
+        let id = Utils.generateUUID();
+        if (self.WSSend($.fn.extend(data, {
+          id,
+        }))) {
+          self.ws.addEventListener('message', function cb(msg) {
+            try {
+              msg = JSON.parse(msg.data);
+            } catch (e) {
+              return;
+            }
+            if (msg.id !== id) return;
+            self.ws.removeEventListener('message', cb);
+            if (msg.err) {
+              reject(msg.err);
+              self.appContext.messageLogVM.addError(msg.err);
+            } else {
+              resolve(msg.res);
+            }
+          });
+        }
+      })
+    }
   }
 
   initialize() {
@@ -135,32 +160,6 @@ class EV3BrickServer {
   stopcod3r() {
     this.WSSend({
       act: "stopCod3r"
-    })
-  }
-
-  async message(data = {}) {
-    let self = this;
-    return new Promise((resolve, reject) => {
-      let id = Utils.generateUUID();
-      if (self.WSSend($.fn.extend(data, {
-        id,
-      }))) {
-        self.ws.addEventListener('message', function cb(msg) {
-          try {
-            msg = JSON.parse(msg.data);
-          } catch (e) {
-            return;
-          }
-          if (msg.id !== id) return;
-          self.ws.removeEventListener('message', cb);
-          if (msg.err) {
-            reject(msg.err);
-            self.appContext.messageLogVM.addError(msg.err);
-          } else {
-            resolve(msg.res);
-          }
-        });
-      }
     })
   }
 }

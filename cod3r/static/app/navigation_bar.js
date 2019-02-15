@@ -52,7 +52,6 @@ class NavigationBarViewModel {
         this.workAreaItems.push(this.btnGeo);
       } // else: Don't show xGeo, GPS not supported by the browser
     }
-    this.onShowWorkAreaItem(this.btnScript);
     this.onFullScreen = () => {
       this.context.compatibility.toggleFullScreen();
       this.__collapseNavbar();
@@ -61,7 +60,7 @@ class NavigationBarViewModel {
       this.context.importImagesVM.display();
       this.__collapseNavbar();
     }
-    this.onShowWorkAreaItem(workAreaItem) => {
+    this.onShowWorkAreaItem = (workAreaItem) => {
       // Set the active item in the model and on screen
       var items = this.workAreaItems(); // return a regular array
       for (var i = 0; i < items.length; i++) {
@@ -71,6 +70,7 @@ class NavigationBarViewModel {
       }
       this.__collapseNavbar();
     }
+    this.onShowWorkAreaItem(this.btnScript);
     // Auto collapse navbar while collapse feature is enabled (screen width is < 768)
     this.onRunScript = () => {
       if (this._runner)

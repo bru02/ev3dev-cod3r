@@ -17,7 +17,7 @@ class GyroscopeSensorTabViewModel {
       // Should not be possible to be here if not allowed (should have already been checked while adding tabs)
       console.log("Device orientation not supported !");
     }
-    onSetAxis() {
+    this.onSetAxis = () => {
       var wo = window.orientation;
       if (wo == undefined) { // Browser don't support orientation
         this.__askAxisOrientationFull();
