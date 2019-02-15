@@ -4,16 +4,6 @@
 /* http://www.htmlfivewow.com/demos/terminal/terminal.html */
 @import url(https://fonts.googleapis.com/css?family=VT323);
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
 /* Variables */
 /** Font */
 /** Colors */
@@ -26,35 +16,11 @@
 /** Scroll */
 /** Popup */
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* Theses are the various imported style files */
 /* THIS NEEDS the python `libsass` library to be installed. */
 /* You can copy the imported files in the theme dir, they will be imported prioritarily. */
 /* You can change this file to import any webfont: */
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 body {
   font-family: "VT323";
   font-size: 2em;
@@ -62,18 +28,6 @@ body {
 
 /* You can comment / uncomment the following to enable/disable terminal effects. */
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 body {
   transition: filter 200ms;
   transform-origin: bottom; }
@@ -114,32 +68,8 @@ body {
 
 /* @import all_fx */
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* The color theme is defined in this one: */
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* Here are the 16 "normal" colors for theming */
 .bg-color-0 {
   background-color: #001100; }
@@ -318,18 +248,6 @@ body {
     background-color: #00ff00 !important; }
 
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* Here are the 240 xterm colors */
 /* See http://upload.wikimedia.org/wikipedia/en/1/15/Xterm_256color_chart.svg */
 .bg-color-16 {
@@ -2995,18 +2913,6 @@ body {
     background-color: #0b0 !important; }
 
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 html, body {
   margin: 0;
   padding: 0;
@@ -3089,18 +2995,6 @@ body {
   outline: none; }
 
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .focus .cursor {
   transition: 300ms; }
 
@@ -3108,18 +3002,6 @@ body {
   box-shadow: 0 0 1 #0b0; }
 
 /* *-* coding: utf-8 *-* */
-/* This file is part of cod3r */
-/* cod3r Copyright(C) 2015-2017 Florian Mounier */
-/* This program is free software: you can redistribute it and/or modify */
-/* it under the terms of the GNU General Public License as published by */
-/* the Free Software Foundation, either version 3 of the License, or */
-/* (at your option) any later version. */
-/* This program is distributed in the hope that it will be useful, */
-/* but WITHOUT ANY WARRANTY; without even the implied warranty of */
-/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
-/* GNU General Public License for more details. */
-/* You should have received a copy of the GNU General Public License */
-/* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .bold {
   font-weight: bold; }
 

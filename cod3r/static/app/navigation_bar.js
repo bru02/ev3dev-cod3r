@@ -72,7 +72,7 @@ class NavigationBarViewModel {
   // Auto collapse navbar while collapse feature is enabled (screen width is < 768)
   onRunScript() {
     if (this._runner)
-      this._runner.disconnect();
+      this._runner.kill();
     if (this.running()) {
       this._runner = null;
     }
@@ -80,13 +80,7 @@ class NavigationBarViewModel {
       var value = (this.context.scriptEditorTabVM ? this.context.scriptEditorTabVM.editor.codeMirror.getValue() : null);
       if (value) {
         if (this.context.settings.lang == "js") {
-          this._runner = new Runner(value, {
-            send: this.context.ev3BrickServer.WSSend,
-            add: this.context.ev3BrickServer.ws.addEventListener.bind(this.context.ev3BrickServer.ws),
-            rem: this.context.ev3BrickServer.ws.removeEventListener.bind(this.context.ev3BrickServer.ws),
-            err: this.context.messageLogVM.addError,
-            id: Utils.generateUUID,
-          }, function (err) {
+          this._runner = new Runner(value, function (data) { return this.appContext.ev3BrickServer.message(data) }, function (err) {
             this._runner = null;
             this.running(false);
             this.context.messageLogVM.addError(`Failed to run code: ${err}`);

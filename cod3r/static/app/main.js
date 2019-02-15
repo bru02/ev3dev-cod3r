@@ -108,7 +108,6 @@ $(document).ready(function () {
   // Translation
   i18n.init({ fallbackLng: 'en', lng: context.settings.language }, function () {
     context.settings.language = i18n.lng(); // Set language really used    
-
     // Technical objects
     context.compatibility = compatibility;
     context.fileName = ko.observable("")
@@ -185,6 +184,7 @@ $(document).ready(function () {
     window.onbeforeunload = function () {
       if (!context.isSaved()) return "";
     };
+    clientLib.init(context.ev3BrickServer.message, i18n.t);
   });
 });
 $(document).ready(function () {
