@@ -1,7 +1,7 @@
 <script>
     const worker = new Worker("{{ static_url('worker.js') }}");
     worker.onmessage = function (e) {
-        parent.postMessage(e)
+        parent.postMessage(e.data)
     }
     window.addEventListener('message', function (e) {
         if (e.data.act == 'kill') worker.terminate();

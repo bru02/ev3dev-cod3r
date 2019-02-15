@@ -40,7 +40,9 @@ var clientLib = (function (window) {
                     }, this.errorHandler, this.options);
                 }
                 toStreet(lat, lon, fn) {
-                    $.getJSON(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, function (obj) {
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`).then(function (res) {
+                        return res.json()
+                    }).then((obj) => {
                         fn(obj.display_name);
                     });
                 }
@@ -520,15 +522,16 @@ var clientLib = (function (window) {
                     let props = val[name];
                     t[name] = async function () {
                         let args = Array.from(arguments);
-                        $(props.args).each(function (i, e) {
+                        for (let i in props.args) {
+                            let e = props.args[i];
                             if (args[i]) {
                                 let type = Array.isArray(args[i]) ? "array" : typeof args[i],
                                     res = true;
                                 if (Array.isArray(e.type)) {
-                                    $(e['type']).each((j, e) => {
+                                    for (let e of e['type']) {
                                         res = res && type !== e;
-                                        if (!res) return false;
-                                    });
+                                        if (!res) break;;
+                                    };
                                 } else {
                                     res = type !== e.type;
                                 }
@@ -542,7 +545,7 @@ var clientLib = (function (window) {
                                     throw new Error("Too few arguments supplied to function " + key + "." + name + ".");
                                 }
                             }
-                        });
+                        };
                         return msg({
                             act: 'ufn',
                             ns: key,
@@ -579,7 +582,7 @@ var clientLib = (function (window) {
             //                 try {
             //                     e = JSON.parse(e.data);
             //                     if (e.btnPressed && cbs[e.pos]) {
-            //                         $(cbs[e.pos]).each((i, e) => e());
+            //                         for(let cb in cbs[e.pos]) cb();
             //                     }
             //                 } catch (e) { }
             //             });
