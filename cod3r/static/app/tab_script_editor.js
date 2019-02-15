@@ -10,32 +10,27 @@ class SaveAsDialogViewModel {
     this.folderDialog = undefined;
     this.onSave = () => {
       let path = this.folder() + this.fileName();
-      $.post("/bridge.py", JSON.stringify({
+      $.post("/bridge.py", {
         action: "createFile",
         item: path
-      }), (e) => {
-        try {
-          e = JSON.parse(e);
-        }
-        catch (e) {
-          this.context.messageLogVM.addError('Failed to create file!');
-          return;
-        }
+      }, (e) => {
         this.context.messageLogVM.addMessage(e.result.success ? 'success' : 'danger', e.result.error || "Saved file!");
-      });
+      }, 'json');
       this.context.fileName(path);
       this.hide();
     }
     this.changeFolder = () => {
       PopupCenter("/manage?save=1", "Pick a folder", 600, 600);
-      addEventListener('message', (e) => {
+      let cb = (e) => {
         if (e.origin == location.origin) {
           e = JSON.parse(e.data);
           if ('dir' in e) {
+            removeEventListener('message', cb)
             this.folder(e['dir']);
           }
         }
-      });
+      };
+      addEventListener('message', cb);
     }
   }
   display() {
@@ -91,15 +86,17 @@ class ScriptEditorTabViewModel {
     };
     this.onLoadScript = () => {
       PopupCenter("/manage?load=1", "Pick a file", 600, 600);
-      addEventListener('message', (e) => {
+      let cb = (e) => {
         if (e.origin == location.origin) {
           e = JSON.parse(e.data);
           if ('dir' in e) {
             this.context.fileName(e['dir']);
             this.loadScript();
+            removeEventListener('message', cb);
           }
         }
-      });
+      };
+      addEventListener('message', cb);
     }
     this.onSaveScript = () => {
       if (!!this.context.fileName()) {
@@ -107,21 +104,14 @@ class ScriptEditorTabViewModel {
         if (!this.isJs() && !val.startsWith("#!/usr/bin python3")) {
           val = "#!/usr/bin python3\n\r" + val;
         }
-        $.post("/bridge.py", JSON.stringify({
+        $.post("/bridge.py", {
           action: "edit",
           content: val,
           item: this.context.fileName()
-        }), (e) => {
-          try {
-            e = JSON.parse(e);
-          }
-          catch (e) {
-            this.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantSaveScriptFile", { filename: this.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
-            return;
-          }
+        }, (e) => {
           let s = e.result.success == false;
           this.context.messageLogVM.addMessage(s ? 'danger' : 'success', i18n.t(`scriptEditorTab.${s ? "errors.cantSaveScriptFile" : "scriptSuccessfullySaved"}`, { filename: this.context.fileName(), causedBy: e.result.error }));
-        });
+        }, 'json');
       }
       else {
         this.context.saveAsVM.display();
@@ -146,21 +136,14 @@ class ScriptEditorTabViewModel {
 
   loadScript() {
     if (this.context.fileName()) {
-      $.post("/bridge.py", JSON.stringify({
+      $.post("/bridge.py", {
         action: "getContent",
         item: this.context.fileName()
-      }), (e) => {
-        try {
-          e = JSON.parse(e);
-        }
-        catch (e) {
-          this.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: this.context.fileName(), causedBy: "ERR_BAD_RESPONSE" }));
-          return;
-        }
+      }, (e) => {
         this.editor.codeMirror.setValue(e.result);
-        this.context.messageLogVM.addMessage(e.result.success == false ? 'danger' : 'success', i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: this.context.fileName(), causedBy: e.result.error }) || "Loaded file!");
+        this.context.messageLogVM.addError(i18n.t("scriptEditorTab.errors.cantLoadScriptFile", { filename: this.context.fileName(), causedBy: e.result.error }));
         localStorage['script'] = this.context.fileName();
-      });
+      }, 'json');
     }
   };
 }

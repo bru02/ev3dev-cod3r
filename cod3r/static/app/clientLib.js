@@ -528,9 +528,9 @@ var clientLib = (function (window) {
                                 let type = Array.isArray(args[i]) ? "array" : typeof args[i],
                                     res = true;
                                 if (Array.isArray(e.type)) {
-                                    for (let e of e['type']) {
-                                        res = res && type !== e;
-                                        if (!res) break;;
+                                    for (let t of e['type']) {
+                                        res = res && type !== t;
+                                        if (!res) break;
                                     };
                                 } else {
                                     res = type !== e.type;
@@ -556,13 +556,11 @@ var clientLib = (function (window) {
                 }
             }
 
-            leds.off = function () {
+            leds.off = async function () {
                 return leds.setColor('BOTH', [0, 0]);
             }
-            infraredSensor.distanceCM = function () {
-                return infraredSensor.proximity.call(this, arguments).then(e => {
-                    return e * 0.7;
-                });
+            infraredSensor.distanceCM = async function () {
+                return await infraredSensor.proximity.apply(this, arguments) * 0.7;
             }
             // var cbs = {
             //     backspace: [],

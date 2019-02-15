@@ -35,7 +35,7 @@ import tornado.process
 import tornado.web
 import tornado.websocket
 import cod3r.utils as utils
-from cod3r import Route, url
+from cod3r import Route, url, wrappers
 from cod3r.terminal import Terminal
 import mimetypes
 
@@ -404,7 +404,11 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
                 if 'fn' in data and hasattr(wrapper, data['fn']):
                     method = getattr(wrapper, data['fn'])
                     try:
-                        msg = method(data['args']) or {}
+                        res = method(*data['args']) or None
+                        if(type(res) is dict):
+                            msg = res
+                        else:
+                            msg = {'res': res}
                     except Exception as e:
                         msg = {'err': str(e)}
 

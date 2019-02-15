@@ -1,6 +1,6 @@
 class Runner {
     constructor(code, fail, success) {
-        this.el = $('<iframe src="frame.html" sandbox="allow-scripts allow-same-origin"></iframe>').appendTo('body');
+        this.el = $('<iframe src="frame.html" sandbox="allow-scripts allow-same-origin"></iframe>').hide().appendTo('body');
         let self = this;
         this.cb = async (e) => {
             if (e.data && e.data.act) {
@@ -34,13 +34,13 @@ class Runner {
         };
         this.el[0].onload = () => {
             this.win = this.el[0].contentWindow;
-            addEventListener('message', cb);
+            addEventListener('message', this.cb);
             this.win.postMessage({ act: 'run', code, }, '*');
         };
     }
     kill() {
         this.win.postMessage({ act: 'kill' }, '*');
-        removeEventListener('message', cb);
+        removeEventListener('message', this.cb);
         this.el.remove();
     }
 }

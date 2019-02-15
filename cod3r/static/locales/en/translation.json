@@ -191,7 +191,7 @@
     "errors": {
       "INVALID_MESSAGE_FIELD_FORMAT": "Field: '__field__' isn't of type text",
       "MESSAGE_FIELD_NOT_FOUND": "Can't found field: '__field__' in parameter message",
-      "SCRITP_LANGUAGE_NOT_SUPPORTED": "Language: '__language__, isn't supported. Try JavaScript instead.",
+      "SCRIPT_LANGUAGE_NOT_SUPPORTED": "Language: '__language__, isn't supported. Try JavaScript instead.",
       "UNKNOWN_ACTION": "No processor registered for action name: '__action__'",
       "INVALID_SENSOR_PORT": "Sensor port '__port__' isn't valid should be in [S1, S2, S3, S4] or [1, 2, 3, 4]",
       "INVALID_MOTOR_PORT": "Motor port '__port__' isn't valid, should be in [A, B, C, D]",
