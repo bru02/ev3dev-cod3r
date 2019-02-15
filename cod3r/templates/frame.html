@@ -1,5 +1,5 @@
 <script>
-    const worker = new Worker('worker.js');
+    const worker = new Worker("{{ static_url('worker.js') }}");
     worker.onmessage = function (e) {
         parent.postMessage(e)
     }

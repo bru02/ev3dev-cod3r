@@ -44,6 +44,11 @@ class Index(Route):
     def get(self):
         return self.render('index.html')
 
+@url(r'/frame.html')
+class Frame(Route):
+    def get(self):
+        return self.render('frame.html')
+
 @url(r'/manage')
 class Manage(Route):
     def get(self):
