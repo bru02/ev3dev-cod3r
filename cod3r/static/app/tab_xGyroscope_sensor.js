@@ -17,6 +17,64 @@ class GyroscopeSensorTabViewModel {
       // Should not be possible to be here if not allowed (should have already been checked while adding tabs)
       console.log("Device orientation not supported !");
     }
+    onSetAxis() {
+      var wo = window.orientation;
+      if (wo == undefined) { // Browser don't support orientation
+        this.__askAxisOrientationFull();
+      }
+      else {
+        if (wo == -180) {
+          wo = 180;
+        }
+        var woLabel = i18n.t("gyroSensorTab.axisOrientation.o" + wo);
+        bootbox.dialog({
+          title: i18n.t("gyroSensorTab.setAxisDialogLight.title"),
+          message: i18n.t("gyroSensorTab.setAxisDialogLight.message", { "axisOrientation": woLabel }),
+          buttons: {
+            cancel: {
+              label: i18n.t("gyroSensorTab.setAxisDialogLight.cancel"),
+              className: "btn-default",
+              callback: function () { }
+            },
+            ok: {
+              label: i18n.t("gyroSensorTab.setAxisDialogLight.ok"),
+              className: "btn-primary",
+              callback: function () {
+                this.__setAxisOrientation(wo);
+              }
+            },
+            fullChoice: {
+              label: i18n.t("gyroSensorTab.setAxisDialogLight.fullChoice"),
+              className: "btn-primary",
+              callback: function () {
+                this.__askAxisOrientationFull();
+              }
+            }
+          }
+        });
+      }
+    }
+    this.onStart = () => {
+      this.isStarted(!this.isStarted());
+      if (this.isStarted()) {
+        if (window.DeviceOrientationEvent) {
+          console.log("Register DeviceOrientationEvent...");
+          this.__resetXValue();
+          window.addEventListener('deviceorientation', this.deviceOrientationHandler, false);
+          //window.addEventListener('devicemotion', this.deviceMotionHandler, false);
+          this.__sendXValue();
+        }
+      }
+      else {
+        if (window.DeviceOrientationEvent) {
+          console.log("Remove DeviceOrientationEvent...");
+          window.removeEventListener('deviceorientation', this.deviceOrientationHandler, false);
+          //window.removeEventListener('devicemotion', this.deviceMotionHandler, false);
+        }
+        this.__resetXValue();
+        this.__sendXValue();
+      }
+    }
   }
   __resetXValue() {
     // EV3 sensor values: angle degree and rate in degree/s
@@ -115,63 +173,5 @@ class GyroscopeSensorTabViewModel {
         }
       }
     });
-  }
-  onSetAxis() {
-    var wo = window.orientation;
-    if (wo == undefined) { // Browser don't support orientation
-      this.__askAxisOrientationFull();
-    }
-    else {
-      if (wo == -180) {
-        wo = 180;
-      }
-      var woLabel = i18n.t("gyroSensorTab.axisOrientation.o" + wo);
-      bootbox.dialog({
-        title: i18n.t("gyroSensorTab.setAxisDialogLight.title"),
-        message: i18n.t("gyroSensorTab.setAxisDialogLight.message", { "axisOrientation": woLabel }),
-        buttons: {
-          cancel: {
-            label: i18n.t("gyroSensorTab.setAxisDialogLight.cancel"),
-            className: "btn-default",
-            callback: function () { }
-          },
-          ok: {
-            label: i18n.t("gyroSensorTab.setAxisDialogLight.ok"),
-            className: "btn-primary",
-            callback: function () {
-              this.__setAxisOrientation(wo);
-            }
-          },
-          fullChoice: {
-            label: i18n.t("gyroSensorTab.setAxisDialogLight.fullChoice"),
-            className: "btn-primary",
-            callback: function () {
-              this.__askAxisOrientationFull();
-            }
-          }
-        }
-      });
-    }
-  }
-  onStart() {
-    this.isStarted(!this.isStarted());
-    if (this.isStarted()) {
-      if (window.DeviceOrientationEvent) {
-        console.log("Register DeviceOrientationEvent...");
-        this.__resetXValue();
-        window.addEventListener('deviceorientation', this.deviceOrientationHandler, false);
-        //window.addEventListener('devicemotion', this.deviceMotionHandler, false);
-        this.__sendXValue();
-      }
-    }
-    else {
-      if (window.DeviceOrientationEvent) {
-        console.log("Remove DeviceOrientationEvent...");
-        window.removeEventListener('deviceorientation', this.deviceOrientationHandler, false);
-        //window.removeEventListener('devicemotion', this.deviceMotionHandler, false);
-      }
-      this.__resetXValue();
-      this.__sendXValue();
-    }
   }
 }

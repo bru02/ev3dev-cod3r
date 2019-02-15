@@ -4,24 +4,22 @@ class SettingsViewModel {
     this.context = appContext; // The application context
     this.language = ko.observable("");
     this.lang = ko.observable("js");
-  }
-
-  display() {
-    // Initialize the values
-    this.language(this.context.settings.language);
-    this.lang(this.context.settings.lang);
-    $('#settingsModal').modal('show');
+    this.onSave = () => {
+      this.context.settings.update({
+        language: this.language(),
+        lang: this.lang()
+      });
+      this.hide();
+    }
+    this.display = () => {
+      // Initialize the values
+      this.language(this.context.settings.language);
+      this.lang(this.context.settings.lang);
+      $('#settingsModal').modal('show');
+    }
   }
 
   hide() {
     $('#settingsModal').modal('hide');
-  }
-
-  onSave() {
-    this.context.settings.update({
-      language: this.language(),
-      lang: this.lang()
-    });
-    this.hide();
   }
 }

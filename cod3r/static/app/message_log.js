@@ -8,13 +8,19 @@ class MessageLogViewModel {
     this.keepOnlyLastMessages = ko.observable(true);
     this.MESSAGES_TO_KEEP = 15;
     // Register events
-    let self = this;
-    this.context.events.resize.add(function (workAreaHeight, usefullWorkAreaHeight) {
-      self.doResize(workAreaHeight, usefullWorkAreaHeight);
+    this.context.events.resize.add((workAreaHeight, usefullWorkAreaHeight) => {
+      this.doResize(workAreaHeight, usefullWorkAreaHeight);
     });
+    this.onResetMessages = () => {
+      this.messages.removeAll();
+    }
+    this.onKeepOnlyLastMessages = () => {
+      this.keepOnlyLastMessages(!this.keepOnlyLastMessages());
+      this.KeepOnlyLastMessages();
+    }
   }
   addMessage(type, message) {
-    function doAddMessage(type, message, count) {
+    const doAddMessage = (type, message, count) => {
       this.messages.unshift({
         "time": new Date().toLocaleTimeString(),
         "cssClass": "list-group-item-" + type,
@@ -43,13 +49,7 @@ class MessageLogViewModel {
   addSuccess(msg) {
     this.addMessage('success', msg);
   }
-  onResetMessages() {
-    this.messages.removeAll();
-  }
-  onKeepOnlyLastMessages() {
-    this.keepOnlyLastMessages(!this.keepOnlyLastMessages());
-    this.KeepOnlyLastMessages();
-  }
+
   KeepOnlyLastMessages() {
     if (this.keepOnlyLastMessages()) {
       this.messages.splice(this.MESSAGES_TO_KEEP); // Keep the first n messages

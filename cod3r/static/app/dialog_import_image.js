@@ -12,25 +12,25 @@ class ImportImagesViewModel {
     this.currentImage = undefined;
     this.MAX_WIDTH = 178;
     this.MAX_HEIGHT = 128;
-    this.useDithering.subscribe(function (newValue) {
+    this.useDithering.subscribe((newValue) => {
       this.RecomputeImage();
     });
-    this.keepAspectRatio.subscribe(function (newValue) {
+    this.keepAspectRatio.subscribe((newValue) => {
       this.RecomputeImage();
     });
-    this.threshold.subscribe(function (newValue) {
+    this.threshold.subscribe((newValue) => {
       this.RecomputeImage();
     });
+    this.display = () => {
+      // Initialize the values
+      $('#importImagesModal').modal('show');
+      $('#importImages_selectFileForm')[0].reset();
+      this.currentImage = undefined;
+      this.codeToBuildTheImage("");
+      this.threshold(128);
+      this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    };
   }
-  display() {
-    // Initialize the values
-    $('#importImagesModal').modal('show');
-    $('#importImages_selectFileForm')[0].reset();
-    this.currentImage = undefined;
-    this.codeToBuildTheImage("");
-    this.threshold(128);
-    this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  };
   uploadImage(file) {
     console.log("Filename: " + file.name);
     // Only process image files.

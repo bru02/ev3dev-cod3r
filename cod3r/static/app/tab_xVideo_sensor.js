@@ -153,32 +153,63 @@ class VideoSensorTabViewModel {
         this.canvasCtx.textBaseline = "bottom";
         this.canvasCtx.font = "bold 14px sans-serif";
         this.canvasCtx.lineWidth = 2;
-    }
-    onStart() {
-        this.isStarted(!this.isStarted());
-        if (this.isStarted()) {
-            if (this.context.compatibility.isUserMediaSupported()) {
-                // Request to access to the Webcam
-                this.context.compatibility.getUserMedia({ video: true }, this.handleVideo, this.videoAccessRefused);
+        this.onStart = () => {
+            this.isStarted(!this.isStarted());
+            if (this.isStarted()) {
+                if (this.context.compatibility.isUserMediaSupported()) {
+                    // Request to access to the Webcam
+                    this.context.compatibility.getUserMedia({ video: true }, this.handleVideo, this.videoAccessRefused);
+                }
+            }
+            else {
+                // Stop acquiring video
+                this.webcam.pause();
+                this.webcam.src = null;
+                this.perfSummary("");
+                this.__clearCanvas();
+                if (this.webcamMediaStream) { // Defined
+                    if (this.webcamMediaStream.stop)
+                        this.webcamMediaStream.stop();
+                    else
+                        this.webcamMediaStream.getVideoTracks()[0].stop();
+                    this.webcamMediaStream = undefined;
+                }
+                // Send an not started value
+                this.SendSensorValue({ isStarted: this.isStarted() });
             }
         }
-        else {
-            // Stop acquiring video
-            this.webcam.pause();
-            this.webcam.src = null;
-            this.perfSummary("");
-            this.__clearCanvas();
-            if (this.webcamMediaStream) { // Defined
-                if (this.webcamMediaStream.stop)
-                    this.webcamMediaStream.stop();
-                else
-                    this.webcamMediaStream.getVideoTracks()[0].stop();
-                this.webcamMediaStream = undefined;
+        this.onCanvasClick = (data, event) => {
+            if (this.isStarted()) {
+                var rect = this.canvas.getBoundingClientRect();
+                var x = event.clientX - rect.left;
+                var y = event.clientY - rect.top;
+                if ((x > 0) && (y > 0) && (x < this.WIDTH) && (y < this.HEIGHT)) { // Add a new point
+                    this.ptce.onClick(x, y);
+                }
             }
-            // Send an not started value
-            this.SendSensorValue({ isStarted: this.isStarted() });
+        };
+        this.onAnimationFrame = () => {
+            if (this.isStarted()) {
+                this.prof.new_frame();
+                if (this.webcam.readyState === this.webcam.HAVE_ENOUGH_DATA) { // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
+                    // Get image and compute
+                    this.canvasCtx.drawImage(this.webcam, 0, 0, this.WIDTH, this.HEIGHT);
+                    var imageData = this.canvasCtx.getImageData(0, 0, this.WIDTH, this.HEIGHT);
+                    this.ptce.compute(imageData, this.WIDTH, this.HEIGHT);
+                    // Update display
+                    var ceJson = this.ptce.drawComputationResult(this.canvasCtx);
+                    this.perfSummary("FPS: " + Math.round(this.prof.fps));
+                    // Send JSON event
+                    this.SendSensorValue({ isStarted: this.isStarted(), objects: ceJson });
+                }
+                this.context.compatibility.requestAnimationFrame(this.onAnimationFrame); // Call for each frame - See note on: https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame
+            }
+            else {
+                this.__clearCanvas();
+            }
         }
     }
+
     SendSensorValue(value) {
         this.context.ev3BrickServer.streamXSensorValue(this.sensorName(), "Vid1", value);
     }
@@ -200,38 +231,9 @@ class VideoSensorTabViewModel {
         console.log("Error: " + JSON.stringify(err));
         alert(i18n.t("videoSensorTab.errors.videoAccessRefused"));
     }
-    onAnimationFrame() {
-        //console.log("onAnimmationFrame");
-        if (this.isStarted()) {
-            this.prof.new_frame();
-            if (this.webcam.readyState === this.webcam.HAVE_ENOUGH_DATA) { // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
-                // Get image and compute
-                this.canvasCtx.drawImage(this.webcam, 0, 0, this.WIDTH, this.HEIGHT);
-                var imageData = this.canvasCtx.getImageData(0, 0, this.WIDTH, this.HEIGHT);
-                this.ptce.compute(imageData, this.WIDTH, this.HEIGHT);
-                // Update display
-                var ceJson = this.ptce.drawComputationResult(this.canvasCtx);
-                this.perfSummary("FPS: " + Math.round(this.prof.fps));
-                // Send JSON event
-                this.SendSensorValue({ isStarted: this.isStarted(), objects: ceJson });
-            }
-            this.context.compatibility.requestAnimationFrame(this.onAnimationFrame); // Call for each frame - See note on: https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame
-        }
-        else {
-            this.__clearCanvas();
-        }
-    }
+
     __clearCanvas() {
         this.canvasCtx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
     }
-    onCanvasClick(data, event) {
-        if (this.isStarted()) {
-            var rect = this.canvas.getBoundingClientRect();
-            var x = event.clientX - rect.left;
-            var y = event.clientY - rect.top;
-            if ((x > 0) && (y > 0) && (x < this.WIDTH) && (y < this.HEIGHT)) { // Add a new point
-                this.ptce.onClick(x, y);
-            }
-        }
-    };
+
 }

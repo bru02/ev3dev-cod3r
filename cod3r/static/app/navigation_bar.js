@@ -53,88 +53,89 @@ class NavigationBarViewModel {
       } // else: Don't show xGeo, GPS not supported by the browser
     }
     this.onShowWorkAreaItem(this.btnScript);
+    this.onFullScreen = () => {
+      this.context.compatibility.toggleFullScreen();
+      this.__collapseNavbar();
+    }
+    this.onDisplayImportImages = () => {
+      this.context.importImagesVM.display();
+      this.__collapseNavbar();
+    }
+    this.onShowWorkAreaItem(workAreaItem) => {
+      // Set the active item in the model and on screen
+      var items = this.workAreaItems(); // return a regular array
+      for (var i = 0; i < items.length; i++) {
+        items[i].active(items[i].tabId == workAreaItem.tabId);
+        $("#" + items[i].tabId).toggleClass("active", items[i].active());
+        this.context.events.tabDisplayedChanged.fire(items[i].tabId, items[i].active());
+      }
+      this.__collapseNavbar();
+    }
+    // Auto collapse navbar while collapse feature is enabled (screen width is < 768)
+    this.onRunScript = () => {
+      if (this._runner)
+        this._runner.kill();
+      if (this.running()) {
+        this._runner = null;
+      }
+      else {
+        var value = (this.context.scriptEditorTabVM ? this.context.scriptEditorTabVM.editor.codeMirror.getValue() : null);
+        if (value) {
+          if (this.context.settings.lang == "js") {
+            this._runner = new Runner(value, (err) => {
+              this._runner = null;
+              this.running(false);
+              this.context.messageLogVM.addError(`Failed to run code: ${err}`);
+            }, () => {
+              this._runner = null;
+              this.running(false);
+              this.context.messageLogVM.addSuccess('Successfully ran code!');
+            });
+          }
+        }
+      }
+      this.running(!this.running());
+    }
+    this.onDisplayAbout = () => {
+      $('#aboutModal').modal("show");
+      this.__collapseNavbar();
+    }
+    this.onStopcod3r = () => {
+      bootbox.dialog({
+        title: i18n.t("navigationBar.confirmStopcod3r.title"),
+        message: i18n.t("navigationBar.confirmStopcod3r.message"),
+        buttons: {
+          cancel: {
+            label: i18n.t("navigationBar.confirmStopcod3r.cancel"),
+            className: "btn-primary",
+            callback: function () { }
+          },
+          stopcod3r: {
+            label: i18n.t("navigationBar.confirmStopcod3r.stopcod3r"),
+            className: "btn-default",
+            callback: () => {
+              this.context.ev3BrickServer.stopcod3r();
+            }
+          },
+          shutdownBrick: {
+            label: i18n.t("navigationBar.confirmStopcod3r.shutdownBrick"),
+            className: "btn-default",
+            callback: () => {
+              this.context.ev3BrickServer.shutdownBrick();
+            }
+          }
+        }
+      });
+    }
+    this.onDisplaySettings = () => {
+      this.context.settingsVM.display();
+      this.__collapseNavbar();
+    }
+
   }
   __collapseNavbar() {
     if ($("#collapser").css("display") != "none") {
       $("#collapser").click();
     }
-  }
-  onShowWorkAreaItem(workAreaItem) {
-    // Set the active item in the model and on screen
-    var items = this.workAreaItems(); // return a regular array
-    for (var i = 0; i < items.length; i++) {
-      items[i].active(items[i].tabId == workAreaItem.tabId);
-      $("#" + items[i].tabId).toggleClass("active", items[i].active());
-      this.context.events.tabDisplayedChanged.fire(items[i].tabId, items[i].active());
-    }
-    this.__collapseNavbar();
-  }
-  // Auto collapse navbar while collapse feature is enabled (screen width is < 768)
-  onRunScript() {
-    if (this._runner)
-      this._runner.kill();
-    if (this.running()) {
-      this._runner = null;
-    }
-    else {
-      var value = (this.context.scriptEditorTabVM ? this.context.scriptEditorTabVM.editor.codeMirror.getValue() : null);
-      if (value) {
-        if (this.context.settings.lang == "js") {
-          this._runner = new Runner(value, function (data) { return this.appContext.ev3BrickServer.message(data) }, function (err) {
-            this._runner = null;
-            this.running(false);
-            this.context.messageLogVM.addError(`Failed to run code: ${err}`);
-          }, function () {
-            this._runner = null;
-            this.running(false);
-            this.context.messageLogVM.addSuccess('Successfully ran code!');
-          });
-        }
-      }
-    }
-    this.running(!this.running());
-  }
-  onDisplayAbout() {
-    $('#aboutModal').modal("show");
-    this.__collapseNavbar();
-  }
-  onFullScreen() {
-    this.context.compatibility.toggleFullScreen();
-    this.__collapseNavbar();
-  }
-  onStopcod3r() {
-    bootbox.dialog({
-      title: i18n.t("navigationBar.confirmStopcod3r.title"),
-      message: i18n.t("navigationBar.confirmStopcod3r.message"),
-      buttons: {
-        cancel: {
-          label: i18n.t("navigationBar.confirmStopcod3r.cancel"),
-          className: "btn-primary",
-          callback: function () { }
-        },
-        stopcod3r: {
-          label: i18n.t("navigationBar.confirmStopcod3r.stopcod3r"),
-          className: "btn-default",
-          callback: function () {
-            this.context.ev3BrickServer.stopcod3r();
-          }
-        },
-        shutdownBrick: {
-          label: i18n.t("navigationBar.confirmStopcod3r.shutdownBrick"),
-          className: "btn-default",
-          callback: function () {
-            this.context.ev3BrickServer.shutdownBrick();
-          }
-        }
-      }
-    });
-  }
-  onDisplaySettings() {
-    this.context.settingsVM.display();
-    this.__collapseNavbar();
-  }
-  onDisplayImportImages() {
-    this.context.importImagesVM.display();
-    this.__collapseNavbar();
   }
 }

@@ -22,60 +22,100 @@ class KeyboardSensorTabViewModel {
     }
     // In order to be able to manage multi-touch, bind events on the top level keyboard element, with jQuery delegate
     // (Don't find a better way to do it with 'standard' button )
+    let self = this;
     $("#xTouchButtons").on("mousedown touchstart", "button", function (event) {
       var btn = ko.dataFor(this);
-      this.OnButtonPressed(btn);
+      self.OnButtonPressed(btn);
       $(this).addClass("active");
       this.style.color = "red";
       return false;
     });
     $("#xTouchButtons").on("mouseup mouseout touchend", "button", function (event) {
       var btn = ko.dataFor(this);
-      this.OnButtonRelease(btn);
+      self.OnButtonRelease(btn);
       $(this).removeClass("active");
       this.style.removeProperty("color");
       return false;
     });
     // Register events
-    this.context.events.resize.add(function (workAreaHeight, usefullWorkAreaHeight) {
+    this.context.events.resize.add((workAreaHeight, usefullWorkAreaHeight) => {
       this.doResize(workAreaHeight, usefullWorkAreaHeight);
     });
-  }
-  onStart() {
-    this.isStarted(!this.isStarted());
-    // Switch the button status according to the mode & button content
-    this.buttons.forEach(function (e0) {
-      e0.forEach(function (e1) {
-        e1.isDisabled(this.isStarted() && (e1.name().length == 0));
-        e1.isPressed = false;
-      });
-    });
-    this.NotifyStateChanged(true);
-  }
-  OnButtonPressed(btn) {
-    if (this.isStarted()) {
-      btn.isPressed = true;
-      this.NotifyStateChanged(false);
-    }
-    else {
-      bootbox.prompt({
-        title: i18n.t('keyboardSensorTab.configureKeyboardButtonModal.title'),
-        value: btn.name(),
-        callback: function (result) {
-          if (result) {
-            btn.actions = this.__splitNameToActions(result);
-            btn.name(this.__buildNameFromActions(btn.actions));
-          } // else, cancel clicked
+    this.onResetKeyboard = () => {
+      bootbox.confirm(i18n.t("keyboardSensorTab.resetKeyboardModal.title"), function (result) {
+        if (result) {
+          this.ResetKeyboard();
         }
       });
     }
+    this.onLoadKeyboard = () => {
+      this.context.manageFilesVM.display(this.loadKeyboardFile, function () { return "/rest/xkeyboardfiles/"; }, function (filename) { return "/rest/xkeyboardfiles/" + filename; });
+    };
+    this.onSaveKeyboard = () => {
+      bootbox.prompt({
+        title: i18n.t('keyboardSensorTab.saveKeyboardModal.title'),
+        value: (this.keyboardFilename ? this.keyboardFilename : ""),
+        callback: function (result) {
+          if (result && (result.trim().lenght != 0)) {
+            var filename = result.trim();
+            console.log("Save keyboard: '" + filename + "'");
+            $.ajax({
+              url: "/rest/xkeyboardfiles/" + filename,
+              content: "application/json",
+              data: JSON.stringify({
+                name: filename,
+                content: this.saveToJSON()
+              }),
+              type: "PUT",
+              success: function (data, status) {
+                this.keyboardFilename = filename;
+                this.context.messageLogVM.addSuccess(i18n.t("keyboardSensorTab.keyboardSuccessfullySaved", { "filename": filename }));
+              },
+              error: function (XMLHttpRequest, textStatus, errorThrown) {
+                this.context.messageLogVM.addError(i18n.t("keyboardSensorTab.errors.cantSaveKeyboardFile", { "filename": filename, causedBy: ("" + XMLHttpRequest.status + " - " + errorThrown) }));
+              }
+            });
+          } // else: cancel clicked
+        }
+      });
+    }
+    this.onStart = () => {
+      this.isStarted(!this.isStarted());
+      // Switch the button status according to the mode & button content
+      this.buttons.forEach(function (e0) {
+        e0.forEach(function (e1) {
+          e1.isDisabled(this.isStarted() && (e1.name().length == 0));
+          e1.isPressed = false;
+        });
+      });
+      this.NotifyStateChanged(true);
+    }
+    this.OnButtonPressed = (btn) => {
+      if (this.isStarted()) {
+        btn.isPressed = true;
+        this.NotifyStateChanged(false);
+      }
+      else {
+        bootbox.prompt({
+          title: i18n.t('keyboardSensorTab.configureKeyboardButtonModal.title'),
+          value: btn.name(),
+          callback: (result) => {
+            if (result) {
+              btn.actions = this.__splitNameToActions(result);
+              btn.name(this.__buildNameFromActions(btn.actions));
+            } // else, cancel clicked
+          }
+        });
+      }
+    }
+    this.OnButtonRelease = (btn) => {
+      if (btn.isPressed) {
+        btn.isPressed = false;
+        this.NotifyStateChanged(false);
+      } // else, useless event
+    };
   }
-  OnButtonRelease(btn) {
-    if (btn.isPressed) {
-      btn.isPressed = false;
-      this.NotifyStateChanged(false);
-    } // else, useless event
-  };
+
   __splitNameToActions(name) {
     return name.trim().split(",")
       .map(function (e) { return e.trim(); })
@@ -109,13 +149,7 @@ class KeyboardSensorTabViewModel {
       this.context.ev3BrickServer.sendXSensorValue(this.sensorName(), "Tch1", xValue);
     }
   }
-  onResetKeyboard() {
-    bootbox.confirm(i18n.t("keyboardSensorTab.resetKeyboardModal.title"), function (result) {
-      if (result) {
-        this.ResetKeyboard();
-      }
-    });
-  }
+
   ResetKeyboard() {
     this.buttons.forEach(function (e0) {
       e0.forEach(function (e1) {
@@ -126,9 +160,6 @@ class KeyboardSensorTabViewModel {
       });
     });
   }
-  onLoadKeyboard() {
-    this.context.manageFilesVM.display(this.loadKeyboardFile, function () { return "/rest/xkeyboardfiles/"; }, function (filename) { return "/rest/xkeyboardfiles/" + filename; });
-  };
   loadKeyboardFile(filename) {
     this.keyboardFilename = undefined;
     console.log("Try loading keyboard: '" + filename + "'");
@@ -182,34 +213,7 @@ class KeyboardSensorTabViewModel {
     });
     return JSON.stringify(keyboard);
   }
-  onSaveKeyboard() {
-    bootbox.prompt({
-      title: i18n.t('keyboardSensorTab.saveKeyboardModal.title'),
-      value: (this.keyboardFilename ? this.keyboardFilename : ""),
-      callback: function (result) {
-        if (result && (result.trim().lenght != 0)) {
-          var filename = result.trim();
-          console.log("Save keyboard: '" + filename + "'");
-          $.ajax({
-            url: "/rest/xkeyboardfiles/" + filename,
-            content: "application/json",
-            data: JSON.stringify({
-              name: filename,
-              content: this.saveToJSON()
-            }),
-            type: "PUT",
-            success: function (data, status) {
-              this.keyboardFilename = filename;
-              this.context.messageLogVM.addSuccess(i18n.t("keyboardSensorTab.keyboardSuccessfullySaved", { "filename": filename }));
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-              this.context.messageLogVM.addError(i18n.t("keyboardSensorTab.errors.cantSaveKeyboardFile", { "filename": filename, causedBy: ("" + XMLHttpRequest.status + " - " + errorThrown) }));
-            }
-          });
-        } // else: cancel clicked
-      }
-    });
-  }
+
   doResize(workAreaHeight, usefullWorkAreaHeight) {
     $('.xkeyboard-touch').css('height', Math.round(Math.max(45, Math.min(window.innerWidth / 6, // Max height for better display for devices in portrait mode 
       (usefullWorkAreaHeight - 10) / 4))).toString() + 'px');

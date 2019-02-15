@@ -12,14 +12,13 @@ class EV3BrickServer {
 
   initialize() {
     if ("WebSocket" in window) {
-      var wsURI = location.protocol.replace('http', 'ws') + "//" + location.host + "/connect",
-        self = this;
+      var wsURI = location.protocol.replace('http', 'ws') + "//" + location.host + "/connect";
       try {
         this.ws = new WebSocket(wsURI);
-        this.ws.onopen = function (evt) { self.__onWSOpen(evt); };
-        this.ws.onclose = function (evt) { self.__onWSClose(evt); };
-        this.ws.onmessage = function (evt) { self.__onWSMessage(evt); };
-        this.ws.onerror = function (evt) { self.__onWSError(evt); };
+        this.ws.onopen = (evt) => { this.__onWSOpen(evt); };
+        this.ws.onclose = (evt) => { this.__onWSClose(evt); };
+        this.ws.onmessage = (evt) => { this.__onWSMessage(evt); };
+        this.ws.onerror = (evt) => { this.__onWSError(evt); };
       } catch (ex) {
         console.warn("Fail to create websocket for: '" + wsURI + "'");
         this.context.messageLogVM.addError(i18n.t("ev3brick.errors.ev3ConnectionFailed", { cansedBy: ex }));
@@ -36,9 +35,9 @@ class EV3BrickServer {
   };
 
   __onWSMessage(evt) {
-    var received_msg = evt.data;
-    var received_data = JSON.parse(received_msg);
-    var msgType = received_data.msgTyp;
+    var received_msg = evt.data,
+      received_data = JSON.parse(received_msg),
+      msgType = received_data.msgTyp;
     console.log("Message received: " + received_msg);
 
     if (msgType == "ScriptException" || msgType == "Exception") {
@@ -62,7 +61,7 @@ class EV3BrickServer {
 
   WSReconnection() {
     this.WSClose();
-    setTimeout(this.initialize, 15000); // Run once in 15s
+    setTimeout(this.initialize.bind(this), 15000); // Run once in 15s
   };
 
   // Close the websocket (if initialized)
@@ -140,22 +139,23 @@ class EV3BrickServer {
   }
 
   async message(data = {}) {
+    let self = this;
     return new Promise((resolve, reject) => {
       let id = Utils.generateUUID();
-      if (this.WSSend($.fn.extend(data, {
+      if (self.WSSend($.fn.extend(data, {
         id,
       }))) {
-        this.ws.addEventListener('message', function cb(msg) {
+        self.ws.addEventListener('message', function cb(msg) {
           try {
             msg = JSON.parse(msg.data);
           } catch (e) {
             return;
           }
           if (msg.id !== id) return;
-          this.ws.removeEventListener('message', cb);
+          self.ws.removeEventListener('message', cb);
           if (msg.err) {
             reject(msg.err);
-            this.appContext.messageLogVM.addError(msg.err);
+            self.appContext.messageLogVM.addError(msg.err);
           } else {
             resolve(msg.res);
           }

@@ -16,6 +16,34 @@ class GeoSensorTabViewModel {
             // Should not be possible to be here if not allowed (should have already been checked while adding tabs)
             console.log("Geolocation not supported !");
         }
+        this.onStart = () => {
+            this.isStarted(!this.isStarted());
+            if (this.isStarted()) {
+                if (navigator.geolocation) {
+                    console.log("Register geolocation callback...");
+                    this.__resetXValue();
+                    var geo_options = {
+                        enableHighAccuracy: true,
+                        maximumAge: 30000,
+                        timeout: 27000
+                    };
+                    this.watchID = navigator.geolocation.watchPosition(this.watchPositionHandler, this.watchPositionErrorHandler, geo_options);
+                    console.log("  ... id of callback is: " + this.watchID);
+                    this.__sendXValue();
+                }
+            }
+            else {
+                if (navigator.geolocation) {
+                    console.log("Unregister geolocation for callback: " + this.watchID);
+                    if (this.watchID) {
+                        navigator.geolocation.clearWatch(this.watchID);
+                        this.watchID = undefined;
+                    }
+                }
+                this.__resetXValue();
+                this.__sendXValue();
+            }
+        }
     }
     __resetXValue() {
         this.xValue = {
@@ -72,32 +100,5 @@ class GeoSensorTabViewModel {
         }
         this.context.messageLogVM.addError(errorMsg);
     };
-    onStart() {
-        this.isStarted(!this.isStarted());
-        if (this.isStarted()) {
-            if (navigator.geolocation) {
-                console.log("Register geolocation callback...");
-                this.__resetXValue();
-                var geo_options = {
-                    enableHighAccuracy: true,
-                    maximumAge: 30000,
-                    timeout: 27000
-                };
-                this.watchID = navigator.geolocation.watchPosition(this.watchPositionHandler, this.watchPositionErrorHandler, geo_options);
-                console.log("  ... id of callback is: " + this.watchID);
-                this.__sendXValue();
-            }
-        }
-        else {
-            if (navigator.geolocation) {
-                console.log("Unregister geolocation for callback: " + this.watchID);
-                if (this.watchID) {
-                    navigator.geolocation.clearWatch(this.watchID);
-                    this.watchID = undefined;
-                }
-            }
-            this.__resetXValue();
-            this.__sendXValue();
-        }
-    };
+
 }
