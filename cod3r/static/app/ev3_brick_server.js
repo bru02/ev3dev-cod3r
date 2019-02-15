@@ -12,13 +12,14 @@ class EV3BrickServer {
 
   initialize() {
     if ("WebSocket" in window) {
-      var wsURI = location.protocol.replace('http', 'ws') + "//" + location.host + "/connect";
+      var wsURI = location.protocol.replace('http', 'ws') + "//" + location.host + "/connect",
+        self = this;
       try {
         this.ws = new WebSocket(wsURI);
-        this.ws.onopen = function (evt) { this.__onWSOpen(evt); };
-        this.ws.onclose = function (evt) { this.__onWSClose(evt); };
-        this.ws.onmessage = function (evt) { this.__onWSMessage(evt); };
-        this.ws.onerror = function (evt) { this.__onWSError(evt); };
+        this.ws.onopen = function (evt) { self.__onWSOpen(evt); };
+        this.ws.onclose = function (evt) { self.__onWSClose(evt); };
+        this.ws.onmessage = function (evt) { self.__onWSMessage(evt); };
+        this.ws.onerror = function (evt) { self.__onWSError(evt); };
       } catch (ex) {
         console.warn("Fail to create websocket for: '" + wsURI + "'");
         this.context.messageLogVM.addError(i18n.t("ev3brick.errors.ev3ConnectionFailed", { cansedBy: ex }));

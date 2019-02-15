@@ -381,7 +381,7 @@ class WSHandler(Route, KeptAliveWebSocketHandler):
                 if(state == True):
                     self.write_message("{\"pos\":\"%s\"}" % btn)
 
-        self.wrapper.btn.on_change = change
+        self.wrapper.button.btn.on_change = change
         print('new connection')
 
     def on_message(self, message):

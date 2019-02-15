@@ -489,7 +489,7 @@ var clientLib = (function (window) {
                         enter: {},
                         buttonsPressed: {}
                     },
-                    global: {
+                    scope: {
                         print: {
                             args: [{
                                 type: "string",
@@ -510,7 +510,7 @@ var clientLib = (function (window) {
                 };
             for (let key in fns) {
                 let val = fns[key];
-                if (key == "global") {
+                if (key == "scope") {
                     t = window
                 } else {
                     window[key] = {};

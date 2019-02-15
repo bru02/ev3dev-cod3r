@@ -8,8 +8,9 @@ class MessageLogViewModel {
     this.keepOnlyLastMessages = ko.observable(true);
     this.MESSAGES_TO_KEEP = 15;
     // Register events
+    let self = this;
     this.context.events.resize.add(function (workAreaHeight, usefullWorkAreaHeight) {
-      this.doResize(workAreaHeight, usefullWorkAreaHeight);
+      self.doResize(workAreaHeight, usefullWorkAreaHeight);
     });
   }
   addMessage(type, message) {

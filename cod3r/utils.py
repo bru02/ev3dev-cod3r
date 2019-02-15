@@ -764,7 +764,7 @@ def get_input(p):
 class apiWrapper:
     def __init__(self):
         self.ev3 = ev3Wrapper()
-        self.global = globalWrapper()
+        self.scope = globalWrapper()
         self.screen = screenWrapper()
         self.led = ledWrapper()
         self.sound = soundWrapper()
